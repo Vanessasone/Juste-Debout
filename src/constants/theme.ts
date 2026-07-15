@@ -1,65 +1,32 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Thèmes clair / sombre. Mêmes clés que Palette (marque JD).
+ * Le sombre = identité par défaut (noir + supagreen). Le clair = blanc + noir + accent vert.
  */
+import { Palette } from '@/constants/brand';
 
-import '@/global.css';
+export type ThemeColors = Record<keyof typeof Palette, string>;
 
-import { Platform } from 'react-native';
+export const darkColors: ThemeColors = { ...Palette };
 
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
-} as const;
-
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
-
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
-
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
-} as const;
-
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
+export const lightColors: ThemeColors = {
+  ...Palette,
+  // Fonds clairs
+  bg: '#FBFBF9',
+  bgElevated: '#FFFFFF',
+  surface: '#FFFFFF',
+  surface2: '#F1F1EE',
+  surface3: '#E7E7E2',
+  border: '#E2E2DB',
+  borderSoft: '#EDEDE8',
+  // Texte foncé
+  text: '#0B0B0B',
+  textDim: '#55554F',
+  textMute: '#9A9A94',
+  // Accents lisibles sur fond clair
+  accent: '#1F7A00', // vert « texte » foncé & lisible sur blanc (le vif #A4FA00 reste pour les fonds)
+  violet: '#2A2A2A',
+  success: '#3E9E00',
+  danger: '#D93A3A',
+  overlay: 'rgba(0,0,0,0.35)',
+  // primary (#A4FA00), volt, cyan, gold restent la signature (fonds avec texte noir)
+};

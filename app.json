@@ -1,26 +1,41 @@
 {
   "expo": {
-    "name": "juste-debout",
+    "name": "Juste Debout",
     "slug": "juste-debout",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "justedebout",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.justedebout.app",
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "icon": "./assets/images/icon-ios.png"
     },
     "android": {
+      "package": "com.justedebout.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#0A0A0A",
+        "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -28,15 +43,52 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0A0A0A",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 160
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Juste Debout accède à tes photos pour ta photo de profil.",
+          "cameraPermission": "Juste Debout accède à l'appareil photo pour prendre ta photo de profil."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Juste Debout utilise la caméra pour scanner les billets à l'entrée."
+        }
+      ],
+      "expo-audio",
+      "expo-asset",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Juste Debout utilise ta position (approximative) pour te montrer les danseurs de la communauté près de toi.",
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ],
+      "expo-notifications",
+      "expo-localization",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "8fce61b0-6f85-4630-837a-89a01d12fba1"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/8fce61b0-6f85-4630-837a-89a01d12fba1"
     }
   }
 }
