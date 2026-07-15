@@ -363,6 +363,9 @@ export default function Profile() {
               <GhostButton label={t('profile.regie')} icon="options" onPress={() => router.push('/regie')} />
             )}
             {isStaff && (
+              <GhostButton label={t('orders.received')} icon="cube" onPress={() => router.push('/admin-orders')} />
+            )}
+            {isStaff && (
               <GhostButton label={t('profile.certsAdmin')} icon="ribbon" onPress={() => router.push('/admin-certs')} />
             )}
             {isStaff && (

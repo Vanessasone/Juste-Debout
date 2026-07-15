@@ -1408,3 +1408,59 @@ returns void language sql security definer set search_path = public as $$
   update public.profile_location set last_nearby_push_at = now() where profile_id = any(p_ids);
 $$;
 revoke execute on function public.mark_nearby_pushed(uuid[]) from anon, authenticated;
+
+-- ============================================================
+-- 28) BOUTIQUE — COMMANDES (adresse de livraison + réception temps réel)
+-- ============================================================
+create table if not exists public.orders (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  status text not null default 'pending', -- pending | paid | shipped | delivered | cancelled
+  currency text not null default 'EUR',
+  total int not null default 0,           -- centimes
+  full_name text not null,
+  phone text,
+  address_line1 text not null,
+  address_line2 text,
+  postal_code text not null,
+  city text not null,
+  country text not null,
+  note text,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_orders_profile on public.orders(profile_id);
+create index if not exists idx_orders_created on public.orders(created_at desc);
+
+create table if not exists public.order_items (
+  id uuid primary key default gen_random_uuid(),
+  order_id uuid not null references public.orders(id) on delete cascade,
+  product_id uuid references public.products(id) on delete set null,
+  name text not null,        -- snapshot du nom du produit
+  unit_price int not null,   -- centimes, snapshot
+  quantity int not null default 1
+);
+create index if not exists idx_order_items_order on public.order_items(order_id);
+
+alter table public.orders enable row level security;
+alter table public.order_items enable row level security;
+
+-- L'acheteur gère ses commandes ; le staff/admin voit et gère TOUT (réception temps réel)
+drop policy if exists "orders_insert_own" on public.orders;
+create policy "orders_insert_own" on public.orders for insert to authenticated
+  with check (profile_id = auth.uid());
+drop policy if exists "orders_read" on public.orders;
+create policy "orders_read" on public.orders for select to authenticated
+  using (profile_id = auth.uid() or public.is_staff());
+drop policy if exists "orders_staff_update" on public.orders;
+create policy "orders_staff_update" on public.orders for update to authenticated
+  using (public.is_staff()) with check (public.is_staff());
+
+drop policy if exists "order_items_insert_own" on public.order_items;
+create policy "order_items_insert_own" on public.order_items for insert to authenticated
+  with check (exists (select 1 from public.orders o where o.id = order_id and o.profile_id = auth.uid()));
+drop policy if exists "order_items_read" on public.order_items;
+create policy "order_items_read" on public.order_items for select to authenticated
+  using (exists (select 1 from public.orders o where o.id = order_id and (o.profile_id = auth.uid() or public.is_staff())));
+
+-- Réception temps réel (le staff s'abonne aux nouvelles commandes)
+alter publication supabase_realtime add table public.orders;
