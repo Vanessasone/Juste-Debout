@@ -78,6 +78,7 @@ create table if not exists public.events (
 );
 -- (idempotent, pour les bases déjà créées)
 alter table public.events add column if not exists tickets_open boolean not null default false;
+alter table public.events add column if not exists hub_date_id uuid unique; -- lien vers JD Hub Partners (sync)
 
 -- 5) INSCRIPTIONS
 create table if not exists public.registrations (
