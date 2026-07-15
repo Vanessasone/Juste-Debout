@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppSwitcher } from '@/components/AppSwitcher';
+import { InstallPrompt } from '@/components/InstallPrompt';
 import { Vitruve, Wordmark } from '@/components/Logo';
 import {
   Card,
@@ -149,6 +150,8 @@ export default function Home() {
 
       {/* Bascule JD ↔ JD School */}
       <AppSwitcher current="jd" />
+
+      <InstallPrompt />
 
       {/* Bannière DIRECT — visible seulement pendant une diffusion */}
       {live ? (
@@ -374,7 +377,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Space.md,
-    backgroundColor: c.danger,
+    backgroundColor: Palette.sideFuchsia,
     borderRadius: Radius.lg,
     paddingVertical: 12,
     paddingHorizontal: Space.lg,

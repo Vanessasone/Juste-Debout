@@ -41,6 +41,18 @@ fi
 # SPA routing (expo-router output:single) — sinon rafraîchir une sous-page = 404 Netlify.
 printf '/*    /index.html   200\n' > _redirects
 
+# PWA : icône « Ajouter à l'écran d'accueil » (iOS + Android).
+cp ../assets/images/icon-ios.png apple-touch-icon.png 2>/dev/null || cp ../assets/images/icon.png apple-touch-icon.png 2>/dev/null
+python3 - <<'PY'
+p='index.html'; s=open(p).read()
+meta=('<link rel="apple-touch-icon" href="/apple-touch-icon.png">'
+      '<meta name="apple-mobile-web-app-capable" content="yes">'
+      '<meta name="apple-mobile-web-app-title" content="Juste Debout">'
+      '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">')
+if 'apple-touch-icon' not in s:
+    open(p,'w').write(s.replace('</head>', meta+'</head>', 1))
+PY
+
 echo ""
 echo "✅ Build web prêt : $(pwd)"
 echo "   → Glisse ce dossier 'dist' sur app.netlify.com (projet justedeboutapp → Deploys)."

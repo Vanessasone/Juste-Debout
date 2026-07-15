@@ -560,7 +560,7 @@ const styles = StyleSheet.create({
   liveTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Palette.live,
+    backgroundColor: Palette.sideFuchsia,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: Radius.pill,

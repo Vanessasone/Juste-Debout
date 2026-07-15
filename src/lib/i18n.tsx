@@ -2201,6 +2201,19 @@ i18n.store({
   },
 });
 
+// Bannière « Ajouter à l'écran d'accueil » (PWA web).
+i18n.store({
+  fr: { 'install.title': "Ajoute Juste Debout à ton écran d'accueil", 'install.ios': "Appuie sur Partager puis « Sur l'écran d'accueil »", 'install.android': "Accède à l'app en un tap, comme une vraie appli", 'install.cta': 'Installer' },
+  en: { 'install.title': 'Add Juste Debout to your home screen', 'install.ios': 'Tap Share, then "Add to Home Screen"', 'install.android': 'Open the app in one tap, like a real app', 'install.cta': 'Install' },
+  de: { 'install.title': 'Füge Juste Debout zum Startbildschirm hinzu', 'install.ios': 'Tippe auf Teilen, dann „Zum Home-Bildschirm"', 'install.android': 'Öffne die App mit einem Tipp, wie eine echte App', 'install.cta': 'Installieren' },
+  it: { 'install.title': 'Aggiungi Juste Debout alla schermata Home', 'install.ios': 'Tocca Condividi, poi "Aggiungi a Home"', 'install.android': "Apri l'app con un tocco, come una vera app", 'install.cta': 'Installa' },
+  es: { 'install.title': 'Añade Juste Debout a tu pantalla de inicio', 'install.ios': 'Toca Compartir y luego "Añadir a inicio"', 'install.android': 'Abre la app con un toque, como una app real', 'install.cta': 'Instalar' },
+  pt: { 'install.title': 'Adiciona o Juste Debout ao ecrã principal', 'install.ios': 'Toca em Partilhar e depois "Adicionar ao ecrã"', 'install.android': 'Abre a app com um toque, como uma app real', 'install.cta': 'Instalar' },
+  zh: { 'install.title': '把 Juste Debout 添加到主屏幕', 'install.ios': '点击分享，然后"添加到主屏幕"', 'install.android': '一键打开应用，就像真正的 App', 'install.cta': '安装' },
+  ko: { 'install.title': 'Juste Debout를 홈 화면에 추가하세요', 'install.ios': '공유를 누른 뒤 "홈 화면에 추가"', 'install.android': '진짜 앱처럼 한 번에 열기', 'install.cta': '설치' },
+  ja: { 'install.title': 'Juste Debout をホーム画面に追加', 'install.ios': '共有をタップして「ホーム画面に追加」', 'install.android': '本物のアプリのようにワンタップで起動', 'install.cta': 'インストール' },
+});
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<string>(i18n.locale);
 

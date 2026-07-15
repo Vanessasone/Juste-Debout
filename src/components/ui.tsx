@@ -446,7 +446,7 @@ const s = StyleSheet.create({
   liveBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Palette.live,
+    backgroundColor: Palette.sideFuchsia,
     paddingVertical: 3,
     paddingHorizontal: 8,
     borderRadius: Radius.pill,
