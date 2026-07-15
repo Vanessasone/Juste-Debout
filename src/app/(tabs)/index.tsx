@@ -74,6 +74,7 @@ const pillars: {
   { label: 'Job Board', icon: 'briefcase', emoji: '💼', route: '/jobs' },
   { tkey: 'home.pPassport', icon: 'ribbon', emoji: '🛂', route: '/passport' },
   { label: 'Hall of Fame', icon: 'trophy', emoji: '🏆', route: '/hall-of-fame' },
+  { label: 'Fantasy JD', icon: 'game-controller', emoji: '🎮', route: '/fantasy' },
   { tkey: 'home.pCerts', icon: 'shield-checkmark', emoji: '🎖️' },
 ];
 

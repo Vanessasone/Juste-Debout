@@ -103,6 +103,7 @@ function RootNavigator() {
         <Stack.Screen name="learning" />
         <Stack.Screen name="jobs" />
         <Stack.Screen name="hall-of-fame" />
+        <Stack.Screen name="fantasy" />
         <Stack.Screen name="passport" />
         <Stack.Screen name="dancer/[id]" />
         <Stack.Screen name="admin-certs" />
