@@ -10,6 +10,7 @@ import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, View } fro
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LiveReactions } from '@/components/LiveReactions';
+import { LiveVotePanel } from '@/components/LiveVotePanel';
 import { Card, T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
@@ -88,6 +89,7 @@ export default function Watch() {
                 <T variant="label" color={c.black}>{t('watch.open')}</T>
               </Pressable>
             </Card>
+            {stream.event_id ? <LiveVotePanel eventId={stream.event_id} /> : null}
           </View>
         ) : (
           <View>
@@ -95,6 +97,7 @@ export default function Watch() {
             <T variant="h3" color="#fff" style={{ paddingHorizontal: Space.lg, marginTop: Space.md }}>
               {stream.title}
             </T>
+            {stream.event_id ? <LiveVotePanel eventId={stream.event_id} /> : null}
           </View>
         )}
       </View>
