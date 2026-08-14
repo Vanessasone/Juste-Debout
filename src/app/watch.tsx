@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LiveCaptions } from '@/components/LiveCaptions';
 import { LiveReactions } from '@/components/LiveReactions';
 import { LiveVotePanel } from '@/components/LiveVotePanel';
 import { Card, T } from '@/components/ui';
@@ -89,11 +90,13 @@ export default function Watch() {
                 <T variant="label" color={c.black}>{t('watch.open')}</T>
               </Pressable>
             </Card>
+            {stream.event_id ? <LiveCaptions eventId={stream.event_id} /> : null}
             {stream.event_id ? <LiveVotePanel eventId={stream.event_id} /> : null}
           </View>
         ) : (
           <View>
             <Player url={url} />
+            {stream.event_id ? <LiveCaptions eventId={stream.event_id} /> : null}
             <T variant="h3" color="#fff" style={{ paddingHorizontal: Space.lg, marginTop: Space.md }}>
               {stream.title}
             </T>

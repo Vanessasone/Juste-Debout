@@ -1428,7 +1428,7 @@ i18n.store({
 
 i18n.store({
   fr: {
-    'watch.whoWins': 'Qui va gagner ?', 'watch.publicVotes': '%{n} votes du public', 'watch.badge': 'EN DIRECT', 'watch.noneTitle': 'Aucun direct en cours', 'watch.noneSub': 'Reviens pendant un événement Juste Debout pour suivre les passages en direct.',
+    'watch.whoWins': 'Qui va gagner ?', 'watch.publicVotes': '%{n} votes du public', 'watch.passageNow': 'En cours', 'watch.voteClosing': 'Vote clos', 'watch.result': 'Résultat', 'watch.cc': 'Légendes', 'watch.badge': 'EN DIRECT', 'watch.noneTitle': 'Aucun direct en cours', 'watch.noneSub': 'Reviens pendant un événement Juste Debout pour suivre les passages en direct.',
     'watch.soonTitle': 'Le direct va commencer', 'watch.soonSub': 'La diffusion démarre dans un instant. Reste connecté !', 'watch.optim': "Le direct est optimisé pour l'app mobile.", 'watch.open': 'Ouvrir le direct',
     'ae.title': 'Événements partenaires', 'ae.subtitle': 'À valider', 'ae.nothing': 'Rien à modérer', 'ae.nothingSub': 'Aucun événement partenaire en attente.', 'ae.datesTba': 'Dates à préciser', 'ae.partner': 'PARTENAIRE', 'ae.reject': 'Refuser',
     'sc.allowCam': 'Autorise la caméra', 'sc.enableCam': 'Activer la caméra', 'sc.computerHint': '(Sur ordinateur, utilise la saisie manuelle ci-dessous)', 'sc.aim': 'Vise le QR du billet',
@@ -1436,7 +1436,7 @@ i18n.store({
     'vid.open': 'Ouvrir la vidéo',
   },
   en: {
-    'watch.whoWins': 'Who will win?', 'watch.publicVotes': '%{n} public votes', 'watch.badge': 'LIVE', 'watch.noneTitle': 'No live right now', 'watch.noneSub': 'Come back during a Juste Debout event to follow the matches live.',
+    'watch.whoWins': 'Who will win?', 'watch.publicVotes': '%{n} public votes', 'watch.passageNow': 'Now', 'watch.voteClosing': 'Vote closed', 'watch.result': 'Result', 'watch.cc': 'Captions', 'watch.badge': 'LIVE', 'watch.noneTitle': 'No live right now', 'watch.noneSub': 'Come back during a Juste Debout event to follow the matches live.',
     'watch.soonTitle': 'The live is about to start', 'watch.soonSub': 'The stream starts in a moment. Stay tuned!', 'watch.optim': 'The live is optimized for the mobile app.', 'watch.open': 'Open the live',
     'ae.title': 'Partner events', 'ae.subtitle': 'To review', 'ae.nothing': 'Nothing to moderate', 'ae.nothingSub': 'No partner event pending.', 'ae.datesTba': 'Dates TBA', 'ae.partner': 'PARTNER', 'ae.reject': 'Reject',
     'sc.allowCam': 'Allow the camera', 'sc.enableCam': 'Enable the camera', 'sc.computerHint': '(On desktop, use the manual entry below)', 'sc.aim': 'Aim at the ticket QR',
@@ -1444,7 +1444,7 @@ i18n.store({
     'vid.open': 'Open the video',
   },
   de: {
-    'watch.whoWins': 'Wer gewinnt?', 'watch.publicVotes': '%{n} Publikumsstimmen', 'watch.badge': 'LIVE', 'watch.noneTitle': 'Kein Live gerade', 'watch.noneSub': 'Komm während eines Juste-Debout-Events wieder, um die Begegnungen live zu verfolgen.',
+    'watch.whoWins': 'Wer gewinnt?', 'watch.publicVotes': '%{n} Publikumsstimmen', 'watch.passageNow': 'Jetzt', 'watch.voteClosing': 'Abstimmung beendet', 'watch.result': 'Ergebnis', 'watch.cc': 'Untertitel', 'watch.badge': 'LIVE', 'watch.noneTitle': 'Kein Live gerade', 'watch.noneSub': 'Komm während eines Juste-Debout-Events wieder, um die Begegnungen live zu verfolgen.',
     'watch.soonTitle': 'Das Live beginnt gleich', 'watch.soonSub': 'Der Stream startet gleich. Bleib dran!', 'watch.optim': 'Das Live ist für die mobile App optimiert.', 'watch.open': 'Live öffnen',
     'ae.title': 'Partner-Events', 'ae.subtitle': 'Zu prüfen', 'ae.nothing': 'Nichts zu moderieren', 'ae.nothingSub': 'Kein Partner-Event ausstehend.', 'ae.datesTba': 'Datum folgt', 'ae.partner': 'PARTNER', 'ae.reject': 'Ablehnen',
     'sc.allowCam': 'Kamera erlauben', 'sc.enableCam': 'Kamera aktivieren', 'sc.computerHint': '(Am Computer die manuelle Eingabe unten nutzen)', 'sc.aim': 'Ziele auf den Ticket-QR',
@@ -1452,7 +1452,7 @@ i18n.store({
     'vid.open': 'Video öffnen',
   },
   it: {
-    'watch.whoWins': 'Chi vincerà?', 'watch.publicVotes': '%{n} voti del pubblico', 'watch.badge': 'LIVE', 'watch.noneTitle': 'Nessuna diretta ora', 'watch.noneSub': 'Torna durante un evento Juste Debout per seguire gli incontri in diretta.',
+    'watch.whoWins': 'Chi vincerà?', 'watch.publicVotes': '%{n} voti del pubblico', 'watch.passageNow': 'Ora', 'watch.voteClosing': 'Voto chiuso', 'watch.result': 'Risultato', 'watch.cc': 'Sottotitoli', 'watch.badge': 'LIVE', 'watch.noneTitle': 'Nessuna diretta ora', 'watch.noneSub': 'Torna durante un evento Juste Debout per seguire gli incontri in diretta.',
     'watch.soonTitle': 'La diretta sta per iniziare', 'watch.soonSub': 'Lo streaming inizia tra poco. Resta connesso!', 'watch.optim': "La diretta è ottimizzata per l'app mobile.", 'watch.open': 'Apri la diretta',
     'ae.title': 'Eventi partner', 'ae.subtitle': 'Da validare', 'ae.nothing': 'Niente da moderare', 'ae.nothingSub': 'Nessun evento partner in attesa.', 'ae.datesTba': 'Date da definire', 'ae.partner': 'PARTNER', 'ae.reject': 'Rifiuta',
     'sc.allowCam': 'Autorizza la fotocamera', 'sc.enableCam': 'Attiva la fotocamera', 'sc.computerHint': '(Su computer, usa l’inserimento manuale sotto)', 'sc.aim': 'Inquadra il QR del biglietto',
@@ -1460,7 +1460,7 @@ i18n.store({
     'vid.open': 'Apri il video',
   },
   es: {
-    'watch.whoWins': '¿Quién ganará?', 'watch.publicVotes': '%{n} votos del público', 'watch.badge': 'EN VIVO', 'watch.noneTitle': 'Ningún directo ahora', 'watch.noneSub': 'Vuelve durante un evento Juste Debout para seguir los encuentros en directo.',
+    'watch.whoWins': '¿Quién ganará?', 'watch.publicVotes': '%{n} votos del público', 'watch.passageNow': 'Ahora', 'watch.voteClosing': 'Voto cerrado', 'watch.result': 'Resultado', 'watch.cc': 'Subtítulos', 'watch.badge': 'EN VIVO', 'watch.noneTitle': 'Ningún directo ahora', 'watch.noneSub': 'Vuelve durante un evento Juste Debout para seguir los encuentros en directo.',
     'watch.soonTitle': 'El directo va a empezar', 'watch.soonSub': 'La transmisión empieza en un momento. ¡No te vayas!', 'watch.optim': 'El directo está optimizado para la app móvil.', 'watch.open': 'Abrir el directo',
     'ae.title': 'Eventos asociados', 'ae.subtitle': 'Por validar', 'ae.nothing': 'Nada que moderar', 'ae.nothingSub': 'Ningún evento asociado pendiente.', 'ae.datesTba': 'Fechas por confirmar', 'ae.partner': 'ASOCIADO', 'ae.reject': 'Rechazar',
     'sc.allowCam': 'Autoriza la cámara', 'sc.enableCam': 'Activar la cámara', 'sc.computerHint': '(En ordenador, usa la entrada manual abajo)', 'sc.aim': 'Apunta al QR de la entrada',
@@ -1468,7 +1468,7 @@ i18n.store({
     'vid.open': 'Abrir el vídeo',
   },
   pt: {
-    'watch.whoWins': 'Quem vai ganhar?', 'watch.publicVotes': '%{n} votos do público', 'watch.badge': 'AO VIVO', 'watch.noneTitle': 'Nenhum direto agora', 'watch.noneSub': 'Volta durante um evento Juste Debout para acompanhar os encontros ao vivo.',
+    'watch.whoWins': 'Quem vai ganhar?', 'watch.publicVotes': '%{n} votos do público', 'watch.passageNow': 'Agora', 'watch.voteClosing': 'Voto encerrado', 'watch.result': 'Resultado', 'watch.cc': 'Legendas', 'watch.badge': 'AO VIVO', 'watch.noneTitle': 'Nenhum direto agora', 'watch.noneSub': 'Volta durante um evento Juste Debout para acompanhar os encontros ao vivo.',
     'watch.soonTitle': 'O direto vai começar', 'watch.soonSub': 'A transmissão começa num instante. Fica atento!', 'watch.optim': 'O direto está otimizado para a app móvel.', 'watch.open': 'Abrir o direto',
     'ae.title': 'Eventos parceiros', 'ae.subtitle': 'Por validar', 'ae.nothing': 'Nada a moderar', 'ae.nothingSub': 'Nenhum evento parceiro pendente.', 'ae.datesTba': 'Datas a anunciar', 'ae.partner': 'PARCEIRO', 'ae.reject': 'Recusar',
     'sc.allowCam': 'Autoriza a câmara', 'sc.enableCam': 'Ativar a câmara', 'sc.computerHint': '(No computador, usa a introdução manual abaixo)', 'sc.aim': 'Aponta ao QR do bilhete',
@@ -1476,7 +1476,7 @@ i18n.store({
     'vid.open': 'Abrir o vídeo',
   },
   zh: {
-    'watch.whoWins': '谁会赢？', 'watch.publicVotes': '%{n} 位观众投票', 'watch.badge': '直播', 'watch.noneTitle': '当前没有直播', 'watch.noneSub': '在 Juste Debout 活动期间回来，实时观看对决。',
+    'watch.whoWins': '谁会赢？', 'watch.publicVotes': '%{n} 位观众投票', 'watch.passageNow': '进行中', 'watch.voteClosing': '投票已结束', 'watch.result': '结果', 'watch.cc': '字幕', 'watch.badge': '直播', 'watch.noneTitle': '当前没有直播', 'watch.noneSub': '在 Juste Debout 活动期间回来，实时观看对决。',
     'watch.soonTitle': '直播即将开始', 'watch.soonSub': '直播马上开始，敬请关注！', 'watch.optim': '直播已针对手机应用优化。', 'watch.open': '打开直播',
     'ae.title': '合作活动', 'ae.subtitle': '待审核', 'ae.nothing': '没有待审核内容', 'ae.nothingSub': '没有待处理的合作活动。', 'ae.datesTba': '日期待定', 'ae.partner': '合作方', 'ae.reject': '拒绝',
     'sc.allowCam': '允许使用相机', 'sc.enableCam': '启用相机', 'sc.computerHint': '（在电脑上请使用下方手动输入）', 'sc.aim': '对准门票二维码',
@@ -1484,7 +1484,7 @@ i18n.store({
     'vid.open': '打开视频',
   },
   ko: {
-    'watch.whoWins': '누가 이길까요?', 'watch.publicVotes': '관중 투표 %{n}표', 'watch.badge': '라이브', 'watch.noneTitle': '현재 진행 중인 라이브 없음', 'watch.noneSub': 'Juste Debout 이벤트 중에 다시 방문해 대결을 실시간으로 시청하세요.',
+    'watch.whoWins': '누가 이길까요?', 'watch.publicVotes': '관중 투표 %{n}표', 'watch.passageNow': '진행 중', 'watch.voteClosing': '투표 종료', 'watch.result': '결과', 'watch.cc': '자막', 'watch.badge': '라이브', 'watch.noneTitle': '현재 진행 중인 라이브 없음', 'watch.noneSub': 'Juste Debout 이벤트 중에 다시 방문해 대결을 실시간으로 시청하세요.',
     'watch.soonTitle': '라이브가 곧 시작됩니다', 'watch.soonSub': '방송이 곧 시작됩니다. 채널 고정!', 'watch.optim': '라이브는 모바일 앱에 최적화되어 있습니다.', 'watch.open': '라이브 열기',
     'ae.title': '파트너 이벤트', 'ae.subtitle': '검토 대기', 'ae.nothing': '검토할 항목 없음', 'ae.nothingSub': '대기 중인 파트너 이벤트가 없습니다.', 'ae.datesTba': '날짜 미정', 'ae.partner': '파트너', 'ae.reject': '거절',
     'sc.allowCam': '카메라 허용', 'sc.enableCam': '카메라 켜기', 'sc.computerHint': '(컴퓨터에서는 아래 수동 입력을 사용하세요)', 'sc.aim': '티켓 QR을 조준하세요',
@@ -1492,7 +1492,7 @@ i18n.store({
     'vid.open': '동영상 열기',
   },
   ja: {
-    'watch.whoWins': '勝つのは？', 'watch.publicVotes': '観客 %{n}票', 'watch.badge': 'ライブ', 'watch.noneTitle': '現在ライブはありません', 'watch.noneSub': 'Juste Debout のイベント中に戻って対戦をライブでご覧ください。',
+    'watch.whoWins': '勝つのは？', 'watch.publicVotes': '観客 %{n}票', 'watch.passageNow': '進行中', 'watch.voteClosing': '投票終了', 'watch.result': '結果', 'watch.cc': '字幕', 'watch.badge': 'ライブ', 'watch.noneTitle': '現在ライブはありません', 'watch.noneSub': 'Juste Debout のイベント中に戻って対戦をライブでご覧ください。',
     'watch.soonTitle': 'まもなくライブ開始', 'watch.soonSub': '配信はまもなく開始します。お待ちください！', 'watch.optim': 'ライブはモバイルアプリに最適化されています。', 'watch.open': 'ライブを開く',
     'ae.title': 'パートナーイベント', 'ae.subtitle': '確認待ち', 'ae.nothing': '審査する項目はありません', 'ae.nothingSub': '保留中のパートナーイベントはありません。', 'ae.datesTba': '日程未定', 'ae.partner': 'パートナー', 'ae.reject': '却下',
     'sc.allowCam': 'カメラを許可', 'sc.enableCam': 'カメラを有効化', 'sc.computerHint': '（パソコンでは下の手動入力を使用）', 'sc.aim': 'チケットのQRを合わせてください',

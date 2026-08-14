@@ -705,8 +705,11 @@ create table if not exists public.commentaries (
   kind text not null default 'mc',   -- mc | ai | system
   tag text,                          -- start | highlight | tie | reveal | upset | info
   text text not null,
+  translations jsonb,                -- légendes auto-traduites { fr,en,de,it,es,pt,zh,ko,ja }
   created_at timestamptz not null default now()
 );
+-- Ajout idempotent pour les bases déjà créées avant la colonne translations.
+alter table public.commentaries add column if not exists translations jsonb;
 create index if not exists idx_comm_event on public.commentaries(event_id, created_at);
 create index if not exists idx_comm_passage on public.commentaries(passage_id);
 alter table public.commentaries enable row level security;

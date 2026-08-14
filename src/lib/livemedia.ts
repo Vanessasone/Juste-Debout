@@ -14,8 +14,27 @@ export type Commentary = {
   kind: CommentaryKind;
   tag: string | null;
   text: string;
+  translations: Record<string, string> | null; // légendes auto-traduites (9 langues)
   created_at: string;
 };
+
+/** La légende à afficher pour un spectateur, dans SA langue (repli sur l'original). */
+export function captionFor(c: Commentary, lang: string): string {
+  return c.translations?.[lang]?.trim() || c.text;
+}
+
+/** Traduit une ligne dans les 9 langues via l'Edge Function `translate`.
+ *  Renvoie null si indisponible (la légende retombe alors sur le texte d'origine). */
+export async function translateLine(text: string): Promise<Record<string, string> | null> {
+  try {
+    const { data, error } = await supabase.functions.invoke('translate', { body: { text } });
+    if (error || !data || data.error) return null;
+    const tr = data.translations as Record<string, string> | undefined;
+    return tr && typeof tr === 'object' ? tr : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function getCommentaries(eventId: string, limit = 80): Promise<Commentary[]> {
   const { data, error } = await supabase
@@ -39,13 +58,17 @@ export async function postCommentary(input: {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error('Tu dois être connecté.');
+  const clean = input.text.trim();
+  // Traduction automatique de la légende dans les 9 langues (échoue en silence → repli sur l'original).
+  const translations = await translateLine(clean);
   const { error } = await supabase.from('commentaries').insert({
     event_id: input.eventId,
     passage_id: input.passageId ?? null,
     author_id: user.id,
     kind: input.kind ?? 'mc',
     tag: input.tag ?? null,
-    text: input.text.trim(),
+    text: clean,
+    translations,
   });
   if (error) throw error;
 }
