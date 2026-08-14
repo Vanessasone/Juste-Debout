@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LiveReactions } from '@/components/LiveReactions';
 import { Card, T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
@@ -97,6 +98,9 @@ export default function Watch() {
           </View>
         )}
       </View>
+
+      {/* Réactions live — la foule qui vibre en temps réel */}
+      {stream ? <LiveReactions channelKey={stream.id} /> : null}
     </View>
   );
 }
