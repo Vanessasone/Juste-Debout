@@ -11,6 +11,7 @@ import { Gradients, Palette, Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
 import { Certification, getMyCertifications } from '@/lib/certifications';
+import { useCountUp } from '@/components/motion';
 import { CoinsByApp, getCoinsBalance, getCoinsByApp } from '@/lib/coins';
 import { badges as computeBadges, countsFrom, quests as computeQuests, rankFor } from '@/lib/gamification';
 import { useT } from '@/lib/i18n';
@@ -81,6 +82,7 @@ export default function Profile() {
     [profile, regs, publicVotes, tickets, predStats],
   );
   const coinRank = useMemo(() => rankFor(coins), [coins]); // palier dérivé du solde RÉEL
+  const coinsUp = useCountUp(Math.max(0, coins)); // compteur animé (monte de 0 au solde)
   const quests = useMemo(() => computeQuests(counts), [counts]);
   const badges = useMemo(() => computeBadges(counts), [counts]);
 
@@ -141,7 +143,7 @@ export default function Profile() {
               </T>
             </View>
             <T variant="title" color={Palette.black} style={{ fontSize: 40, marginTop: 8 }}>
-              {Math.max(0, coins).toLocaleString('fr-FR')}
+              {coinsUp.toLocaleString('fr-FR')}
               <T variant="h3" color={Palette.black}>
                 {' '}
                 {t('profile.coins')}

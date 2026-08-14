@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppSwitcher } from '@/components/AppSwitcher';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { FadeInUp, PressableScale } from '@/components/motion';
 import { Vitruve, Wordmark } from '@/components/Logo';
 import {
   Card,
@@ -328,18 +329,19 @@ export default function Home() {
       {/* EXPLORER */}
       <Section title={t('home.explore')}>
         <View style={styles.grid}>
-          {pillars.map((p) => (
-            <Pressable
-              key={p.tkey ?? p.label}
-              style={styles.gridItem}
-              onPress={() => p.route && router.push(p.route as never)}>
-              <View style={styles.emojiTile}>
-                <T style={styles.emojiGlyph}>{p.emoji}</T>
-              </View>
-              <T variant="label" color={c.textDim} style={{ marginTop: 8, textAlign: 'center' }} numberOfLines={2}>
-                {p.tkey ? t(p.tkey) : p.label}
-              </T>
-            </Pressable>
+          {pillars.map((p, i) => (
+            <FadeInUp key={p.tkey ?? p.label} delay={i * 45} style={styles.gridItem}>
+              <PressableScale
+                style={{ alignItems: 'center' }}
+                onPress={() => p.route && router.push(p.route as never)}>
+                <View style={styles.emojiTile}>
+                  <T style={styles.emojiGlyph}>{p.emoji}</T>
+                </View>
+                <T variant="label" color={c.textDim} style={{ marginTop: 8, textAlign: 'center' }} numberOfLines={2}>
+                  {p.tkey ? t(p.tkey) : p.label}
+                </T>
+              </PressableScale>
+            </FadeInUp>
           ))}
         </View>
       </Section>
