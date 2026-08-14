@@ -5,7 +5,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppSwitcher } from '@/components/AppSwitcher';
 import { InstallPrompt } from '@/components/InstallPrompt';
-import { FadeInUp, PressableScale } from '@/components/motion';
+import { FadeInUp, Pulse, PressableScale } from '@/components/motion';
 import { Vitruve, Wordmark } from '@/components/Logo';
 import {
   Card,
@@ -157,7 +157,9 @@ export default function Home() {
       {/* Bannière DIRECT — visible seulement pendant une diffusion */}
       {live ? (
         <Pressable onPress={() => router.push('/watch')} style={styles.liveBanner}>
-          <View style={styles.liveDot} />
+          <Pulse>
+            <View style={styles.liveDot} />
+          </Pulse>
           <View style={{ flex: 1 }}>
             <T variant="label" color={c.white} style={{ fontSize: 13, letterSpacing: 1 }}>
               {t('home.liveNow')}
@@ -171,7 +173,7 @@ export default function Home() {
       ) : null}
 
       {/* HERO — prochain événement, orienté « ville » */}
-      <View style={styles.hero}>
+      <FadeInUp delay={40} distance={24} style={styles.hero}>
         <View style={styles.accentBar}>
           <View style={styles.accentFuchsia} />
         </View>
@@ -208,7 +210,7 @@ export default function Home() {
           </T>
           <Ionicons name="arrow-forward" size={16} color={c.black} style={{ marginLeft: 6 }} />
         </Pressable>
-      </View>
+      </FadeInUp>
 
       {/* SAISON — carrousel des villes */}
       {railEvents.length > 0 && (
@@ -327,6 +329,7 @@ export default function Home() {
       )}
 
       {/* EXPLORER */}
+      <FadeInUp delay={160} distance={20}>
       <Section title={t('home.explore')}>
         <View style={styles.grid}>
           {pillars.map((p, i) => (
@@ -345,6 +348,7 @@ export default function Home() {
           ))}
         </View>
       </Section>
+      </FadeInUp>
 
       {/* JD+ */}
       <Section title={t('home.levelUp')}>
@@ -423,7 +427,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     overflow: 'hidden',
   },
   accentFuchsia: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '45%', backgroundColor: Palette.sideFuchsia },
-  heroCity: { marginTop: Space.lg, fontSize: 46, letterSpacing: -1, textTransform: 'uppercase' },
+  heroCity: { marginTop: Space.lg, fontSize: 56, lineHeight: 54, letterSpacing: -1.5, textTransform: 'uppercase' },
   heroDate: {
     flexDirection: 'row',
     alignItems: 'center',

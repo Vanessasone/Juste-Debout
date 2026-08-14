@@ -1464,3 +1464,29 @@ create policy "order_items_read" on public.order_items for select to authenticat
 
 -- Réception temps réel (le staff s'abonne aux nouvelles commandes)
 alter publication supabase_realtime add table public.orders;
+
+-- ============================================================
+-- « TON MOMENT » (backend prêt — UI activée à la sortie officielle)
+--   source 'upload' = clip posté par le danseur (Phase 1 · TOTF)
+--   source 'official' = captation JD auto-attribuée via passage_participants (Phase 2 · JD)
+-- ============================================================
+create table if not exists public.moments (
+  id uuid primary key default gen_random_uuid(),
+  dancer_id uuid references public.profiles(id) on delete cascade,
+  passage_id uuid references public.passages(id) on delete set null,
+  event_id uuid references public.events(id) on delete set null,
+  source text not null default 'upload',
+  video_url text,
+  highlight_url text,
+  discipline text,
+  status text not null default 'pending', -- pending | approved | published | rejected
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_moments_dancer on public.moments(dancer_id);
+alter table public.moments enable row level security;
+drop policy if exists "moments_read" on public.moments;
+create policy "moments_read" on public.moments for select to authenticated
+  using (status = 'published' or dancer_id = auth.uid());
+drop policy if exists "moments_insert_own" on public.moments;
+create policy "moments_insert_own" on public.moments for insert to authenticated
+  with check (dancer_id = auth.uid() and source = 'upload');

@@ -96,6 +96,33 @@ export function useCountUp(value: number, duration = 900): number {
   return n;
 }
 
+/** Battement en boucle — pour le point/tag LIVE (attire l'œil). */
+export function Pulse({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
+  const v = useMemo(() => new Animated.Value(0), []);
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(v, { toValue: 1, duration: 720, easing: Easing.inOut(Easing.ease), useNativeDriver: NATIVE }),
+        Animated.timing(v, { toValue: 0, duration: 720, easing: Easing.inOut(Easing.ease), useNativeDriver: NATIVE }),
+      ]),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [v]);
+  return (
+    <Animated.View
+      style={[
+        style,
+        {
+          opacity: v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.3] }),
+          transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1, 0.72] }) }],
+        },
+      ]}>
+      {children}
+    </Animated.View>
+  );
+}
+
 /** Placeholder scintillant (chargement élégant au lieu d'une roue qui tourne). */
 export function Skeleton({
   height = 16,
