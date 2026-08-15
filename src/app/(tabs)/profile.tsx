@@ -351,6 +351,8 @@ export default function Profile() {
             <GhostButton label={t('profile.worldRanking')} icon="podium" onPress={() => router.push('/ranking')} />
             <GhostButton label="Juste Debout School" icon="library" onPress={() => router.push('/school')} />
             <GhostButton label={t('profile.wallet')} icon="wallet" onPress={() => router.push('/wallet')} />
+            <GhostButton label={t('coins.title')} icon="server" onPress={() => router.push('/coins')} />
+            <GhostButton label={t('earn.title')} icon="cash" onPress={() => router.push('/earnings')} />
             {isScanner && (
               <GhostButton label={t('profile.scanner')} icon="qr-code" onPress={() => router.push('/scanner')} />
             )}

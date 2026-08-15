@@ -27,6 +27,9 @@ export const COIN_PACKS: CoinPack[] = [
   { id: 'boss', price_eur: 99.99, base: 10000, bonus: 2000 },
 ];
 
+/** En dessous de ce solde, on incite l'utilisateur à recharger (relance re-achat). */
+export const LOW_COINS = 200;
+
 export async function getGifts(): Promise<Gift[]> {
   const { data, error } = await supabase.from('gifts').select('*').eq('active', true).order('sort');
   if (error) throw error;
@@ -53,19 +56,18 @@ export async function buyCoins(pack: CoinPack): Promise<number> {
 
 export type SendGiftResult = { ok: boolean; cost: number; cash_coins: number; balance: number };
 
-/** Envoie un cadeau, attribué au danseur du passage en cours. */
+/** Envoie un cadeau vers un côté (a/b) du passage en cours. Les gains sont
+ *  répartis serveur entre les danseurs de ce côté (binôme = 50/50). */
 export async function sendGift(input: {
   giftId: string;
   eventId: string | null;
   passageId: string | null;
-  dancerId: string | null;
-  side: 'a' | 'b' | null;
+  side: 'a' | 'b';
 }): Promise<SendGiftResult> {
   const { data, error } = await supabase.rpc('send_gift', {
     p_gift: input.giftId,
     p_event: input.eventId,
     p_passage: input.passageId,
-    p_dancer: input.dancerId,
     p_side: input.side,
   });
   if (error) throw error;

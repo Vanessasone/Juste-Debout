@@ -25,3 +25,25 @@ export function openReactions(channelKey: string, onReact: (kind: string) => voi
     },
   };
 }
+
+/** Un cadeau diffusé en direct : emoji + nom + pseudo de l'envoyeur + côté visé. */
+export type GiftBlast = { emoji: string; name: string; who: string; side: 'a' | 'b' };
+
+/** Canal de diffusion des cadeaux (éphémère, comme les réactions). */
+export function openGiftBroadcast(channelKey: string, onGift: (g: GiftBlast) => void) {
+  const channel = supabase.channel(`gift:${channelKey}`, { config: { broadcast: { self: false } } });
+  channel
+    .on('broadcast', { event: 'g' }, (msg: { payload?: { emoji?: string; name?: string; who?: string; side?: 'a' | 'b' } }) => {
+      const g = msg?.payload;
+      if (g?.emoji) onGift({ emoji: g.emoji, name: g.name ?? '', who: g.who ?? '', side: g.side ?? 'a' });
+    })
+    .subscribe();
+  return {
+    send(g: GiftBlast) {
+      channel.send({ type: 'broadcast', event: 'g', payload: g });
+    },
+    close() {
+      supabase.removeChannel(channel);
+    },
+  };
+}

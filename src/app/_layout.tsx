@@ -114,6 +114,8 @@ function RootNavigator() {
         <Stack.Screen name="chat/[id]" />
         <Stack.Screen name="nearby" />
         <Stack.Screen name="watch" />
+        <Stack.Screen name="coins" />
+        <Stack.Screen name="earnings" />
         <Stack.Screen name="live-admin" />
       </Stack>
     </>

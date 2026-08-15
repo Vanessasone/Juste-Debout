@@ -10,8 +10,10 @@ import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, View } fro
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LiveCaptions } from '@/components/LiveCaptions';
+import { LiveGifts } from '@/components/LiveGifts';
 import { LiveReactions } from '@/components/LiveReactions';
 import { LiveVotePanel } from '@/components/LiveVotePanel';
+import { getMyProfile } from '@/lib/profile';
 import { Card, T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
@@ -36,6 +38,13 @@ export default function Watch() {
   const insets = useSafeAreaInsets();
   const [stream, setStream] = useState<LiveStream | null>(null);
   const [loading, setLoading] = useState(true);
+  const [who, setWho] = useState('Fan');
+
+  useEffect(() => {
+    getMyProfile()
+      .then((p) => setWho(p?.alias || p?.full_name || 'Fan'))
+      .catch(() => {});
+  }, []);
 
   const load = useCallback(() => {
     getActiveLive()
@@ -107,6 +116,8 @@ export default function Watch() {
 
       {/* Réactions live — la foule qui vibre en temps réel */}
       {stream ? <LiveReactions channelKey={stream.id} /> : null}
+      {/* Cadeaux live — soutien premium attribué au danseur */}
+      {stream?.event_id ? <LiveGifts channelKey={stream.id} eventId={stream.event_id} who={who} /> : null}
     </View>
   );
 }
