@@ -11,6 +11,7 @@ import { Gradients, Palette, Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
 import { Certification, getMyCertifications } from '@/lib/certifications';
+import { useCountUp } from '@/components/motion';
 import { CoinsByApp, getCoinsBalance, getCoinsByApp } from '@/lib/coins';
 import { badges as computeBadges, countsFrom, quests as computeQuests, rankFor } from '@/lib/gamification';
 import { useT } from '@/lib/i18n';
@@ -81,6 +82,7 @@ export default function Profile() {
     [profile, regs, publicVotes, tickets, predStats],
   );
   const coinRank = useMemo(() => rankFor(coins), [coins]); // palier dérivé du solde RÉEL
+  const coinsUp = useCountUp(Math.max(0, coins)); // compteur animé (monte de 0 au solde)
   const quests = useMemo(() => computeQuests(counts), [counts]);
   const badges = useMemo(() => computeBadges(counts), [counts]);
 
@@ -141,7 +143,7 @@ export default function Profile() {
               </T>
             </View>
             <T variant="title" color={Palette.black} style={{ fontSize: 40, marginTop: 8 }}>
-              {Math.max(0, coins).toLocaleString('fr-FR')}
+              {coinsUp.toLocaleString('fr-FR')}
               <T variant="h3" color={Palette.black}>
                 {' '}
                 {t('profile.coins')}
@@ -349,6 +351,8 @@ export default function Profile() {
             <GhostButton label={t('profile.worldRanking')} icon="podium" onPress={() => router.push('/ranking')} />
             <GhostButton label="Juste Debout School" icon="library" onPress={() => router.push('/school')} />
             <GhostButton label={t('profile.wallet')} icon="wallet" onPress={() => router.push('/wallet')} />
+            <GhostButton label={t('coins.title')} icon="server" onPress={() => router.push('/coins')} />
+            <GhostButton label={t('earn.title')} icon="cash" onPress={() => router.push('/earnings')} />
             {isScanner && (
               <GhostButton label={t('profile.scanner')} icon="qr-code" onPress={() => router.push('/scanner')} />
             )}
@@ -361,6 +365,9 @@ export default function Profile() {
             )}
             {isStaff && (
               <GhostButton label={t('profile.regie')} icon="options" onPress={() => router.push('/regie')} />
+            )}
+            {isStaff && (
+              <GhostButton label={t('orders.received')} icon="cube" onPress={() => router.push('/admin-orders')} />
             )}
             {isStaff && (
               <GhostButton label={t('profile.certsAdmin')} icon="ribbon" onPress={() => router.push('/admin-certs')} />

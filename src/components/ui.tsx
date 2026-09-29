@@ -18,6 +18,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PressableScale } from '@/components/motion';
 import { Font, Gradients, Palette, Radius, Space, Type } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useColors } from '@/lib/theme';
@@ -321,10 +322,10 @@ export function GhostButton({
 }) {
   const c = useColors();
   return (
-    <Pressable onPress={onPress} style={[s.ghostBtn, { borderColor: c.border, backgroundColor: c.surface }]}>
+    <PressableScale onPress={onPress} style={[s.ghostBtn, { borderColor: c.border, backgroundColor: c.surface }]}>
       {icon ? <Ionicons name={icon} size={18} color={c.text} style={{ marginRight: 8 }} /> : null}
       <Text style={[s.ghostText, { color: c.text }]}>{label}</Text>
-    </Pressable>
+    </PressableScale>
   );
 }
 

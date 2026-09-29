@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { AppSwitcher } from '@/components/AppSwitcher';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { FadeInUp, Pulse, PressableScale } from '@/components/motion';
 import { Vitruve, Wordmark } from '@/components/Logo';
 import {
   Card,
@@ -28,12 +29,12 @@ import { flagEmoji, getEventPassageCards, PassageCard } from '@/lib/vote';
 
 // Événement affiché tant que la base n'en renvoie aucun (premier lancement).
 const FALLBACK_EVENT = {
-  title: 'Juste Debout World Final',
+  title: 'Juste Debout — Finales Mondiales',
   city: 'Paris',
   country: 'France',
   venue: 'Bientôt annoncé',
-  starts_on: null,
-  ends_on: null,
+  starts_on: '2027-03-13',
+  ends_on: '2027-03-14',
   status: 'upcoming',
 } as const;
 
@@ -70,11 +71,8 @@ const pillars: {
   { tkey: 'home.pPredictions', icon: 'analytics', emoji: '🔮', route: '/pronostics' },
   { label: 'JD School', icon: 'library', emoji: '🎓', route: '/school' },
   { tkey: 'home.pTickets', icon: 'ticket', emoji: '🎟️', route: '/wallet' },
-  // Formations & Masterclass retirées de l'app JD (destinées à l'app JD School / futur JD+).
-  { label: 'Job Board', icon: 'briefcase', emoji: '💼', route: '/jobs' },
   { tkey: 'home.pPassport', icon: 'ribbon', emoji: '🛂', route: '/passport' },
-  { label: 'Hall of Fame', icon: 'trophy', emoji: '🏆', route: '/hall-of-fame' },
-  { label: 'Fantasy JD', icon: 'game-controller', emoji: '🎮', route: '/fantasy' },
+  // Masqués pour la V1 (pas encore prêts) : Formations (→ JD School), Job Board, Hall of Fame, Fantasy JD.
 ];
 
 export default function Home() {
@@ -156,7 +154,9 @@ export default function Home() {
       {/* Bannière DIRECT — visible seulement pendant une diffusion */}
       {live ? (
         <Pressable onPress={() => router.push('/watch')} style={styles.liveBanner}>
-          <View style={styles.liveDot} />
+          <Pulse>
+            <View style={styles.liveDot} />
+          </Pulse>
           <View style={{ flex: 1 }}>
             <T variant="label" color={c.white} style={{ fontSize: 13, letterSpacing: 1 }}>
               {t('home.liveNow')}
@@ -170,7 +170,7 @@ export default function Home() {
       ) : null}
 
       {/* HERO — prochain événement, orienté « ville » */}
-      <View style={styles.hero}>
+      <FadeInUp delay={40} distance={24} style={styles.hero}>
         <View style={styles.accentBar}>
           <View style={styles.accentFuchsia} />
         </View>
@@ -207,7 +207,7 @@ export default function Home() {
           </T>
           <Ionicons name="arrow-forward" size={16} color={c.black} style={{ marginLeft: 6 }} />
         </Pressable>
-      </View>
+      </FadeInUp>
 
       {/* SAISON — carrousel des villes */}
       {railEvents.length > 0 && (
@@ -326,23 +326,26 @@ export default function Home() {
       )}
 
       {/* EXPLORER */}
+      <FadeInUp delay={160} distance={20}>
       <Section title={t('home.explore')}>
         <View style={styles.grid}>
-          {pillars.map((p) => (
-            <Pressable
-              key={p.tkey ?? p.label}
-              style={styles.gridItem}
-              onPress={() => p.route && router.push(p.route as never)}>
-              <View style={styles.emojiTile}>
-                <T style={styles.emojiGlyph}>{p.emoji}</T>
-              </View>
-              <T variant="label" color={c.textDim} style={{ marginTop: 8, textAlign: 'center' }} numberOfLines={2}>
-                {p.tkey ? t(p.tkey) : p.label}
-              </T>
-            </Pressable>
+          {pillars.map((p, i) => (
+            <FadeInUp key={p.tkey ?? p.label} delay={i * 45} style={styles.gridItem}>
+              <PressableScale
+                style={{ alignItems: 'center' }}
+                onPress={() => p.route && router.push(p.route as never)}>
+                <View style={styles.emojiTile}>
+                  <T style={styles.emojiGlyph}>{p.emoji}</T>
+                </View>
+                <T variant="label" color={c.textDim} style={{ marginTop: 8, textAlign: 'center' }} numberOfLines={2}>
+                  {p.tkey ? t(p.tkey) : p.label}
+                </T>
+              </PressableScale>
+            </FadeInUp>
           ))}
         </View>
       </Section>
+      </FadeInUp>
 
       {/* JD+ */}
       <Section title={t('home.levelUp')}>
@@ -421,7 +424,7 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     overflow: 'hidden',
   },
   accentFuchsia: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '45%', backgroundColor: Palette.sideFuchsia },
-  heroCity: { marginTop: Space.lg, fontSize: 46, letterSpacing: -1, textTransform: 'uppercase' },
+  heroCity: { marginTop: Space.lg, fontSize: 56, lineHeight: 54, letterSpacing: -1.5, textTransform: 'uppercase' },
   heroDate: {
     flexDirection: 'row',
     alignItems: 'center',

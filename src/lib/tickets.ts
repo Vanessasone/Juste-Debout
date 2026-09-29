@@ -9,14 +9,18 @@ export type Ticket = {
   event_id: string;
   profile_id: string;
   type: string;
-  status: string; // active | used | cancelled
+  status: string; // active | inside | exited | used(legacy) | cancelled
   qr_token: string;
   payment_method: string | null;
   created_at: string;
   used_at: string | null;
+  entered_at?: string | null;
+  exited_at?: string | null;
   events?: { title: string; city: string | null; venue: string | null; starts_on: string | null } | null;
   profiles?: { full_name: string | null; alias: string | null } | null;
 };
+
+export type ScanResult = { result: string; type?: string; name?: string; entered_at?: string | null };
 
 export async function getMyTickets(): Promise<Ticket[]> {
   const {
@@ -76,4 +80,32 @@ export async function markTicketUsed(id: string): Promise<boolean> {
     .select('id');
   if (error) throw error;
   return (data?.length ?? 0) > 0;
+}
+
+/**
+ * Scan ENTRÉE : marque l'entrée UNE seule fois, renvoie le type + le nom (atomique, anti double-scan).
+ * Si le billet a déjà servi → result 'already_in' + `entered_at` (heure de la 1re entrée).
+ */
+export async function scanEntry(token: string): Promise<ScanResult> {
+  const { data, error } = await supabase.rpc('scan_entry', { p_token: token.trim() });
+  if (error) throw error;
+  return (data as ScanResult) ?? { result: 'error' };
+}
+
+/** Délivrer un billet (admin/scanner) de n'importe quel type, sans Stripe (test / espèces / invitation). */
+export async function issueTicket(
+  eventId: string,
+  type = 'day',
+  payment: 'cash' | 'comp' | 'test' = 'cash',
+  profileId?: string,
+): Promise<{ ok: boolean; qrToken?: string; error?: string }> {
+  const { data, error } = await supabase.rpc('issue_ticket', {
+    p_event: eventId,
+    p_type: type,
+    p_payment: payment,
+    p_profile: profileId ?? null,
+  });
+  if (error) return { ok: false, error: error.message };
+  const o = data as { ok: boolean; qr_token?: string; error?: string };
+  return { ok: !!o?.ok, qrToken: o?.qr_token, error: o?.error };
 }

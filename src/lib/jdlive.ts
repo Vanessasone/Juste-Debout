@@ -34,8 +34,17 @@ export type Registration = {
   event_id: string;
   type: RegType;
   category_id: string | null;
+  partner_id: string | null; // binôme, pour les disciplines 2v2
   status: string;
   created_at: string;
+};
+
+/** Profil réduit d'un binôme (affichage + sélection). */
+export type PartnerLite = {
+  id: string;
+  full_name: string | null;
+  alias: string | null;
+  official_photo_url?: string | null;
 };
 
 /** Événements à venir (finale + présélections). */
@@ -188,7 +197,7 @@ export async function getMyRegistrations(): Promise<Registration[]> {
   if (!user) return [];
   const { data, error } = await supabase
     .from('registrations')
-    .select('id,event_id,type,category_id,status,created_at')
+    .select('id,event_id,type,category_id,partner_id,status,created_at')
     .eq('profile_id', user.id);
   if (error) throw error;
   return (data ?? []) as Registration[];
@@ -212,6 +221,7 @@ export type MyRegistration = {
     status: string;
   } | null;
   categories: { name: string; format: string; family: string | null } | null;
+  partner: PartnerLite | null;
 };
 
 export async function getMyRegistrationsFull(): Promise<MyRegistration[]> {
@@ -222,7 +232,7 @@ export async function getMyRegistrationsFull(): Promise<MyRegistration[]> {
   const { data, error } = await supabase
     .from('registrations')
     .select(
-      'id,type,status,created_at,category_id,events(id,title,city,country,venue,starts_on,ends_on,status),categories(name,format,family)',
+      'id,type,status,created_at,category_id,events(id,title,city,country,venue,starts_on,ends_on,status),categories(name,format,family),partner:profiles!registrations_partner_id_fkey(id,full_name,alias,official_photo_url)',
     )
     .eq('profile_id', user.id)
     .order('created_at', { ascending: false });
@@ -245,6 +255,7 @@ export type RegistrationFull = {
     official_photo_url: string | null;
   } | null;
   categories: { name: string; format: string; family: string | null } | null;
+  partner: PartnerLite | null;
 };
 
 /** Tous les inscrits d'un événement (accès organisateur/admin via RLS). */
@@ -252,7 +263,9 @@ export async function getEventRegistrations(eventId: string): Promise<Registrati
   const { data, error } = await supabase
     .from('registrations')
     .select(
-      'id,type,status,created_at,profiles(id,full_name,alias,country,city,official_photo_url),categories(name,format,family)',
+      // `registrations` a deux clés étrangères vers `profiles` (profile_id et partner_id) :
+      // il faut nommer la contrainte, sinon PostgREST refuse la jointure (ambiguë).
+      'id,type,status,created_at,profiles!registrations_profile_id_fkey(id,full_name,alias,country,city,official_photo_url),categories(name,format,family),partner:profiles!registrations_partner_id_fkey(id,full_name,alias,official_photo_url)',
     )
     .eq('event_id', eventId)
     .order('created_at', { ascending: false });
@@ -269,22 +282,49 @@ export async function setOfficialPhoto(dancerId: string, url: string): Promise<v
   if (error) throw error;
 }
 
+/**
+ * Rechercher un binôme parmi les danseurs de l'app.
+ * Exclut l'utilisateur courant : on ne peut pas être son propre binôme.
+ */
+export async function searchPartners(query: string, limit = 20): Promise<PartnerLite[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const safe = q.replace(/[%,()]/g, ' ');
+  let req = supabase
+    .from('profiles')
+    .select('id,full_name,alias,official_photo_url')
+    .or(`full_name.ilike.%${safe}%,alias.ilike.%${safe}%`)
+    .order('full_name', { ascending: true })
+    .limit(limit);
+  if (user) req = req.neq('id', user.id);
+  const { data, error } = await req;
+  if (error) throw error;
+  return (data ?? []) as PartnerLite[];
+}
+
 /** S'inscrire à un événement (danseur ou spectateur). */
 export async function register(input: {
   eventId: string;
   type: RegType;
   categoryId?: string | null;
+  partnerId?: string | null; // requis pour les disciplines 2v2
   consent: boolean;
 }): Promise<void> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error('Tu dois être connecté.');
+  if (input.partnerId && input.partnerId === user.id)
+    throw new Error('Tu ne peux pas être ton propre binôme.');
   const { error } = await supabase.from('registrations').insert({
     event_id: input.eventId,
     profile_id: user.id,
     type: input.type,
     category_id: input.categoryId ?? null,
+    partner_id: input.type === 'dancer' ? input.partnerId ?? null : null,
     consent_rgpd: input.consent,
     status: 'registered',
   });

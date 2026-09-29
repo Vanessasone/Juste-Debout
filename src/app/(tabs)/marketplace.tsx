@@ -3,9 +3,9 @@
  * Catalogue stylé ; achat sur la boutique officielle (paiement natif via Stripe plus tard).
  */
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { ActivityIndicator, Image, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppHeader, Card, Screen, T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
@@ -17,6 +17,7 @@ import { useColors } from '@/lib/theme';
 export default function Marketplace() {
   const c = useColors();
   const t = useT();
+  const router = useRouter();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,8 +60,8 @@ export default function Marketplace() {
             <Pressable
               key={p.id}
               style={styles.pcard}
-              disabled={!p.product_url}
-              onPress={() => p.product_url && Linking.openURL(p.product_url)}>
+              disabled={p.sold_out}
+              onPress={() => router.push(`/checkout?productId=${p.id}` as never)}>
               <View style={styles.thumbWrap}>
                 {p.image_url ? (
                   <Image source={{ uri: p.image_url }} style={[styles.thumb, p.sold_out && { opacity: 0.4 }]} resizeMode="cover" />

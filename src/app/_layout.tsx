@@ -104,6 +104,8 @@ function RootNavigator() {
         <Stack.Screen name="jobs" />
         <Stack.Screen name="hall-of-fame" />
         <Stack.Screen name="fantasy" />
+        <Stack.Screen name="checkout" />
+        <Stack.Screen name="admin-orders" />
         <Stack.Screen name="passport" />
         <Stack.Screen name="dancer/[id]" />
         <Stack.Screen name="admin-certs" />
@@ -112,6 +114,8 @@ function RootNavigator() {
         <Stack.Screen name="chat/[id]" />
         <Stack.Screen name="nearby" />
         <Stack.Screen name="watch" />
+        <Stack.Screen name="coins" />
+        <Stack.Screen name="earnings" />
         <Stack.Screen name="live-admin" />
       </Stack>
     </>

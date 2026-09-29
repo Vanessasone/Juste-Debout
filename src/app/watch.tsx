@@ -9,6 +9,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { LiveCaptions } from '@/components/LiveCaptions';
+import { LiveGifts } from '@/components/LiveGifts';
+import { LiveReactions } from '@/components/LiveReactions';
+import { LiveVotePanel } from '@/components/LiveVotePanel';
+import { getMyProfile } from '@/lib/profile';
 import { Card, T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
@@ -33,6 +38,13 @@ export default function Watch() {
   const insets = useSafeAreaInsets();
   const [stream, setStream] = useState<LiveStream | null>(null);
   const [loading, setLoading] = useState(true);
+  const [who, setWho] = useState('Fan');
+
+  useEffect(() => {
+    getMyProfile()
+      .then((p) => setWho(p?.alias || p?.full_name || 'Fan'))
+      .catch(() => {});
+  }, []);
 
   const load = useCallback(() => {
     getActiveLive()
@@ -87,16 +99,25 @@ export default function Watch() {
                 <T variant="label" color={c.black}>{t('watch.open')}</T>
               </Pressable>
             </Card>
+            {stream.event_id ? <LiveCaptions eventId={stream.event_id} /> : null}
+            {stream.event_id ? <LiveVotePanel eventId={stream.event_id} /> : null}
           </View>
         ) : (
           <View>
             <Player url={url} />
+            {stream.event_id ? <LiveCaptions eventId={stream.event_id} /> : null}
             <T variant="h3" color="#fff" style={{ paddingHorizontal: Space.lg, marginTop: Space.md }}>
               {stream.title}
             </T>
+            {stream.event_id ? <LiveVotePanel eventId={stream.event_id} /> : null}
           </View>
         )}
       </View>
+
+      {/* Réactions live — la foule qui vibre en temps réel */}
+      {stream ? <LiveReactions channelKey={stream.id} /> : null}
+      {/* Cadeaux live — soutien premium attribué au danseur */}
+      {stream?.event_id ? <LiveGifts channelKey={stream.id} eventId={stream.event_id} who={who} /> : null}
     </View>
   );
 }
