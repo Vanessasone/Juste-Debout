@@ -4,8 +4,8 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { Card, PageHeader, Screen, Section, T, Tag } from '@/components/ui';
 import { JD_COORDS, Palette, Radius, Space } from '@/constants/brand';
@@ -18,9 +18,11 @@ import {
   getEventCategories,
   getEvents,
   getMyRegistrations,
+  PartnerLite,
   register,
   RegType,
   Registration,
+  searchPartners,
 } from '@/lib/jdlive';
 
 export default function Register() {
@@ -40,10 +42,22 @@ export default function Register() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Binôme (disciplines 2v2)
+  const [partner, setPartner] = useState<PartnerLite | null>(null);
+  const [partnerQuery, setPartnerQuery] = useState('');
+  const [partnerResults, setPartnerResults] = useState<PartnerLite[]>([]);
+  const [searchingPartner, setSearchingPartner] = useState(false);
+
   const selectedEvent = useMemo(
     () => events.find((e) => e.id === eventId) ?? null,
     [events, eventId],
   );
+  const selectedCategory = useMemo(
+    () => categories.find((cat) => cat.id === categoryId) ?? null,
+    [categories, categoryId],
+  );
+  /** Cette discipline se danse à deux → il faut un binôme. */
+  const needsPartner = type === 'dancer' && selectedCategory?.format === '2v2';
   const existing = useMemo(
     () => myRegs.find((r) => r.event_id === eventId),
     [myRegs, eventId],
@@ -73,15 +87,62 @@ export default function Register() {
     getEventCategories(eventId).then(setCategories).catch(() => setCategories([]));
   }, [eventId]);
 
+  // Changer de type ou de discipline annule le binôme choisi.
+  const clearPartner = useCallback(() => {
+    setPartner(null);
+    setPartnerQuery('');
+    setPartnerResults([]);
+  }, []);
+
+  // Recherche de binôme, temporisée pour ne pas interroger la base à chaque frappe.
+  useEffect(() => {
+    if (!needsPartner || partner) return;
+    const q = partnerQuery.trim();
+    if (q.length < 2) {
+      setPartnerResults([]);
+      setSearchingPartner(false);
+      return;
+    }
+    setSearchingPartner(true);
+    let cancelled = false;
+    const timer = setTimeout(() => {
+      searchPartners(q)
+        .then((res) => {
+          if (!cancelled) setPartnerResults(res);
+        })
+        .catch(() => {
+          if (!cancelled) setPartnerResults([]);
+        })
+        .finally(() => {
+          if (!cancelled) setSearchingPartner(false);
+        });
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [partnerQuery, needsPartner, partner]);
+
   const canSubmit =
-    !!eventId && !!type && (type === 'spectator' || !!categoryId) && consent && !submitting;
+    !!eventId &&
+    !!type &&
+    (type === 'spectator' || !!categoryId) &&
+    (!needsPartner || !!partner) &&
+    consent &&
+    !submitting;
 
   const submit = async () => {
     if (!eventId || !type) return;
     setSubmitting(true);
     setError(null);
     try {
-      await register({ eventId, type, categoryId: type === 'dancer' ? categoryId : null, consent });
+      await register({
+        eventId,
+        type,
+        categoryId: type === 'dancer' ? categoryId : null,
+        partnerId: needsPartner ? partner?.id ?? null : null,
+        consent,
+      });
       const regs = await getMyRegistrations();
       setMyRegs(regs);
     } catch (e: any) {
@@ -184,6 +245,7 @@ export default function Register() {
                 onPress={() => {
                   setType('dancer');
                   setCategoryId(null);
+                  clearPartner();
                 }}
               />
               <TypeCard
@@ -194,6 +256,7 @@ export default function Register() {
                 onPress={() => {
                   setType('spectator');
                   setCategoryId(null);
+                  clearPartner();
                 }}
               />
             </View>
@@ -216,7 +279,10 @@ export default function Register() {
                       {grp.items.map((disc) => (
                         <Pressable
                           key={disc.id}
-                          onPress={() => setCategoryId(disc.id)}
+                          onPress={() => {
+                            setCategoryId(disc.id);
+                            clearPartner();
+                          }}
                           style={[styles.cat, categoryId === disc.id && styles.catActive]}>
                           <T variant="h3" color={categoryId === disc.id ? c.black : c.text}>
                             {disc.name}
@@ -231,6 +297,82 @@ export default function Register() {
                     </View>
                   </View>
                 ))
+              )}
+            </Section>
+          )}
+
+          {/* Binôme — uniquement pour les disciplines 2 vs 2 */}
+          {needsPartner && (
+            <Section title={t('reg.partnerTitle')}>
+              <T variant="small" color={c.textMute} style={{ marginBottom: Space.md }}>
+                {t('reg.partnerHint')}
+              </T>
+
+              {partner ? (
+                <View style={styles.partnerPicked}>
+                  <Ionicons name="person-circle" size={30} color={c.primary} />
+                  <View style={{ flex: 1 }}>
+                    <T variant="h3" color={c.text}>
+                      {partner.full_name || partner.alias || '—'}
+                    </T>
+                    {!!partner.alias && !!partner.full_name && (
+                      <T variant="caption" color={c.textMute}>
+                        {partner.alias}
+                      </T>
+                    )}
+                  </View>
+                  <Pressable onPress={() => setPartner(null)} hitSlop={10}>
+                    <T variant="label" color={c.accent}>
+                      {t('reg.partnerClear')}
+                    </T>
+                  </Pressable>
+                </View>
+              ) : (
+                <>
+                  <View style={styles.searchBox}>
+                    <Ionicons name="search" size={17} color={c.textMute} />
+                    <TextInput
+                      value={partnerQuery}
+                      onChangeText={setPartnerQuery}
+                      placeholder={t('reg.partnerSearch')}
+                      placeholderTextColor={c.textMute}
+                      autoCapitalize="none"
+                      autoCorrect={false}
+                      style={styles.searchInput}
+                    />
+                    {searchingPartner && <ActivityIndicator size="small" color={c.accent} />}
+                  </View>
+
+                  {partnerResults.map((p) => (
+                    <Pressable
+                      key={p.id}
+                      onPress={() => {
+                        setPartner(p);
+                        setPartnerResults([]);
+                      }}
+                      style={styles.partnerRow}>
+                      <Ionicons name="person-circle-outline" size={26} color={c.textDim} />
+                      <View style={{ flex: 1 }}>
+                        <T variant="h3" color={c.text}>
+                          {p.full_name || p.alias || '—'}
+                        </T>
+                        {!!p.alias && !!p.full_name && (
+                          <T variant="caption" color={c.textMute}>
+                            {p.alias}
+                          </T>
+                        )}
+                      </View>
+                    </Pressable>
+                  ))}
+
+                  {!searchingPartner &&
+                    partnerQuery.trim().length >= 2 &&
+                    partnerResults.length === 0 && (
+                      <T variant="small" color={c.textMute} style={{ marginTop: Space.sm }}>
+                        {t('reg.partnerNone')}
+                      </T>
+                    )}
+                </>
               )}
             </Section>
           )}
@@ -396,6 +538,41 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     backgroundColor: c.surface,
   },
   catActive: { backgroundColor: c.primary, borderColor: c.primary },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: c.surface,
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: Radius.md,
+    paddingHorizontal: 14,
+    minHeight: 48,
+  },
+  searchInput: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 12 },
+  partnerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    marginTop: Space.sm,
+    backgroundColor: c.surface,
+    borderWidth: 1,
+    borderColor: c.border,
+    borderRadius: Radius.md,
+  },
+  partnerPicked: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    backgroundColor: '#12160A',
+    borderWidth: 1,
+    borderColor: c.primary,
+    borderRadius: Radius.md,
+  },
   consent: {
     flexDirection: 'row',
     alignItems: 'flex-start',

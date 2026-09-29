@@ -212,6 +212,11 @@ export default function Organizer() {
                   <T variant="small" color={Palette.textDim} style={{ marginTop: 2 }}>
                     {[r.profiles?.city, r.profiles?.country].filter(Boolean).join(', ') || '—'}
                   </T>
+                  {!!r.partner && (
+                    <T variant="caption" color={Palette.primary} style={{ marginTop: 4 }}>
+                      {t('reg.partnerLabel')} : {r.partner.full_name || r.partner.alias || '—'}
+                    </T>
+                  )}
                   {r.type === 'dancer' && (
                     <T variant="caption" color={Palette.textMute} style={{ marginTop: 4 }}>
                       {t('or.officialPhoto')} {r.profiles?.official_photo_url ? t('or.posee') : t('or.aPoser')}
@@ -256,7 +261,7 @@ function statusLabel(s: string, t: (k: string) => string): string {
 }
 
 function toCSV(rows: RegistrationFull[], t: (k: string) => string, locale: string): string {
-  const head = [t('or.csvName'), t('or.csvAlias'), t('or.csvType'), t('or.csvDiscipline'), t('or.csvFormat'), t('or.csvCountry'), t('or.csvCity'), t('or.csvStatus'), t('or.csvDate')];
+  const head = [t('or.csvName'), t('or.csvAlias'), t('or.csvType'), t('or.csvDiscipline'), t('or.csvFormat'), t('reg.partnerLabel'), t('or.csvCountry'), t('or.csvCity'), t('or.csvStatus'), t('or.csvDate')];
   const esc = (v: string) => `"${(v ?? '').replace(/"/g, '""')}"`;
   const lines = rows.map((r) =>
     [
@@ -265,6 +270,7 @@ function toCSV(rows: RegistrationFull[], t: (k: string) => string, locale: strin
       r.type === 'dancer' ? t('profile.dancer') : t('profile.spectator'),
       r.categories?.name ?? '',
       r.categories?.format ?? '',
+      r.partner?.full_name || r.partner?.alias || '',
       r.profiles?.country ?? '',
       r.profiles?.city ?? '',
       statusLabel(r.status, t),

@@ -29,12 +29,12 @@ import { flagEmoji, getEventPassageCards, PassageCard } from '@/lib/vote';
 
 // Événement affiché tant que la base n'en renvoie aucun (premier lancement).
 const FALLBACK_EVENT = {
-  title: 'Juste Debout World Final',
+  title: 'Juste Debout — Finales Mondiales',
   city: 'Paris',
   country: 'France',
   venue: 'Bientôt annoncé',
-  starts_on: null,
-  ends_on: null,
+  starts_on: '2027-03-13',
+  ends_on: '2027-03-14',
   status: 'upcoming',
 } as const;
 
@@ -71,11 +71,8 @@ const pillars: {
   { tkey: 'home.pPredictions', icon: 'analytics', emoji: '🔮', route: '/pronostics' },
   { label: 'JD School', icon: 'library', emoji: '🎓', route: '/school' },
   { tkey: 'home.pTickets', icon: 'ticket', emoji: '🎟️', route: '/wallet' },
-  // Formations & Masterclass retirées de l'app JD (destinées à l'app JD School / futur JD+).
-  { label: 'Job Board', icon: 'briefcase', emoji: '💼', route: '/jobs' },
   { tkey: 'home.pPassport', icon: 'ribbon', emoji: '🛂', route: '/passport' },
-  { label: 'Hall of Fame', icon: 'trophy', emoji: '🏆', route: '/hall-of-fame' },
-  { label: 'Fantasy JD', icon: 'game-controller', emoji: '🎮', route: '/fantasy' },
+  // Masqués pour la V1 (pas encore prêts) : Formations (→ JD School), Job Board, Hall of Fame, Fantasy JD.
 ];
 
 export default function Home() {

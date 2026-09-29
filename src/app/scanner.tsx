@@ -12,9 +12,29 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
 import { useT } from '@/lib/i18n';
-import { getTicketByToken, markTicketUsed } from '@/lib/tickets';
+import { scanEntry } from '@/lib/tickets';
 
-type Result = { status: 'ok' | 'used' | 'unknown' | 'error'; name?: string; msg?: string } | null;
+type Result = { code: string; type?: string; name?: string; enteredAt?: string | null } | null;
+
+// Libellés (console staff — FR ; i18n possible plus tard).
+const TYPE_LABEL: Record<string, string> = {
+  spectator: 'Spectateur', participant: 'Participant', day: 'Pass Jour', full: 'Pass Complet', vip: 'VIP',
+};
+function resultLabel(code: string): string {
+  const m: Record<string, string> = {
+    ok: 'ENTRÉE validée',
+    already_in: 'Déjà entré',
+    cancelled: 'Billet annulé',
+    unknown: 'Billet inconnu',
+    error: 'Erreur',
+  };
+  return m[code] ?? code;
+}
+function hhmm(iso?: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+}
 
 export default function Scanner() {
   const insets = useSafeAreaInsets();
@@ -30,37 +50,24 @@ export default function Scanner() {
     if (processing.current || !token.trim()) return;
     processing.current = true;
     try {
-      const tk = await getTicketByToken(token);
-      if (!tk) {
-        setResult({ status: 'unknown' });
-      } else if (tk.status === 'used') {
-        setResult({ status: 'used', name: tk.profiles?.full_name ?? tk.profiles?.alias ?? '' });
-      } else {
-        const name = tk.profiles?.full_name ?? tk.profiles?.alias ?? '';
-        const marked = await markTicketUsed(tk.id);
-        if (marked) {
-          setResult({ status: 'ok', name });
-          setCount((n) => n + 1);
-        } else {
-          // Course : un autre scanner a validé ce billet entre-temps → pas de double-comptage.
-          setResult({ status: 'used', name });
-        }
-      }
+      const r = await scanEntry(token);
+      setResult({ code: r.result, type: r.type, name: r.name, enteredAt: r.entered_at });
+      if (r.result === 'ok') setCount((n) => n + 1);
     } catch (e: any) {
-      setResult({ status: 'error', msg: e?.message ?? 'Erreur' });
+      setResult({ code: 'error' });
     } finally {
       setTimeout(() => {
         processing.current = false;
         setResult(null);
         setManual('');
-      }, 2500);
+      }, 3000);
     }
   };
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
 
   const overlayColor =
-    result?.status === 'ok' ? Palette.success : result ? Palette.danger : 'transparent';
+    result?.code === 'ok' ? Palette.success : result ? Palette.danger : 'transparent';
 
   return (
     <View style={styles.root}>
@@ -103,21 +110,25 @@ export default function Scanner() {
       {result && (
         <View style={[styles.result, { backgroundColor: overlayColor + 'F2' }]}>
           <Ionicons
-            name={result.status === 'ok' ? 'checkmark-circle' : 'close-circle'}
+            name={result.code === 'ok' ? 'log-in' : result.code === 'already_in' ? 'alert-circle' : 'close-circle'}
             size={90}
             color={Palette.black}
           />
           <T variant="title" color={Palette.black} style={{ marginTop: Space.md, textAlign: 'center' }}>
-            {result.status === 'ok'
-              ? t('sc.ok')
-              : result.status === 'used'
-                ? t('sc.used')
-                : result.status === 'unknown'
-                  ? t('sc.unknown')
-                  : t('sc.error')}
+            {resultLabel(result.code)}
           </T>
+          {result.code === 'already_in' && result.enteredAt ? (
+            <T variant="h3" color={Palette.black} style={{ marginTop: 4, textAlign: 'center' }}>
+              à {hhmm(result.enteredAt)}
+            </T>
+          ) : null}
+          {!!result.type && (
+            <View style={styles.typePill}>
+              <T variant="label" color={Palette.white}>{TYPE_LABEL[result.type] ?? result.type}</T>
+            </View>
+          )}
           {!!result.name && (
-            <T variant="h2" color={Palette.black} style={{ marginTop: 4 }}>
+            <T variant="h2" color={Palette.black} style={{ marginTop: 6 }}>
               {result.name}
             </T>
           )}
@@ -195,6 +206,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: Space.xl,
+  },
+  typePill: {
+    marginTop: Space.md,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: Radius.pill,
   },
   header: {
     position: 'absolute',
