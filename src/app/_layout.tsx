@@ -26,7 +26,9 @@ function RootNavigator() {
     if (initializing) return;
     let cancelled = false;
     (async () => {
-      const publicRoutes = ['login', 'legal'];
+      // auth-callback doit rester accessible sans session : c'est précisément
+      // cette route qui crée la session après le retour Google.
+      const publicRoutes = ['login', 'legal', 'auth-callback'];
       const inPublic = publicRoutes.includes(segments[0]);
       if (!session && !inPublic) {
         router.replace('/login');
