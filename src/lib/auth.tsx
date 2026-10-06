@@ -42,12 +42,22 @@ async function consumeSsoFromUrl(): Promise<void> {
 export async function signInWithGoogle(): Promise<void> {
   if (Platform.OS === 'web') {
     const redirectTo = window.location.origin;
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo, queryParams: { access_type: 'offline', prompt: 'consent' } },
+      options: {
+        redirectTo,
+        skipBrowserRedirect: true,
+        queryParams: { access_type: 'offline', prompt: 'consent' },
+      },
     });
     if (error) throw error;
-    return; // la page se redirige vers Google
+    if (!data?.url) throw new Error('google_no_url');
+
+    // Important pour les PWA iOS : rester dans le même contexte de stockage.
+    // Une navigation de la web-app conserve son localStorage, contrairement à
+    // une fenêtre Safari séparée qui perd la session au retour.
+    window.location.assign(data.url);
+    return;
   }
 
   // Natif : flux via navigateur système.
