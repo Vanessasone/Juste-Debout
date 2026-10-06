@@ -3,6 +3,8 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 import { useState, useMemo } from 'react';
 import {
   ActivityIndicator,
@@ -39,6 +41,44 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
+
+  const signInWithGoogle = async () => {
+    setError(null);
+    setInfo(null);
+    setLoading(true);
+    try {
+      const redirectTo = Linking.createURL('auth/callback');
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          skipBrowserRedirect: true,
+        },
+      });
+      if (error) throw error;
+      if (!data.url) throw new Error('Google OAuth URL missing');
+
+      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
+      if (result.type !== 'success') return;
+
+      const params = new URL(result.url).searchParams;
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      if (!access_token || !refresh_token) {
+        throw new Error('Google OAuth session missing');
+      }
+
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token,
+        refresh_token,
+      });
+      if (sessionError) throw sessionError;
+    } catch (e: any) {
+      setError(traduireErreur(e?.message ?? '', t));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const submit = async () => {
     setError(null);
@@ -173,6 +213,17 @@ export default function Login() {
             </View>
           )}
 
+          {/* Connexion Google */}
+          <Pressable
+            onPress={signInWithGoogle}
+            disabled={loading}
+            style={[styles.googleCta, loading && { opacity: 0.7 }]}>
+            <Ionicons name="logo-google" size={18} color={c.text} />
+            <T variant="label" color={c.text} style={{ fontSize: 15, marginLeft: 10 }}>
+              Continuer avec Google
+            </T>
+          </Pressable>
+
           {/* Bouton */}
           <Pressable
             onPress={submit}
@@ -280,6 +331,18 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     borderRadius: Radius.md,
     padding: 12,
     marginTop: Space.lg,
+  },
+  googleCta: {
+    borderWidth: 1,
+    borderColor: c.border,
+    backgroundColor: c.surface,
+    borderRadius: Radius.pill,
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    marginTop: Space.xl,
+    minHeight: 52,
   },
   cta: {
     backgroundColor: c.primary,
