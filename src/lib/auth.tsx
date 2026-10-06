@@ -18,24 +18,16 @@ import { supabase } from '@/lib/supabase';
  * Web uniquement.
  */
 async function consumeSsoFromUrl(): Promise<void> {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || !window.location?.hash) return;
 
-  // OAuth Supabase peut revenir soit avec un code PKCE (?code=...),
-  // soit avec des tokens dans le hash (flux implicite / SSO School).
-  const query = new URLSearchParams(window.location.search);
-  const code = query.get('code');
-  if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (error) throw error;
-    window.history.replaceState(null, '', window.location.pathname);
-    return;
-  }
-
-  if (!window.location.hash) return;
+  // Les callbacks OAuth web PKCE (?code=...) sont consommés automatiquement
+  // par supabase-js (detectSessionInUrl=true). Ici on ne gère que le handoff
+  // historique School / flux implicite contenant directement les tokens.
   const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   const access_token = params.get('access_token');
   const refresh_token = params.get('refresh_token');
   if (!access_token || !refresh_token) return;
+
   const { error } = await supabase.auth.setSession({ access_token, refresh_token });
   if (error) throw error;
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
