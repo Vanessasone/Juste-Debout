@@ -27,10 +27,11 @@ export const supabase = createClient(
       storage: AsyncStorage,
       autoRefreshToken: true,
       persistSession: true,
-      // Sur le web, Supabase doit consommer automatiquement le callback OAuth.
-      // Sur natif, le callback est géré manuellement via WebBrowser/deep link.
-      detectSessionInUrl: Platform.OS === 'web',
-      flowType: Platform.OS === 'web' ? 'pkce' : 'implicit',
+      // Cette app web/PWA s'ouvre depuis l'écran d'accueil iOS puis passe par
+      // une fenêtre Safari pour OAuth. Le flux implicite évite de dépendre du
+      // code_verifier PKCE stocké dans un contexte navigateur différent.
+      detectSessionInUrl: false,
+      flowType: 'implicit',
     },
   },
 );
