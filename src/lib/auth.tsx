@@ -18,13 +18,26 @@ import { supabase } from '@/lib/supabase';
  * Web uniquement.
  */
 async function consumeSsoFromUrl(): Promise<void> {
-  if (typeof window === 'undefined' || !window.location?.hash) return;
-  const hash = window.location.hash;
-  const params = new URLSearchParams(hash.replace(/^#/, ''));
+  if (typeof window === 'undefined') return;
+
+  // OAuth Supabase peut revenir soit avec un code PKCE (?code=...),
+  // soit avec des tokens dans le hash (flux implicite / SSO School).
+  const query = new URLSearchParams(window.location.search);
+  const code = query.get('code');
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error) throw error;
+    window.history.replaceState(null, '', window.location.pathname);
+    return;
+  }
+
+  if (!window.location.hash) return;
+  const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   const access_token = params.get('access_token');
   const refresh_token = params.get('refresh_token');
-  if (!access_token || !refresh_token) return; // ni SSO ni retour OAuth
-  await supabase.auth.setSession({ access_token, refresh_token });
+  if (!access_token || !refresh_token) return;
+  const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+  if (error) throw error;
   window.history.replaceState(null, '', window.location.pathname + window.location.search);
 }
 
@@ -39,7 +52,7 @@ export async function signInWithGoogle(): Promise<void> {
     const redirectTo = window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo },
+      options: { redirectTo, queryParams: { access_type: 'offline', prompt: 'consent' } },
     });
     if (error) throw error;
     return; // la page se redirige vers Google
