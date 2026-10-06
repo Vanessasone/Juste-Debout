@@ -21,7 +21,6 @@ import { T } from '@/components/ui';
 import { JD_TAGLINE, Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
-import { signInWithGoogle } from '@/lib/auth';
 import { useColors } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
 
@@ -38,23 +37,8 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
-
-  const handleGoogle = async () => {
-    setError(null);
-    setInfo(null);
-    setGoogleLoading(true);
-    try {
-      await signInWithGoogle();
-      // Web : la page se redirige. Natif : la session est posée → le garde d'auth redirige.
-    } catch (e: any) {
-      setError(traduireErreur(e?.message ?? '', t));
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
 
   const submit = async () => {
     setError(null);
@@ -141,32 +125,6 @@ export default function Login() {
                 </T>
               </Pressable>
             ))}
-          </View>
-
-          {/* Continuer avec Google */}
-          <Pressable
-            onPress={handleGoogle}
-            disabled={googleLoading || loading}
-            style={[styles.google, (googleLoading || loading) && { opacity: 0.7 }]}>
-            {googleLoading ? (
-              <ActivityIndicator color={c.text} />
-            ) : (
-              <>
-                <Ionicons name="logo-google" size={18} color={c.text} />
-                <T variant="label" color={c.text} style={{ fontSize: 15 }}>
-                  {t('auth.continueGoogle')}
-                </T>
-              </>
-            )}
-          </Pressable>
-
-          {/* Séparateur */}
-          <View style={styles.divider}>
-            <View style={styles.line} />
-            <T variant="caption" color={c.textMute} style={{ marginHorizontal: 12 }}>
-              {t('auth.orEmail')}
-            </T>
-            <View style={styles.line} />
           </View>
 
           {/* Champs */}
@@ -332,19 +290,4 @@ const makeStyles = (c: ThemeColors) => StyleSheet.create({
     marginTop: Space.xl,
     minHeight: 52,
   },
-  google: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: c.surface,
-    borderWidth: 1,
-    borderColor: c.border,
-    borderRadius: Radius.pill,
-    paddingVertical: 15,
-    marginTop: Space.xl,
-    minHeight: 52,
-  },
-  divider: { flexDirection: 'row', alignItems: 'center', marginTop: Space.lg },
-  line: { flex: 1, height: 1, backgroundColor: c.border },
 });
