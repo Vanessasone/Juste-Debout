@@ -45,7 +45,9 @@ async function consumeSsoFromUrl(): Promise<void> {
  */
 export async function signInWithGoogle(): Promise<void> {
   if (Platform.OS === 'web') {
-    const redirectTo = window.location.origin;
+    // Callback dédié : permet de diagnostiquer et finaliser OAuth avant de
+    // revenir dans le routeur principal.
+    const redirectTo = `${window.location.origin}/auth-callback`;
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
