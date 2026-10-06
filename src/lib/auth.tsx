@@ -28,9 +28,13 @@ async function consumeSsoFromUrl(): Promise<void> {
   const refresh_token = params.get('refresh_token');
   if (!access_token || !refresh_token) return;
 
-  const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+  const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
   if (error) throw error;
-  window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  if (!data.session) throw new Error('oauth_session_not_created');
+
+  // Ne pas rester sur /login après un callback OAuth réussi.
+  // Le replace retire aussi les tokens du hash.
+  window.location.replace('/');
 }
 
 /**
