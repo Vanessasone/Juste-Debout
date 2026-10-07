@@ -3,7 +3,7 @@
  * Catalogue stylé ; achat sur la boutique officielle (paiement natif via Stripe plus tard).
  */
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 
@@ -16,6 +16,8 @@ import { useColors } from '@/lib/theme';
 import { getMyBlackCard } from '@/lib/blackCard';
 
 export default function Marketplace() {
+  const { test } = useLocalSearchParams<{ test?: string }>();
+  const testMode = test === '1';
   const c = useColors();
   const t = useT();
   const router = useRouter();
@@ -26,8 +28,8 @@ export default function Marketplace() {
 
   useFocusEffect(
     useCallback(() => {
-      Promise.all([getProducts(), getMyBlackCard()]).then(([ps,bc])=>{setProducts(ps);setBlackDiscount(bc?.merchandise_discount_percent ?? 0);}).catch(() => setProducts([])).finally(() => setLoading(false));
-    }, []),
+      Promise.all([getProducts(testMode), getMyBlackCard()]).then(([ps,bc])=>{setProducts(ps);setBlackDiscount(bc?.merchandise_discount_percent ?? 0);}).catch(() => setProducts([])).finally(() => setLoading(false));
+    }, [testMode]),
   );
 
   return (
@@ -63,7 +65,7 @@ export default function Marketplace() {
               key={p.id}
               style={styles.pcard}
               disabled={p.sold_out}
-              onPress={() => router.push(`/checkout?productId=${p.id}` as never)}>
+              onPress={() => router.push(`/checkout?productId=${p.id}${testMode ? '&test=1' : ''}` as never)}>
               <View style={styles.thumbWrap}>
                 {p.image_url ? (
                   <Image source={{ uri: p.image_url }} style={[styles.thumb, p.sold_out && { opacity: 0.4 }]} resizeMode="cover" />
