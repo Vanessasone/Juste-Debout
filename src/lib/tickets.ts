@@ -110,3 +110,11 @@ export async function cancelTicketTransfer(ticketId: string): Promise<void> {
   if (error) throw error;
   if (!data?.ok) throw new Error(data?.error ?? 'cancel_transfer_failed');
 }
+
+
+export async function scanTicketForToday(id: string): Promise<{ ok: boolean; error?: string; scan_count?: number; access_days?: number }> {
+  const today = new Date().toISOString().slice(0, 10);
+  const { data, error } = await supabase.rpc('scan_ticket', { p_ticket: id, p_access_date: today });
+  if (error) throw error;
+  return data;
+}
