@@ -181,6 +181,12 @@ function TicketCard({
         )}
       </View>
 
+      {ticket.ticket_products?.code?.startsWith('family_') && ticket.order_item_id && (
+        <Pressable onPress={() => router.push({pathname:'/family-tickets',params:{item:ticket.order_item_id!}})} style={styles.groupBtn}>
+          <Ionicons name="people-outline" size={18} color={c.primary}/>
+          <T variant="label">Attribuer les 2 adultes et 2 enfants</T>
+        </Pressable>
+      )}
       {ticket.ticket_products?.code === 'black_card' && (
         <Pressable onPress={() => router.push('/black-card')} style={styles.blackCardBtn}>
           <Ionicons name="diamond-outline" size={17} color="#D9C27A" />
