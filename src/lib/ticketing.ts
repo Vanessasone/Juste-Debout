@@ -22,15 +22,28 @@ export type TicketProduct = {
   sort_order: number;
 };
 
-export async function getTicketProducts(eventId: string): Promise<TicketProduct[]> {
+export async function getTicketProducts(eventId: string, includeInternalTest = false): Promise<TicketProduct[]> {
+  const cols = 'id,event_id,code,name,description,price_cents,currency,active,sales_start,sales_end,min_per_order,max_per_order,group_size,access_days,access_date,audience,promo_eligible,sort_order';
+
   const { data, error } = await supabase
     .from('ticket_products')
-    .select('id,event_id,code,name,description,price_cents,currency,active,sales_start,sales_end,min_per_order,max_per_order,group_size,access_days,access_date,audience,promo_eligible,sort_order')
+    .select(cols)
     .eq('event_id', eventId)
     .eq('active', true)
     .order('sort_order', { ascending: true });
   if (error) throw error;
-  return (data ?? []) as TicketProduct[];
+
+  const products = (data ?? []) as TicketProduct[];
+  if (!includeInternalTest) return products;
+
+  const { data: testData, error: testError } = await supabase
+    .from('ticket_products')
+    .select(cols)
+    .eq('event_id', eventId)
+    .eq('code', 'internal_test_1eur')
+    .maybeSingle();
+  if (testError) throw testError;
+  return testData ? [...products, testData as TicketProduct] : products;
 }
 
 export async function startTicketCheckout(input: {
