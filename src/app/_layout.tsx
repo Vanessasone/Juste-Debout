@@ -36,6 +36,12 @@ function RootNavigator() {
         return;
       }
       if (session) {
+        const pendingClaim = await AsyncStorage.getItem('jd_pending_claim_token').catch(() => null);
+        if (cancelled) return;
+        if (pendingClaim && segments[0] !== 'claim-ticket') {
+          router.replace({ pathname: '/claim-ticket', params: { token: pendingClaim } });
+          return;
+        }
         // Cérémonie d'accueil une seule fois (première connexion sur l'appareil).
         const welcomed = await AsyncStorage.getItem(WELCOME_FLAG).catch(() => '1');
         if (cancelled) return;
