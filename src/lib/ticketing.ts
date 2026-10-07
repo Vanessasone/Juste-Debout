@@ -58,7 +58,13 @@ export async function startTicketCheckout(input: {
       promoCode: input.promoCode?.trim() || null,
     },
   });
-  if (error) throw error;
+  if (error) {
+    const response = (error as any).context;
+    const detail = response && typeof response.json === 'function'
+      ? await response.json().catch(() => null)
+      : null;
+    throw new Error(detail?.error ?? error.message);
+  }
   if (!data?.url || !data?.orderId) throw new Error(data?.error ?? 'checkout_failed');
 
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
