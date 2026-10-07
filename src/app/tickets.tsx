@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Card, PageHeader, Screen, Section, T } from '@/components/ui';
@@ -12,6 +13,8 @@ import { getTicketProducts, startTicketCheckout, TicketProduct } from '@/lib/tic
 const FINAL_TITLE = 'Juste Debout — Finales Mondiales Paris 2027';
 
 export default function Tickets() {
+  const { test } = useLocalSearchParams<{ test?: string }>();
+  const testMode = test === '1';
   const c = useColors();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [eventId, setEventId] = useState<string | null>(null);
@@ -29,7 +32,7 @@ export default function Tickets() {
         const event = events.find((e) => e.title === FINAL_TITLE) ?? events.find((e) => e.starts_on === '2027-03-13' && e.ends_on === '2027-03-14');
         if (!event) throw new Error('Événement introuvable.');
         setEventId(event.id);
-        const ps = await getTicketProducts(event.id);
+        const ps = await getTicketProducts(event.id, testMode);
         setProducts(ps);
         const initial: Record<string, number> = {};
         ps.forEach((p) => { initial[p.id] = p.min_per_order || 1; });
@@ -40,7 +43,7 @@ export default function Tickets() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [testMode]);
 
   const changeQty = (p: TicketProduct, delta: number) => {
     setQty((q) => {
@@ -98,6 +101,8 @@ export default function Tickets() {
       </View>
 
       {error && <T variant="small" color={c.danger} style={{ marginTop: Space.md }}>{error}</T>}
+
+      {testMode && <T variant="caption" color={c.accent} style={{ marginTop: Space.md }}>MODE TEST INTERNE · billet 1 € visible uniquement via ce lien</T>}
 
       <Section title="Choisis ton pass">
         {products.map((p) => {
