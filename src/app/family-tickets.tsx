@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, TextInput, View } from 'react-native';
+import { Alert, Pressable, TextInput } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Card, PageHeader, Screen, T } from '@/components/ui';
 import { Space } from '@/constants/brand';
@@ -16,9 +16,10 @@ export default function FamilyTickets() {
  const [busy,setBusy]=useState(false);
  const load=async()=>{
   const all=await getMyTickets();
-  const family=all.filter(t=>t.order_item_id===item && t.ticket_products?.code?.startsWith('family_'));
+  const family=all.filter(t=>t.order_item_id===item && t.ticket_products?.code?.startsWith('family_')).sort((a,b)=>(a.unit_index??0)-(b.unit_index??0));
   setTickets(family);
   setNames(Object.fromEntries(family.map(t=>[t.id,t.holder_name||''])));
+  setBirths(Object.fromEntries(family.map(t=>[t.id,t.holder_birth_date||''])));
  };
  useEffect(()=>{load().catch(()=>Alert.alert('Erreur','Impossible de charger les billets familiaux.'));},[item]);
  const save=async()=>{
@@ -39,7 +40,7 @@ export default function FamilyTickets() {
  };
  return <Screen>
   <PageHeader title="Attribuer le Pass Famille" subtitle="2 adultes et 2 enfants de moins de 12 ans"/>
-  <Card><T variant="small" color={c.textDim}>Les enfants doivent avoir moins de 12 ans le 13 mars 2027. Les dates de naissance des enfants servent uniquement à vérifier leur éligibilité.</T></Card>
+  <Card><T variant="small" color={c.textDim}>Les enfants doivent avoir moins de 12 ans chaque jour couvert par leur billet (13 et/ou 14 mars 2027). Leurs dates de naissance permettent de vérifier l’éligibilité.</T></Card>
   {tickets.map((t,i)=><Card key={t.id} style={{marginTop:Space.md}}>
    <T variant="h3">{i<2?'Adulte':'Enfant'} {i%2+1}</T>
    <T variant="caption" color={c.textMute}>Billet {i+1} sur 4</T>
