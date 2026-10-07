@@ -68,6 +68,7 @@ export default function Tickets() {
       if (msg.includes('sales_not_started')) setError('La billetterie ouvre le 8 octobre à 21h.');
       else if (msg.includes('minimum_quantity_not_met')) setError('La quantité minimum pour ce tarif n’est pas atteinte.');
       else if (msg.includes('invalid_or_expired_promo')) setError('Ce code promotionnel est invalide ou expiré.');
+      else if (msg.includes('sold_out_for_day')) setError('Cette journée a atteint sa capacité maximale. Ce pass n’est plus disponible.');
       else setError('Impossible de lancer le paiement pour le moment.');
       setBusy(false);
     }
@@ -101,6 +102,13 @@ export default function Tickets() {
       </View>
 
       {error && <T variant="small" color={c.danger} style={{ marginTop: Space.md }}>{error}</T>}
+
+      <Card style={{ marginTop: Space.lg }}>
+        <T variant="h3">À savoir avant d’acheter</T>
+        <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>Toute sortie est définitive : aucun retour après le premier scan de la journée.</T>
+        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Pass 2 jours et Black Card : une entrée samedi et une entrée dimanche.</T>
+        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Chaque billet possède un QR unique.</T>
+      </Card>
 
       {testMode && <T variant="caption" color={c.accent} style={{ marginTop: Space.md }}>MODE TEST INTERNE · billet 1 € visible uniquement via ce lien</T>}
 
