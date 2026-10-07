@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
 
 import { Card, PageHeader, Screen, Section, T } from '@/components/ui';
 import { Radius, Space } from '@/constants/brand';
@@ -13,6 +14,7 @@ export default function ManageTickets() {
   const c=useColors(); const styles=useMemo(()=>makeStyles(c),[c]); const router=useRouter();
   const [tickets,setTickets]=useState<Ticket[]>([]); const [raw,setRaw]=useState('');
   const [busy,setBusy]=useState(false);
+  const [links,setLinks]=useState<Array<{email:string;link:string}>>([]);
   const [allTickets,setAllTickets]=useState<Ticket[]>([]);
   const load=()=>getMyTickets().then((x)=>{setTickets(x);setAllTickets(x);}).catch(()=>{setTickets([]);setAllTickets([]);});
   useEffect(()=>{load();},[]);
@@ -24,9 +26,10 @@ export default function ManageTickets() {
   const submit=async()=>{
     if(!canSend)return; setBusy(true);
     try{
-      await createTransferBatch(available,parsed.valid);
-      Alert.alert('Attributions préparées',`${parsed.valid.length} billet(s) ont été attribués. Les destinataires pourront les récupérer avec leur compte Juste Debout dès que les invitations email seront activées.`);
-      router.replace('/(tabs)/tickets');
+      const result=await createTransferBatch(available,parsed.valid);
+      setLinks(result.invitationLinks);
+      await load();
+      Alert.alert('Attributions préparées',`${result.invitationLinks.length} lien(s) individuels prêts à copier et partager. Les emails automatiques restent en attente de validation du domaine.`);
     }catch(e:any){Alert.alert('Import impossible',e?.message??'Réessaie plus tard.');}
     finally{setBusy(false);}
   };
@@ -54,6 +57,16 @@ export default function ManageTickets() {
         </Card>
       })}
     </Section>
+    {links.length>0 && <Section title="Liens d’invitation à partager">
+      <Card>
+        <T variant="small" color={c.textDim}>Chaque lien est réservé à l'adresse du destinataire. Transmets chaque lien uniquement à la personne concernée.</T>
+        <Pressable onPress={async()=>{await Clipboard.setStringAsync(links.map(x=>x.email+' ; '+x.link).join('\n'));Alert.alert('Copié','Liste des liens copiée.');}} style={styles.send}><T variant="label" color={c.black}>COPIER TOUS LES LIENS</T></Pressable>
+      </Card>
+      {links.map(x=><Card key={x.email} style={{marginTop:Space.sm}}>
+        <T variant="small">{x.email}</T>
+        <Pressable onPress={async()=>{await Clipboard.setStringAsync(x.link);Alert.alert('Copié','Lien individuel copié.');}} style={styles.smallBtn}><T variant="caption" color={c.primary}>COPIER SON LIEN</T></Pressable>
+      </Card>)}
+    </Section>}
     <Section title="Importer les participants">
       <TextInput multiline value={raw} onChangeText={setRaw} placeholder={"Marie ; Dupont ; marie@email.com\nPaul ; Martin ; paul@email.com"} placeholderTextColor={c.textMute} style={styles.area}/>
       <View style={styles.stats}>
