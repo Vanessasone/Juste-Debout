@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
 import { useT } from '@/lib/i18n';
-import { getTicketByToken, markTicketUsed } from '@/lib/tickets';
+import { getTicketByToken, scanTicketForToday } from '@/lib/tickets';
 
 type Result = { status: 'ok' | 'used' | 'unknown' | 'error'; name?: string; msg?: string } | null;
 
@@ -37,12 +37,15 @@ export default function Scanner() {
         setResult({ status: 'used', name: tk.profiles?.full_name ?? tk.profiles?.alias ?? '' });
       } else {
         const name = tk.profiles?.full_name ?? tk.profiles?.alias ?? '';
-        const marked = await markTicketUsed(tk.id);
-        if (marked) {
+        const scan = await scanTicketForToday(tk.id);
+        if (scan.ok) {
           setResult({ status: 'ok', name });
           setCount((n) => n + 1);
+        } else if (scan.error === 'already_scanned_today') {
+          setResult({ status: 'used', name, msg: 'Déjà scanné aujourd’hui' });
+        } else if (scan.error === 'wrong_day') {
+          setResult({ status: 'error', name, msg: 'Billet non valable aujourd’hui' });
         } else {
-          // Course : un autre scanner a validé ce billet entre-temps → pas de double-comptage.
           setResult({ status: 'used', name });
         }
       }
