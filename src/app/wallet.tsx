@@ -74,6 +74,17 @@ export default function Wallet() {
     <Screen>
       <PageHeader title={t('wallet.title')} subtitle={t('wallet.subtitle')} />
 
+      {tickets.filter((x) => x.status === 'active').length > 1 && (
+        <Pressable onPress={() => router.push('/manage-tickets')} style={styles.groupBtn}>
+          <Ionicons name="people-outline" size={19} color={c.text} />
+          <View style={{flex:1}}>
+            <T variant="h3">Gérer mes billets / mon groupe</T>
+            <T variant="caption" color={c.textMute}>Importer une liste et attribuer plusieurs billets</T>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={c.textMute} />
+        </Pressable>
+      )}
+
       {error && (
         <T variant="small" color={c.danger} style={{ marginBottom: Space.sm }}>
           {error}
@@ -235,6 +246,7 @@ const makeStyles = (c: ThemeColors) =>
       justifyContent: 'space-between',
       alignSelf: 'stretch',
     },
+    groupBtn:{flexDirection:'row',alignItems:'center',gap:12,backgroundColor:c.surface,borderWidth:1,borderColor:c.border,borderRadius:Radius.lg,padding:Space.lg,marginBottom:Space.lg},
     modalBackdrop:{flex:1,backgroundColor:'rgba(0,0,0,0.72)',justifyContent:'flex-end'},
     modalCard:{backgroundColor:c.surface,borderTopLeftRadius:Radius.xl,borderTopRightRadius:Radius.xl,padding:Space.xl},
     input:{backgroundColor:c.surface2,borderWidth:1,borderColor:c.border,borderRadius:Radius.md,paddingHorizontal:14,paddingVertical:13,color:c.text,fontSize:16,marginVertical:Space.lg},
