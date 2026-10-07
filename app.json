@@ -36,7 +36,12 @@
     },
     "web": {
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "Juste Debout",
+      "shortName": "Juste Debout",
+      "themeColor": "#0A0A0A",
+      "backgroundColor": "#0A0A0A",
+      "display": "standalone"
     },
     "plugins": [
       "expo-router",
