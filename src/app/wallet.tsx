@@ -4,7 +4,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
 import { Card, GButton, PageHeader, Screen, Section, T, Tag } from '@/components/ui';
@@ -12,7 +12,7 @@ import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
 import { EventRow, getEvents } from '@/lib/jdlive';
-import { getMyTickets, Ticket } from '@/lib/tickets';
+import { getMyTickets, prepareTicketTransfer, Ticket } from '@/lib/tickets';
 import { useColors } from '@/lib/theme';
 
 export default function Wallet() {
@@ -24,6 +24,9 @@ export default function Wallet() {
   const [events, setEvents] = useState<EventRow[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [transferTicket, setTransferTicket] = useState<Ticket | null>(null);
+  const [transferEmail, setTransferEmail] = useState('');
+  const [transferBusy, setTransferBusy] = useState(false);
 
   const load = async () => {
     try {
@@ -42,6 +45,19 @@ export default function Wallet() {
   }, []);
 
   const ticketFor = (eventId: string) => tickets.find((t) => t.event_id === eventId);
+
+  const sendTransfer = async () => {
+    if (!transferTicket || !transferEmail.trim()) return;
+    setTransferBusy(true);
+    try {
+      await prepareTicketTransfer(transferTicket.id, transferEmail);
+      Alert.alert('Invitation préparée', `Ce billet est maintenant réservé à ${transferEmail.trim()}. L'envoi automatique par email sera activé dès que le domaine Juste Debout sera validé.`);
+      setTransferTicket(null); setTransferEmail('');
+      await load();
+    } catch (e: any) {
+      Alert.alert('Impossible de transférer', e?.message ?? 'Réessaie plus tard.');
+    } finally { setTransferBusy(false); }
+  };
 
   if (loading) {
     return (
@@ -69,7 +85,7 @@ export default function Wallet() {
         return (
           <Section key={e.id} title={e.city ?? e.title}>
             {tkt ? (
-              <TicketCard ticket={tkt} event={e} c={c} styles={styles} />
+              <TicketCard ticket={tkt} event={e} c={c} styles={styles} onTransfer={() => { setTransferTicket(tkt); setTransferEmail(tkt.transfer_email ?? ''); }} />
             ) : e.tickets_open ? (
               <Card>
                 <T variant="h3">{e.title}</T>
@@ -111,11 +127,13 @@ function TicketCard({
   event,
   c,
   styles,
+  onTransfer,
 }: {
   ticket: Ticket;
   event: EventRow;
   c: ThemeColors;
   styles: ReturnType<typeof makeStyles>;
+  onTransfer: () => void;
 }) {
   const t = useT();
   const used = ticket.status === 'used';
@@ -155,6 +173,15 @@ function TicketCard({
         )}
       </View>
 
+      {ticket.status === 'active' && (
+        <Pressable onPress={onTransfer} style={styles.transferBtn}>
+          <Ionicons name="paper-plane-outline" size={17} color={c.black} />
+          <T variant="label" color={c.black}>Envoyer ce billet</T>
+        </Pressable>
+      )}
+      {ticket.transfer_status === 'pending' && ticket.transfer_email ? (
+        <T variant="caption" color={c.accent} style={{marginBottom:Space.sm}}>Invitation en attente · {ticket.transfer_email}</T>
+      ) : null}
       <View style={styles.rowFull}>
         <T variant="caption" color={c.textMute}>
           {ticketTypeLabel(ticket.type, t)}
@@ -208,6 +235,10 @@ const makeStyles = (c: ThemeColors) =>
       justifyContent: 'space-between',
       alignSelf: 'stretch',
     },
+    modalBackdrop:{flex:1,backgroundColor:'rgba(0,0,0,0.72)',justifyContent:'flex-end'},
+    modalCard:{backgroundColor:c.surface,borderTopLeftRadius:Radius.xl,borderTopRightRadius:Radius.xl,padding:Space.xl},
+    input:{backgroundColor:c.surface2,borderWidth:1,borderColor:c.border,borderRadius:Radius.md,paddingHorizontal:14,paddingVertical:13,color:c.text,fontSize:16,marginVertical:Space.lg},
+    transferBtn:{alignSelf:'stretch',backgroundColor:c.primary,borderRadius:Radius.pill,paddingVertical:13,paddingHorizontal:18,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8,marginBottom:Space.md},
     ticketDetails: {
       alignSelf: 'stretch',
       backgroundColor: c.surface2,
