@@ -17,6 +17,7 @@ export default function Tickets() {
   const testMode = test === '1';
   const c = useColors();
   const router = useRouter();
+  const router = useRouter();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [eventId, setEventId] = useState<string | null>(null);
   const [products, setProducts] = useState<TicketProduct[]>([]);
@@ -85,6 +86,10 @@ export default function Tickets() {
 
       <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
         <View style={{flex:1}}><T variant="h3">DÉCOUVRIR LE PLAN DE PLACEMENT</T><T variant="small" color={c.textDim} style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
+        <Ionicons name="map-outline" size={24} color={c.primary}/>
+      </Pressable>
+      <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+        <View style={{flex:1}}><T variant="h3">PLAN DE PLACEMENT</T><T variant="small" color={c.textDim} style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
         <Ionicons name="map-outline" size={24} color={c.primary}/>
       </Pressable>
       <Card style={styles.early}>
