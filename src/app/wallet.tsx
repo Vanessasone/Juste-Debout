@@ -12,7 +12,7 @@ import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
 import { EventRow, getEvents } from '@/lib/jdlive';
-import { getMyTickets, prepareTicketTransfer, Ticket } from '@/lib/tickets';
+import { cancelTicketTransfer, getMyTickets, prepareTicketTransfer, Ticket } from '@/lib/tickets';
 import { useColors } from '@/lib/theme';
 
 export default function Wallet() {
@@ -96,7 +96,12 @@ export default function Wallet() {
         return (
           <Section key={e.id} title={e.city ?? e.title}>
             {tkt ? (
-              <TicketCard ticket={tkt} event={e} c={c} styles={styles} onTransfer={() => { setTransferTicket(tkt); setTransferEmail(tkt.transfer_email ?? ''); }} />
+              <TicketCard ticket={tkt} event={e} c={c} styles={styles}
+                onTransfer={() => { setTransferTicket(tkt); setTransferEmail(tkt.transfer_email ?? ''); }}
+                onCancelTransfer={async () => {
+                  try { await cancelTicketTransfer(tkt.id); await load(); }
+                  catch (err:any) { Alert.alert('Impossible d’annuler', err?.message ?? 'Réessaie plus tard.'); }
+                }} />
             ) : e.tickets_open ? (
               <Card>
                 <T variant="h3">{e.title}</T>
@@ -139,12 +144,14 @@ function TicketCard({
   c,
   styles,
   onTransfer,
+  onCancelTransfer,
 }: {
   ticket: Ticket;
   event: EventRow;
   c: ThemeColors;
   styles: ReturnType<typeof makeStyles>;
   onTransfer: () => void;
+  onCancelTransfer: () => void;
 }) {
   const t = useT();
   const used = ticket.status === 'used';
@@ -184,14 +191,22 @@ function TicketCard({
         )}
       </View>
 
-      {ticket.status === 'active' && (
+      {ticket.status === 'active' && ticket.transfer_status !== 'pending' && (
         <Pressable onPress={onTransfer} style={styles.transferBtn}>
           <Ionicons name="paper-plane-outline" size={17} color={c.black} />
           <T variant="label" color={c.black}>Envoyer ce billet</T>
         </Pressable>
       )}
       {ticket.transfer_status === 'pending' && ticket.transfer_email ? (
-        <T variant="caption" color={c.accent} style={{marginBottom:Space.sm}}>Invitation en attente · {ticket.transfer_email}</T>
+        <View style={styles.pendingBox}>
+          <View style={{flex:1}}>
+            <T variant="caption" color={c.accent}>INVITATION EN ATTENTE</T>
+            <T variant="small" color={c.text} style={{marginTop:3}}>{ticket.transfer_email}</T>
+          </View>
+          <Pressable onPress={onCancelTransfer} style={styles.cancelInvite}><T variant="caption" color={c.danger}>ANNULER</T></Pressable>
+        </View>
+      ) : ticket.transfer_status === 'accepted' ? (
+        <T variant="caption" color={c.primary} style={{marginBottom:Space.sm}}>✓ BILLET RÉCUPÉRÉ PAR LE DESTINATAIRE</T>
       ) : null}
       <View style={styles.rowFull}>
         <T variant="caption" color={c.textMute}>
@@ -250,6 +265,8 @@ const makeStyles = (c: ThemeColors) =>
     modalBackdrop:{flex:1,backgroundColor:'rgba(0,0,0,0.72)',justifyContent:'flex-end'},
     modalCard:{backgroundColor:c.surface,borderTopLeftRadius:Radius.xl,borderTopRightRadius:Radius.xl,padding:Space.xl},
     input:{backgroundColor:c.surface2,borderWidth:1,borderColor:c.border,borderRadius:Radius.md,paddingHorizontal:14,paddingVertical:13,color:c.text,fontSize:16,marginVertical:Space.lg},
+    pendingBox:{alignSelf:'stretch',flexDirection:'row',alignItems:'center',backgroundColor:c.surface2,borderRadius:Radius.md,padding:Space.md,marginBottom:Space.md},
+    cancelInvite:{paddingVertical:8,paddingHorizontal:10},
     transferBtn:{alignSelf:'stretch',backgroundColor:c.primary,borderRadius:Radius.pill,paddingVertical:13,paddingHorizontal:18,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8,marginBottom:Space.md},
     ticketDetails: {
       alignSelf: 'stretch',
