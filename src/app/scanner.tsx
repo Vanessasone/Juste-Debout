@@ -33,8 +33,6 @@ export default function Scanner() {
       const tk = await getTicketByToken(token);
       if (!tk) {
         setResult({ status: 'unknown' });
-      } else if (tk.status === 'used') {
-        setResult({ status: 'used', name: tk.profiles?.full_name ?? tk.profiles?.alias ?? '' });
       } else {
         const name = tk.profiles?.full_name ?? tk.profiles?.alias ?? '';
         const scan = await scanTicketForToday(tk.id);
@@ -48,10 +46,12 @@ export default function Scanner() {
           setResult({ status: 'used', name, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
         } else if (scan.error === 'wrong_day') {
           setResult({ status: 'error', name, msg: 'Billet non valable aujourd’hui' });
+        } else if (scan.error === 'cancelled') {
+          setResult({ status: 'error', name, msg: 'Billet annulé : accès refusé' });
         } else if (scan.error === 'scanner_forbidden') {
           setResult({ status: 'error', name, msg: 'Ce compte n’est pas autorisé à scanner les billets' });
         } else {
-          setResult({ status: 'used', name });
+          setResult({ status: 'error', name, msg: 'Billet refusé : ' + (scan.error ?? 'vérification impossible') });
         }
       }
     } catch (e: any) {
