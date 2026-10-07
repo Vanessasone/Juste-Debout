@@ -143,7 +143,7 @@ export default function Tickets() {
           const sun = availability?.days.find(d=>d.date==='2027-03-14')?.remaining;
           const remaining = bc ? availability?.black_card.remaining : p.code==='vip_sat' ? sat : p.code==='vip_sun' ? sun : vip && sat!==undefined && sun!==undefined ? Math.min(sat,sun) : undefined;
           const soldOut = remaining !== undefined && remaining < q;
-          const groupNote = p.group_size > 1 ? `${p.group_size} personnes incluses` : p.min_per_order > 1 ? `Minimum ${p.min_per_order} personnes` : null;
+          const groupNote = p.code.startsWith('family_') ? '2 adultes + 2 enfants de moins de 12 ans' : p.group_size > 1 ? `${p.group_size} personnes incluses` : p.min_per_order > 1 ? `Minimum ${p.min_per_order} personnes` : null;
           return (
             <Card key={p.id} style={{ marginBottom: Space.md }}>
               <View style={styles.rowBetween}>
