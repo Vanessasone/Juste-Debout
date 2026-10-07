@@ -191,7 +191,13 @@ function TicketCard({
         )}
       </View>
 
-      {ticket.status === 'active' && ticket.transfer_status !== 'pending' && (
+      {ticket.ticket_products?.code === 'black_card' && (
+        <Pressable onPress={() => router.push('/black-card')} style={styles.blackCardBtn}>
+          <Ionicons name="diamond-outline" size={17} color="#D9C27A" />
+          <T variant="label" color="#D9C27A">Voir ma Black Card</T>
+        </Pressable>
+      )}
+            {ticket.status === 'active' && ticket.transfer_status !== 'pending' && (
         <Pressable onPress={onTransfer} style={styles.transferBtn}>
           <Ionicons name="paper-plane-outline" size={17} color={c.black} />
           <T variant="label" color={c.black}>Envoyer ce billet</T>
@@ -267,6 +273,7 @@ const makeStyles = (c: ThemeColors) =>
     input:{backgroundColor:c.surface2,borderWidth:1,borderColor:c.border,borderRadius:Radius.md,paddingHorizontal:14,paddingVertical:13,color:c.text,fontSize:16,marginVertical:Space.lg},
     pendingBox:{alignSelf:'stretch',flexDirection:'row',alignItems:'center',backgroundColor:c.surface2,borderRadius:Radius.md,padding:Space.md,marginBottom:Space.md},
     cancelInvite:{paddingVertical:8,paddingHorizontal:10},
+    blackCardBtn:{alignSelf:'stretch',backgroundColor:'#080808',borderWidth:1,borderColor:'#3A3421',borderRadius:Radius.pill,paddingVertical:13,paddingHorizontal:18,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8,marginBottom:Space.sm},
     transferBtn:{alignSelf:'stretch',backgroundColor:c.primary,borderRadius:Radius.pill,paddingVertical:13,paddingHorizontal:18,flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8,marginBottom:Space.md},
     ticketDetails: {
       alignSelf: 'stretch',
