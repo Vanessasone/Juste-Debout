@@ -103,3 +103,10 @@ export async function acceptTicketTransfer(token: string): Promise<string> {
   if (!data?.ok) throw new Error(data?.error ?? 'transfer_failed');
   return data.ticket_id;
 }
+
+
+export async function cancelTicketTransfer(ticketId: string): Promise<void> {
+  const { data, error } = await supabase.rpc('cancel_ticket_transfer', { p_ticket: ticketId });
+  if (error) throw error;
+  if (!data?.ok) throw new Error(data?.error ?? 'cancel_transfer_failed');
+}
