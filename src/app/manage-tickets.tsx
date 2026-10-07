@@ -16,7 +16,8 @@ export default function ManageTickets() {
   const [allTickets,setAllTickets]=useState<Ticket[]>([]);
   const load=()=>getMyTickets().then((x)=>{setTickets(x);setAllTickets(x);}).catch(()=>{setTickets([]);setAllTickets([]);});
   useEffect(()=>{load();},[]);
-  const available=tickets.filter(t=>t.status==='active' && (!t.transfer_status || t.transfer_status==='owned'));
+  const available=tickets.filter(t=>t.status==='active' && !t.ticket_products?.code?.startsWith('family_') && (!t.transfer_status || t.transfer_status==='owned'));
+  const mjcCount=tickets.filter(t=>t.ticket_products?.code?.startsWith('mjc_')).length;
   const parsed=parseRecipientList(raw);
   const canSend=parsed.valid.length>0 && parsed.valid.length<=available.length && !busy;
 
@@ -34,7 +35,8 @@ export default function ManageTickets() {
     <PageHeader title="Gérer mon groupe" subtitle="Attribue plusieurs billets en quelques secondes" />
     <Card>
       <T variant="h3">{available.length} billet{available.length>1?'s':''} disponible{available.length>1?'s':''}</T>
-      <T variant="small" color={c.textDim} style={{marginTop:6}}>Colle une liste depuis Excel, Numbers ou Google Sheets. Formats acceptés : Prénom ; Nom ; Email, ou simplement une adresse email par ligne.</T>
+      {mjcCount>0 && <T variant="small" color={c.primary} style={{marginTop:6}}>{mjcCount} billet(s) MJC dans ton groupe · un QR individuel par participant.</T>}
+      <T variant="small" color={c.textDim} style={{marginTop:6}}>Les Pass Famille s’attribuent dans leur formulaire dédié. Colle une liste depuis Excel, Numbers ou Google Sheets. Formats acceptés : Prénom ; Nom ; Email, ou simplement une adresse email par ligne.</T>
     </Card>
     <Section title="Suivi des participants">
       {allTickets.filter(t=>t.status==='active').map((t,i)=>{
