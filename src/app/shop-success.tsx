@@ -44,8 +44,8 @@ export default function ShopSuccess() {
           ? 'Ton paiement est confirmé. Merci pour ta commande Juste Debout !'
           : 'Nous vérifions le statut de ta commande. Ne recommence pas le paiement : consulte tes commandes ou contacte le support si nécessaire.'}
       </T>
-      <Pressable onPress={() => router.replace('/(tabs)/marketplace')} style={styles.button}>
-        <T variant="label" color="#000000">RETOURNER À LA BOUTIQUE</T>
+      <Pressable onPress={() => router.replace('/my-orders')} style={styles.button}>
+        <T variant="label" color="#000000">VOIR MES COMMANDES</T>
       </Pressable>
     </View>
   </Screen>;
