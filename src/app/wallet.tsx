@@ -174,7 +174,7 @@ function TicketCard({
       <View style={styles.ticketDetails}>
         <DetailRow icon="ticket-outline" label="Catégorie" value={ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type, t)} c={c} />
         <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
-        <DetailRow icon="location-outline" label="Lieu" value={[event.venue, event.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
+        <DetailRow icon="location-outline" label="Lieu" value={[event.venue, event.address, event.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
         <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
         <DetailRow icon="receipt-outline" label="Référence" value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
       </View>
