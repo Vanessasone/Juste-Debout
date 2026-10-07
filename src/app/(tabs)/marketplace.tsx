@@ -89,7 +89,7 @@ export default function Marketplace() {
               <T variant="small" numberOfLines={2} style={{ marginTop: 8, minHeight: 34 }}>
                 {p.name}
               </T>
-              {blackDiscount > 0 ? <><T variant="caption" color={c.textMute} style={{textDecorationLine:'line-through',marginTop:2}}>{formatPrice(p)}</T><T variant="h3" color={c.primary}>{p.price==null?'':`${(p.price*(1-blackDiscount/100)).toFixed(2)} €`} · BLACK CARD</T></> : <T variant="h3" color={c.primary} style={{ marginTop: 2 }}>{formatPrice(p)}</T>}
+              {blackDiscount > 0 ? <><T variant="caption" color={c.textMute} style={{textDecorationLine:'line-through',marginTop:2}}>{formatPrice(p)}</T><T variant="h3" color={c.primary}>{p.price==null?'':formatPrice({...p,price:Math.round(p.price*100*(1-blackDiscount/100))/100})} · BLACK CARD</T></> : <T variant="h3" color={c.primary} style={{ marginTop: 2 }}>{formatPrice(p)}</T>}
             </Pressable>
           ))}
         </View>
