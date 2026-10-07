@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
 
 import { WELCOME_FLAG } from '@/app/welcome';
 import { AuthProvider, useAuth } from '@/lib/auth';
@@ -49,6 +50,24 @@ function RootNavigator() {
       cancelled = true;
     };
   }, [session, initializing, segments, router]);
+
+  // PWA/web : si une nouvelle version a été déployée pendant que l'app était ouverte,
+  // recharge au retour dans l'app pour éviter de conserver un ancien bundle.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        const key = 'jd_last_refresh';
+        const last = Number(sessionStorage.getItem(key) || '0');
+        if (Date.now() - last > 30 * 60 * 1000) {
+          sessionStorage.setItem(key, String(Date.now()));
+          window.location.reload();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
 
   // Notifications : configuration + enregistrement du token à la connexion.
   useEffect(() => {
