@@ -42,7 +42,10 @@ export default function Scanner() {
           setResult({ status: 'ok', name });
           setCount((n) => n + 1);
         } else if (scan.error === 'already_scanned_today') {
-          setResult({ status: 'used', name, msg: 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
+          const time = scan.scanned_at
+            ? new Date(scan.scanned_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })
+            : null;
+          setResult({ status: 'used', name, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
         } else if (scan.error === 'wrong_day') {
           setResult({ status: 'error', name, msg: 'Billet non valable aujourd’hui' });
         } else {
