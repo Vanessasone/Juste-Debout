@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Card, PageHeader, Screen, Section, T } from '@/components/ui';
@@ -16,6 +16,7 @@ export default function Tickets() {
   const { test } = useLocalSearchParams<{ test?: string }>();
   const testMode = test === '1';
   const c = useColors();
+  const router = useRouter();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [eventId, setEventId] = useState<string | null>(null);
   const [products, setProducts] = useState<TicketProduct[]>([]);
@@ -82,6 +83,10 @@ export default function Tickets() {
     <Screen>
       <PageHeader title="Billetterie" subtitle="Finales Mondiales · 13–14 mars 2027" />
 
+      <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+        <View style={{flex:1}}><T variant="h3">DÉCOUVRIR LE PLAN DE PLACEMENT</T><T variant="small" color={c.textDim} style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
+        <Ionicons name="map-outline" size={24} color={c.primary}/>
+      </Pressable>
       <Card style={styles.early}>
         <T variant="h3">EARLY BIRD · 48H</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>
