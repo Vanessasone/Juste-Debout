@@ -103,6 +103,7 @@ function RootNavigator() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="wallet" />
         <Stack.Screen name="scanner" />
+        <Stack.Screen name="entry-dashboard" />
         <Stack.Screen name="school" />
         <Stack.Screen name="organizer" />
         <Stack.Screen name="create-event" />
