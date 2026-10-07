@@ -135,6 +135,14 @@ function TicketCard({
         {[event.venue, event.city].filter(Boolean).join(' · ')}
       </T>
 
+      <View style={styles.ticketDetails}>
+        <DetailRow icon="ticket-outline" label="Catégorie" value={ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type, t)} c={c} />
+        <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
+        <DetailRow icon="location-outline" label="Lieu" value={[event.venue, event.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
+        <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
+        <DetailRow icon="receipt-outline" label="Référence" value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
+      </View>
+
       <View style={[styles.qrBox, used && { opacity: 0.3 }]}>
         <QRCode value={ticket.qr_token} size={180} color="#0A0A0A" backgroundColor="#FFFFFF" />
         {used && (
@@ -159,6 +167,32 @@ function TicketCard({
   );
 }
 
+function DetailRow({ icon, label, value, c }: { icon: keyof typeof Ionicons.glyphMap; label: string; value: string; c: ThemeColors }) {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'flex-start', paddingVertical: 8 }}>
+      <Ionicons name={icon} size={17} color={c.primary} style={{ marginTop: 1, marginRight: 10 }} />
+      <View style={{ flex: 1 }}>
+        <T variant="caption" color={c.textMute}>{label.toUpperCase()}</T>
+        <T variant="small" color={c.text} style={{ marginTop: 2 }}>{value}</T>
+      </View>
+    </View>
+  );
+}
+
+function ticketDateLabel(ticket: Ticket): string {
+  const product = ticket.ticket_products;
+  const event = ticket.events;
+  const date = product?.access_date;
+  if (date) return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  if (!event?.starts_on) return 'À confirmer';
+  const start = new Date(event.starts_on + 'T12:00:00');
+  const end = event.ends_on ? new Date(event.ends_on + 'T12:00:00') : null;
+  if ((product?.access_days ?? 1) > 1 && end && event.ends_on !== event.starts_on) {
+    return `${start.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} + ${end.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
+  }
+  return start.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 function ticketTypeLabel(type: string, t: (k: string) => string): string {
   return (
     { spectator: t('profile.spectator'), participant: t('wallet.tParticipant'), day: t('wallet.tDay'), full: 'Full pass', vip: 'VIP' }[type] ??
@@ -173,6 +207,13 @@ const makeStyles = (c: ThemeColors) =>
       alignItems: 'center',
       justifyContent: 'space-between',
       alignSelf: 'stretch',
+    },
+    ticketDetails: {
+      alignSelf: 'stretch',
+      backgroundColor: c.surface2,
+      borderRadius: Radius.md,
+      paddingHorizontal: Space.md,
+      marginTop: Space.lg,
     },
     qrBox: {
       backgroundColor: '#FFFFFF',
