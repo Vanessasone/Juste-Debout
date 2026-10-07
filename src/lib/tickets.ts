@@ -18,6 +18,10 @@ export type Ticket = {
   unit_index?: number | null;
   holder_name?: string | null;
   holder_email?: string | null;
+  purchaser_id?: string | null;
+  transfer_status?: string | null;
+  transfer_email?: string | null;
+  transfer_sent_at?: string | null;
   price_cents?: number | null;
   currency?: string | null;
   events?: { title: string; city: string | null; country: string | null; venue: string | null; starts_on: string | null; ends_on: string | null } | null;
@@ -83,4 +87,19 @@ export async function markTicketUsed(id: string): Promise<boolean> {
     .select('id');
   if (error) throw error;
   return (data?.length ?? 0) > 0;
+}
+
+
+export async function prepareTicketTransfer(ticketId: string, email: string): Promise<{ token: string }> {
+  const { data, error } = await supabase.rpc('prepare_ticket_transfer', { p_ticket: ticketId, p_email: email.trim() });
+  if (error) throw error;
+  if (!data?.ok) throw new Error(data?.error ?? 'transfer_failed');
+  return { token: data.token };
+}
+
+export async function acceptTicketTransfer(token: string): Promise<string> {
+  const { data, error } = await supabase.rpc('accept_ticket_transfer', { p_token: token });
+  if (error) throw error;
+  if (!data?.ok) throw new Error(data?.error ?? 'transfer_failed');
+  return data.ticket_id;
 }
