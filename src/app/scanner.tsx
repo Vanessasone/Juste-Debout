@@ -48,6 +48,8 @@ export default function Scanner() {
           setResult({ status: 'used', name, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
         } else if (scan.error === 'wrong_day') {
           setResult({ status: 'error', name, msg: 'Billet non valable aujourd’hui' });
+        } else if (scan.error === 'scanner_forbidden') {
+          setResult({ status: 'error', name, msg: 'Ce compte n’est pas autorisé à scanner les billets' });
         } else {
           setResult({ status: 'used', name });
         }
