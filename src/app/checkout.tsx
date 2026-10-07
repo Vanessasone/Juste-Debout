@@ -16,6 +16,7 @@ import { createOrder } from '@/lib/orders';
 import { getProducts, Product } from '@/lib/products';
 import { getMyProfile } from '@/lib/profile';
 import { useColors } from '@/lib/theme';
+import { getMyBlackCard } from '@/lib/blackCard';
 
 export default function Checkout() {
   const c = useColors();
@@ -30,6 +31,7 @@ export default function Checkout() {
   const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [blackDiscount, setBlackDiscount] = useState(0);
 
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
@@ -45,12 +47,14 @@ export default function Checkout() {
       .then((list) => setProduct(list.find((p) => p.id === productId) ?? null))
       .catch(() => setProduct(null))
       .finally(() => setLoading(false));
+    getMyBlackCard().then((bc)=>setBlackDiscount(bc?.merchandise_discount_percent ?? 0)).catch(()=>{});
     getMyProfile()
       .then((p) => p?.full_name && setFullName(p.full_name))
       .catch(() => {});
   }, [productId]);
 
-  const unitCents = product?.price != null ? Math.round(product.price * 100) : 0;
+  const baseUnitCents = product?.price != null ? Math.round(product.price * 100) : 0;
+  const unitCents = Math.round(baseUnitCents * (1 - blackDiscount / 100));
   const totalCents = unitCents * qty;
   const cur = product?.currency ?? 'EUR';
   const money = (cents: number) => `${(cents / 100).toFixed(2)} ${cur === 'USD' ? '$' : '€'}`;
@@ -143,7 +147,7 @@ export default function Checkout() {
           <View style={{ flex: 1 }}>
             <T variant="h3">{product.name}</T>
             <T variant="small" color={c.textDim} style={{ marginTop: 2 }}>
-              {money(unitCents)}
+              {blackDiscount > 0 ? `${money(unitCents)} · avantage Black Card -${blackDiscount}%` : money(unitCents)}
             </T>
           </View>
           <View style={styles.qty}>
