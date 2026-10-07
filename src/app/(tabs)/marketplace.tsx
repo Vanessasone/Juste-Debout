@@ -13,6 +13,7 @@ import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
 import { formatPrice, getProducts, Product } from '@/lib/products';
 import { useColors } from '@/lib/theme';
+import { getMyBlackCard } from '@/lib/blackCard';
 
 export default function Marketplace() {
   const c = useColors();
@@ -21,10 +22,11 @@ export default function Marketplace() {
   const styles = useMemo(() => makeStyles(c), [c]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [blackDiscount, setBlackDiscount] = useState(0);
 
   useFocusEffect(
     useCallback(() => {
-      getProducts().then(setProducts).catch(() => setProducts([])).finally(() => setLoading(false));
+      Promise.all([getProducts(), getMyBlackCard()]).then(([ps,bc])=>{setProducts(ps);setBlackDiscount(bc?.merchandise_discount_percent ?? 0);}).catch(() => setProducts([])).finally(() => setLoading(false));
     }, []),
   );
 
@@ -81,9 +83,7 @@ export default function Marketplace() {
               <T variant="small" numberOfLines={2} style={{ marginTop: 8, minHeight: 34 }}>
                 {p.name}
               </T>
-              <T variant="h3" color={c.primary} style={{ marginTop: 2 }}>
-                {formatPrice(p)}
-              </T>
+              {blackDiscount > 0 ? <><T variant="caption" color={c.textMute} style={{textDecorationLine:'line-through',marginTop:2}}>{formatPrice(p)}</T><T variant="h3" color={c.primary}>{p.price==null?'':`${(p.price*(1-blackDiscount/100)).toFixed(2)} €`} · BLACK CARD</T></> : <T variant="h3" color={c.primary} style={{ marginTop: 2 }}>{formatPrice(p)}</T>}
             </Pressable>
           ))}
         </View>
