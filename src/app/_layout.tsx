@@ -29,7 +29,7 @@ function RootNavigator() {
     (async () => {
       // auth-callback doit rester accessible sans session : c'est précisément
       // cette route qui crée la session après le retour Google.
-      const publicRoutes = ['login', 'legal', 'auth-callback', 'claim-ticket'];
+      const publicRoutes = ['login', 'legal', 'auth-callback', 'claim-ticket', 'shop-success'];
       const inPublic = publicRoutes.includes(segments[0]);
       if (!session && !inPublic) {
         router.replace('/login');
@@ -128,6 +128,7 @@ function RootNavigator() {
         <Stack.Screen name="hall-of-fame" />
         <Stack.Screen name="fantasy" />
         <Stack.Screen name="checkout" />
+        <Stack.Screen name="shop-success" />
         <Stack.Screen name="admin-orders" />
         <Stack.Screen name="passport" />
         <Stack.Screen name="dancer/[id]" />
