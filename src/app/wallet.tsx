@@ -2,8 +2,8 @@
  * Portefeuille — les billets de l'utilisateur avec leur QR d'entrée.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
@@ -37,9 +37,9 @@ export default function Wallet() {
     }
   };
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     load();
-  }, []);
+  }, []));
 
 
   const sendTransfer = async () => {
