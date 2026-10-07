@@ -11,7 +11,6 @@ import { Card, GButton, PageHeader, Screen, Section, T, Tag } from '@/components
 import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
-import { EventRow, getEvents } from '@/lib/jdlive';
 import { cancelTicketTransfer, getMyTickets, prepareTicketTransfer, Ticket } from '@/lib/tickets';
 import { useColors } from '@/lib/theme';
 
@@ -21,7 +20,6 @@ export default function Wallet() {
   const router = useRouter();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [loading, setLoading] = useState(true);
-  const [events, setEvents] = useState<EventRow[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [transferTicket, setTransferTicket] = useState<Ticket | null>(null);
@@ -30,8 +28,7 @@ export default function Wallet() {
 
   const load = async () => {
     try {
-      const [ev, tk] = await Promise.all([getEvents(), getMyTickets()]);
-      setEvents(ev);
+      const tk = await getMyTickets();
       setTickets(tk);
     } catch (e: any) {
       setError(e?.message ?? t('reg.loadFail'));
@@ -44,7 +41,6 @@ export default function Wallet() {
     load();
   }, []);
 
-  const ticketFor = (eventId: string) => tickets.find((t) => t.event_id === eventId);
 
   const sendTransfer = async () => {
     if (!transferTicket || !transferEmail.trim()) return;
@@ -91,49 +87,41 @@ export default function Wallet() {
         </T>
       )}
 
-      {events.map((e) => {
-        const tkt = ticketFor(e.id);
-        return (
-          <Section key={e.id} title={e.city ?? e.title}>
-            {tkt ? (
-              <TicketCard ticket={tkt} event={e} c={c} styles={styles}
-                onTransfer={() => { setTransferTicket(tkt); setTransferEmail(tkt.transfer_email ?? ''); }}
-                onCancelTransfer={async () => {
-                  try { await cancelTicketTransfer(tkt.id); await load(); }
-                  catch (err:any) { Alert.alert('Impossible d’annuler', err?.message ?? 'Réessaie plus tard.'); }
-                }} />
-            ) : e.tickets_open ? (
-              <Card>
-                <T variant="h3">{e.title}</T>
-                <T variant="small" color={c.textDim} style={{ marginTop: 2, marginBottom: Space.md }}>
-                  {[e.venue, e.city].filter(Boolean).join(' · ')}
-                </T>
-                <GButton
-                  label="Voir les billets"
-                  icon="ticket"
-                  onPress={() => router.push('/tickets')}
-                />
-                <T variant="caption" color={c.textMute} style={{ textAlign: 'center', marginTop: Space.sm }}>
-                  Paiement sécurisé par Stripe · QR émis après confirmation du paiement.
-                </T>
-              </Card>
-            ) : (
-              <Card>
-                <T variant="h3">{e.title}</T>
-                <T variant="small" color={c.textDim} style={{ marginTop: 2, marginBottom: Space.md }}>
-                  {[e.venue, e.city].filter(Boolean).join(' · ')}
-                </T>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Ionicons name="time-outline" size={16} color={c.accent} />
-                  <T variant="small" color={c.accent}>
-                    {t('wallet.ticketsSoon')}
-                  </T>
-                </View>
-              </Card>
-            )}
-          </Section>
-        );
-      })}
+      {tickets.length === 0 ? (
+        <Card>
+          <T variant="h3">Aucun billet pour le moment</T>
+          <T variant="small" color={c.textDim} style={{marginTop:8,marginBottom:Space.md}}>Tes billets achetés apparaîtront ici avec leur QR code.</T>
+          <GButton label="Accéder à la billetterie" icon="ticket" onPress={() => router.push('/tickets')} />
+        </Card>
+      ) : tickets.map((tkt) => (
+        <Section key={tkt.id} title={tkt.events?.title ?? 'Mon billet'}>
+          <TicketCard ticket={tkt} event={tkt.events ?? null} c={c} styles={styles}
+            onTransfer={() => { setTransferTicket(tkt); setTransferEmail(tkt.transfer_email ?? ''); }}
+            onCancelTransfer={async () => {
+              try { await cancelTicketTransfer(tkt.id); await load(); }
+              catch (err:any) { Alert.alert('Impossible d’annuler', err?.message ?? 'Réessaie plus tard.'); }
+            }} />
+        </Section>
+      ))}
+      <Pressable onPress={() => router.push('/tickets')} style={styles.groupBtn}>
+        <Ionicons name="add-circle-outline" size={20} color={c.primary} />
+        <View style={{flex:1}}><T variant="h3">Acheter des billets</T><T variant="caption" color={c.textMute}>Finales Mondiales Paris 2027</T></View>
+        <Ionicons name="chevron-forward" size={18} color={c.textMute} />
+      </Pressable>
+      <Pressable onPress={() => router.push('/my-orders')} style={styles.groupBtn}>
+        <Ionicons name="receipt-outline" size={20} color={c.primary} />
+        <View style={{flex:1}}><T variant="h3">Mes commandes boutique</T><T variant="caption" color={c.textMute}>Paiements, articles et livraisons</T></View>
+        <Ionicons name="chevron-forward" size={18} color={c.textMute} />
+      </Pressable>
+      <Modal visible={!!transferTicket} transparent animationType="slide" onRequestClose={() => setTransferTicket(null)}>
+        <View style={styles.modalBackdrop}><View style={styles.modalCard}>
+          <T variant="h2">Envoyer ce billet</T>
+          <T variant="small" color={c.textDim} style={{marginTop:6}}>Le destinataire doit se connecter avec l’adresse email utilisée pour l’invitation.</T>
+          <TextInput value={transferEmail} onChangeText={setTransferEmail} autoCapitalize="none" keyboardType="email-address" placeholder="email@exemple.com" placeholderTextColor={c.textMute} style={styles.input}/>
+          <GButton label={transferBusy ? 'Un instant…' : 'Préparer l’invitation'} icon="mail" onPress={sendTransfer}/>
+          <Pressable onPress={() => setTransferTicket(null)} style={{padding:14,alignItems:'center'}}><T variant="small" color={c.textDim}>Fermer</T></Pressable>
+        </View></View>
+      </Modal>
     </Screen>
   );
 }
@@ -147,20 +135,22 @@ function TicketCard({
   onCancelTransfer,
 }: {
   ticket: Ticket;
-  event: EventRow;
+  event: Ticket['events'];
   c: ThemeColors;
   styles: ReturnType<typeof makeStyles>;
   onTransfer: () => void;
   onCancelTransfer: () => void;
 }) {
   const t = useT();
+  const router = useRouter();
+  const ev = event ?? { title: 'Juste Debout', venue: null, city: null, address: null };
   const used = ticket.status === 'used';
   const cancelled = ticket.status === 'cancelled';
   return (
     <Card style={{ alignItems: 'center' }}>
       <View style={styles.rowFull}>
         <T variant="h3" numberOfLines={1} style={{ flex: 1 }}>
-          {event.title}
+          {ev.title}
         </T>
         <Tag
           label={used ? t('wallet.used') : cancelled ? t('wallet.cancelled') : t('wallet.valid')}
@@ -168,13 +158,13 @@ function TicketCard({
         />
       </View>
       <T variant="small" color={c.textDim} style={{ alignSelf: 'flex-start', marginTop: 2 }}>
-        {[event.venue, event.city].filter(Boolean).join(' · ')}
+        {[ev.venue, ev.city].filter(Boolean).join(' · ')}
       </T>
 
       <View style={styles.ticketDetails}>
         <DetailRow icon="ticket-outline" label="Catégorie" value={ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type, t)} c={c} />
         <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
-        <DetailRow icon="location-outline" label="Lieu" value={[event.venue, event.address, event.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
+        <DetailRow icon="location-outline" label="Lieu" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
         <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
         <DetailRow icon="receipt-outline" label="Référence" value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
       </View>
