@@ -8,6 +8,7 @@ import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useColors } from '@/lib/theme';
 import { getEvents } from '@/lib/jdlive';
+import { supabase } from '@/lib/supabase';
 import { getTicketProducts, startTicketCheckout, TicketProduct } from '@/lib/ticketing';
 
 const FINAL_TITLE = 'Juste Debout — Finales Mondiales Paris 2027';
@@ -17,7 +18,6 @@ export default function Tickets() {
   const testMode = test === '1';
   const c = useColors();
   const router = useRouter();
-  const router = useRouter();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [eventId, setEventId] = useState<string | null>(null);
   const [products, setProducts] = useState<TicketProduct[]>([]);
@@ -26,6 +26,7 @@ export default function Tickets() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [availability, setAvailability] = useState<{ days: { date: string; remaining: number }[]; black_card: { capacity: number; remaining: number } } | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -46,6 +47,17 @@ export default function Tickets() {
       }
     })();
   }, [testMode]);
+
+  useEffect(() => {
+    let mounted = true;
+    const refresh = async () => {
+      const { data, error } = await supabase.rpc('vip_availability_2027');
+      if (mounted && !error && data?.days && data?.black_card) setAvailability(data);
+    };
+    refresh();
+    const timer = setInterval(refresh, 15000);
+    return () => { mounted = false; clearInterval(timer); };
+  }, []);
 
   const changeQty = (p: TicketProduct, delta: number) => {
     setQty((q) => {
@@ -70,6 +82,8 @@ export default function Tickets() {
       if (msg.includes('sales_not_started')) setError('La billetterie ouvre le 8 octobre à 21h.');
       else if (msg.includes('minimum_quantity_not_met')) setError('La quantité minimum pour ce tarif n’est pas atteinte.');
       else if (msg.includes('invalid_or_expired_promo')) setError('Ce code promotionnel est invalide ou expiré.');
+      else if (msg.includes('vip_sold_out_for_day')) setError('Les places VIP sont complètes pour cette journée.');
+      else if (msg.includes('ticket_products_stock_limit') || msg.includes('sold_out')) setError('Cette catégorie est complète.');
       else if (msg.includes('sold_out_for_day')) setError('Cette journée a atteint sa capacité maximale. Ce pass n’est plus disponible.');
       else setError('Impossible de lancer le paiement pour le moment.');
       setBusy(false);
@@ -86,10 +100,6 @@ export default function Tickets() {
 
       <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
         <View style={{flex:1}}><T variant="h3">DÉCOUVRIR LE PLAN DE PLACEMENT</T><T variant="small" color={c.textDim} style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
-        <Ionicons name="map-outline" size={24} color={c.primary}/>
-      </Pressable>
-      <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-        <View style={{flex:1}}><T variant="h3">PLAN DE PLACEMENT</T><T variant="small" color={c.textDim} style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
         <Ionicons name="map-outline" size={24} color={c.primary}/>
       </Pressable>
       <Card style={styles.early}>
@@ -127,6 +137,12 @@ export default function Tickets() {
           const q = qty[p.id] ?? p.min_per_order;
           const price = (p.price_cents / 100).toFixed(0);
           const total = ((p.price_cents * q) / 100).toFixed(0);
+          const vip = ['vip_sat','vip_sun','vip_two_days'].includes(p.code);
+          const bc = p.code === 'black_card';
+          const sat = availability?.days.find(d=>d.date==='2027-03-13')?.remaining;
+          const sun = availability?.days.find(d=>d.date==='2027-03-14')?.remaining;
+          const remaining = bc ? availability?.black_card.remaining : p.code==='vip_sat' ? sat : p.code==='vip_sun' ? sun : vip && sat!==undefined && sun!==undefined ? Math.min(sat,sun) : undefined;
+          const soldOut = remaining !== undefined && remaining < q;
           const groupNote = p.group_size > 1 ? `${p.group_size} personnes incluses` : p.min_per_order > 1 ? `Minimum ${p.min_per_order} personnes` : null;
           return (
             <Card key={p.id} style={{ marginBottom: Space.md }}>
@@ -134,6 +150,7 @@ export default function Tickets() {
                 <View style={{ flex: 1, paddingRight: Space.md }}>
                   <T variant="h2">{p.name}</T>
                   {!!p.description && <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>{p.description}</T>}
+                  {(vip || bc) && <T variant="small" color={soldOut ? c.danger : c.accent} style={{marginTop:6}}>{remaining===undefined ? 'Disponibilité en cours de vérification' : remaining===0 ? 'COMPLET' : `${remaining} place${remaining>1?'s':''} restante${remaining>1?'s':''} sur ${bc?56:112}${vip?' par jour':''}`}</T>}
                   {!!groupNote && <T variant="caption" color={c.accent} style={{ marginTop: 6 }}>{groupNote}</T>}
                 </View>
                 <T variant="title" color={c.accent} style={{ fontSize: 24 }}>{price} €</T>
@@ -148,8 +165,8 @@ export default function Tickets() {
                 </View>
               )}
 
-              <Pressable disabled={busy} onPress={() => buy(p)} style={[styles.buy, busy && { opacity: 0.5 }]}>
-                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>Acheter</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
+              <Pressable disabled={busy || soldOut || ((vip || bc) && !availability)} onPress={() => buy(p)} style={[styles.buy, (busy || soldOut || ((vip || bc) && !availability)) && { opacity: 0.5 }]}>
+                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{soldOut ? "Complet" : "Acheter"}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
               </Pressable>
             </Card>
           );
