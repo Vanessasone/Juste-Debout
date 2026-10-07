@@ -84,7 +84,7 @@ export default function Tickets() {
       <Card style={styles.early}>
         <T variant="h3">EARLY BIRD · 48H</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>
-          Code 48 · Pass 1 jour à 30 € · Pass 2 jours à 60 € · jusqu’au 10 octobre à 21h.
+          Code 48 · -5 € sur le Pass Samedi ou Dimanche · -10 € sur le Pass 2 jours · jusqu’au 10 octobre à 21h.
         </T>
       </Card>
 
