@@ -131,6 +131,7 @@ function RootNavigator() {
         <Stack.Screen name="shop-success" />
         <Stack.Screen name="my-orders" />
         <Stack.Screen name="seating-plan" />
+        <Stack.Screen name="family-tickets" />
         <Stack.Screen name="admin-orders" />
         <Stack.Screen name="passport" />
         <Stack.Screen name="dancer/[id]" />
