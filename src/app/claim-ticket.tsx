@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { GButton, Screen, T } from '@/components/ui';
@@ -16,6 +17,7 @@ export default function ClaimTicket() {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        if (token) await AsyncStorage.setItem('jd_pending_claim_token', token);
         setNeedsLogin(true);
         setMessage('Crée ton compte Juste Debout ou connecte-toi avec l’adresse email qui a reçu cette invitation.');
         return;
@@ -23,6 +25,7 @@ export default function ClaimTicket() {
       if (!token) { setMessage('Invitation invalide.'); return; }
       try {
         await acceptTicketTransfer(token);
+        await AsyncStorage.removeItem('jd_pending_claim_token');
         setMessage('Ton billet est maintenant dans ton wallet.');
         setTimeout(() => router.replace('/(tabs)/tickets'), 900);
       } catch (e: any) {
