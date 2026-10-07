@@ -3,6 +3,7 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
@@ -11,17 +12,17 @@ import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
 import { EventRow, getEvents } from '@/lib/jdlive';
-import { getMyTickets, obtainTicket, Ticket } from '@/lib/tickets';
+import { getMyTickets, Ticket } from '@/lib/tickets';
 import { useColors } from '@/lib/theme';
 
 export default function Wallet() {
   const c = useColors();
   const t = useT();
+  const router = useRouter();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [loading, setLoading] = useState(true);
   const [events, setEvents] = useState<EventRow[]>([]);
   const [tickets, setTickets] = useState<Ticket[]>([]);
-  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
@@ -41,21 +42,6 @@ export default function Wallet() {
   }, []);
 
   const ticketFor = (eventId: string) => tickets.find((t) => t.event_id === eventId);
-
-  const getTicket = async (eventId: string) => {
-    setBusy(eventId);
-    setError(null);
-    try {
-      await obtainTicket(eventId, 'spectator');
-      await load();
-    } catch (e: any) {
-      const m = (e?.message ?? '').toLowerCase();
-      if (m.includes('duplicate')) await load();
-      else setError(e?.message ?? t('wallet.getFail'));
-    } finally {
-      setBusy(null);
-    }
-  };
 
   if (loading) {
     return (
@@ -91,12 +77,12 @@ export default function Wallet() {
                   {[e.venue, e.city].filter(Boolean).join(' · ')}
                 </T>
                 <GButton
-                  label={busy === e.id ? t('wallet.oneMoment') : t('wallet.getTicket')}
+                  label="Voir les billets"
                   icon="ticket"
-                  onPress={() => getTicket(e.id)}
+                  onPress={() => router.push('/tickets')}
                 />
                 <T variant="caption" color={c.textMute} style={{ textAlign: 'center', marginTop: Space.sm }}>
-                  {t('wallet.freeNote')}
+                  Paiement sécurisé par Stripe · QR émis après confirmation du paiement.
                 </T>
               </Card>
             ) : (
