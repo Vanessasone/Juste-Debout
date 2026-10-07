@@ -24,7 +24,7 @@ export type Ticket = {
   transfer_sent_at?: string | null;
   price_cents?: number | null;
   currency?: string | null;
-  events?: { title: string; city: string | null; country: string | null; venue: string | null; starts_on: string | null; ends_on: string | null } | null;
+  events?: { title: string; city: string | null; country: string | null; venue: string | null; address: string | null; starts_on: string | null; ends_on: string | null } | null;
   ticket_products?: { name: string; code: string; access_days: number; access_date: string | null; group_size: number } | null;
   profiles?: { full_name: string | null; alias: string | null } | null;
 };
@@ -36,7 +36,7 @@ export async function getMyTickets(): Promise<Ticket[]> {
   if (!user) return [];
   const { data, error } = await supabase
     .from('tickets')
-    .select('*, events(title,city,country,venue,starts_on,ends_on), ticket_products(name,code,access_days,access_date,group_size)')
+    .select('*, events(title,city,country,venue,address,starts_on,ends_on), ticket_products(name,code,access_days,access_date,group_size)')
     .eq('profile_id', user.id)
     .order('created_at', { ascending: false });
   if (error) throw error;
