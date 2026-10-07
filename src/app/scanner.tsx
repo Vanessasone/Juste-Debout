@@ -39,7 +39,7 @@ export default function Scanner() {
         if (scan.ok) {
           setResult({ status: 'ok', name });
           setCount((n) => n + 1);
-        } else if (scan.error === 'already_scanned_today') {
+        } else if ((scan.error === 'already_scanned_today' || scan.error === 'already_used')) {
           const time = scan.scanned_at
             ? new Date(scan.scanned_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })
             : null;
