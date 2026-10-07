@@ -17,6 +17,7 @@ export type Ticket = {
   ticket_product_id?: string | null;
   order_item_id?: string | null;
   family_role?: 'adult' | 'child' | null;
+  holder_birth_date?: string | null;
   unit_index?: number | null;
   holder_name?: string | null;
   holder_email?: string | null;
