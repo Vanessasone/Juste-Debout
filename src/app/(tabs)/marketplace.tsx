@@ -36,6 +36,10 @@ export default function Marketplace() {
     <Screen>
       <AppHeader title={t('shop.title')} subtitle={t('shop.subtitle')} />
 
+      <Pressable onPress={() => router.push('/my-orders')} style={{padding:14,backgroundColor:c.surface,borderRadius:Radius.md,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+        <T variant="h3">Mes commandes</T>
+        <Ionicons name="chevron-forward" size={18} color={c.textMute}/>
+      </Pressable>
       {/* Bandeau shop */}
       <View style={styles.hero}>
         <View style={styles.heroAccent} />
