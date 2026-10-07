@@ -102,6 +102,7 @@ function RootNavigator() {
         <Stack.Screen name="edit-profile" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="wallet" />
+        <Stack.Screen name="black-card" />
         <Stack.Screen name="scanner" />
         <Stack.Screen name="entry-dashboard" />
         <Stack.Screen name="school" />
