@@ -24,7 +24,8 @@ export default function Checkout() {
   const styles = useMemo(() => makeStyles(c), [c]);
   const t = useT();
   const router = useRouter();
-  const { productId } = useLocalSearchParams<{ productId?: string }>();
+  const { productId, test } = useLocalSearchParams<{ productId?: string; test?: string }>();
+  const testMode = test === '1';
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,7 +44,7 @@ export default function Checkout() {
   const [note, setNote] = useState('');
 
   useEffect(() => {
-    getProducts()
+    getProducts(testMode)
       .then((list) => setProduct(list.find((p) => p.id === productId) ?? null))
       .catch(() => setProduct(null))
       .finally(() => setLoading(false));
@@ -51,7 +52,7 @@ export default function Checkout() {
     getMyProfile()
       .then((p) => p?.full_name && setFullName(p.full_name))
       .catch(() => {});
-  }, [productId]);
+  }, [productId, testMode]);
 
   const baseUnitCents = product?.price != null ? Math.round(product.price * 100) : 0;
   const unitCents = Math.round(baseUnitCents * (1 - blackDiscount / 100));
