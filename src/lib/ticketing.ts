@@ -1,0 +1,57 @@
+import { Linking, Platform } from 'react-native';
+import { supabase } from '@/lib/supabase';
+
+export type TicketProduct = {
+  id: string;
+  event_id: string;
+  code: string;
+  name: string;
+  description: string | null;
+  price_cents: number;
+  currency: string;
+  active: boolean;
+  sales_start: string | null;
+  sales_end: string | null;
+  min_per_order: number;
+  max_per_order: number;
+  group_size: number;
+  access_days: number;
+  access_date: string | null;
+  audience: string;
+  promo_eligible: boolean;
+  sort_order: number;
+};
+
+export async function getTicketProducts(eventId: string): Promise<TicketProduct[]> {
+  const { data, error } = await supabase
+    .from('ticket_products')
+    .select('id,event_id,code,name,description,price_cents,currency,active,sales_start,sales_end,min_per_order,max_per_order,group_size,access_days,access_date,audience,promo_eligible,sort_order')
+    .eq('event_id', eventId)
+    .eq('active', true)
+    .order('sort_order', { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as TicketProduct[];
+}
+
+export async function startTicketCheckout(input: {
+  eventId: string;
+  items: Array<{ productId: string; quantity: number }>;
+  promoCode?: string | null;
+}): Promise<{ orderId: string; url: string }> {
+  const { data, error } = await supabase.functions.invoke('create-ticket-checkout', {
+    body: {
+      eventId: input.eventId,
+      items: input.items,
+      promoCode: input.promoCode?.trim() || null,
+    },
+  });
+  if (error) throw error;
+  if (!data?.url || !data?.orderId) throw new Error(data?.error ?? 'checkout_failed');
+
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    window.location.assign(data.url);
+  } else {
+    await Linking.openURL(data.url);
+  }
+  return { orderId: data.orderId, url: data.url };
+}
