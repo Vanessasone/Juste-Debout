@@ -6,16 +6,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Linking, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { Card, PageHeader, Screen, Section, T } from '@/components/ui';
 import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
-import { createOrder } from '@/lib/orders';
+
 import { getProducts, Product } from '@/lib/products';
 import { getMyProfile } from '@/lib/profile';
 import { useColors } from '@/lib/theme';
+import { supabase } from '@/lib/supabase';
 import { getMyBlackCard } from '@/lib/blackCard';
 
 export default function Checkout() {
@@ -28,7 +29,6 @@ export default function Checkout() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
-  const [done, setDone] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [blackDiscount, setBlackDiscount] = useState(0);
@@ -70,24 +70,18 @@ export default function Checkout() {
 
   const submit = async () => {
     if (!product) return;
-    setSaving(true);
-    setError(null);
+    setSaving(true); setError(null);
     try {
-      await createOrder(
-        {
-          full_name: fullName,
-          phone,
-          address_line1: addr1,
-          address_line2: addr2,
-          postal_code: postal,
-          city,
-          country,
-          note,
+      const { data, error } = await supabase.functions.invoke('create-shop-checkout', {
+        body: {
+          productId: product.id,
+          quantity: qty,
+          address: { full_name: fullName, phone, address_line1: addr1, address_line2: addr2, postal_code: postal, city, country, note },
         },
-        [{ product_id: product.id, name: product.name, unit_price: unitCents, quantity: qty }],
-        cur,
-      );
-      setDone(true);
+      });
+      if (error || !data?.url) throw error ?? new Error(data?.error ?? 'checkout_failed');
+      if (Platform.OS === 'web' && typeof window !== 'undefined') window.location.assign(data.url);
+      else await Linking.openURL(data.url);
     } catch (e: any) {
       setError(e?.message ?? t('checkout.fail'));
       setSaving(false);
@@ -99,28 +93,6 @@ export default function Checkout() {
       <Screen>
         <PageHeader title={t('checkout.title')} subtitle={t('shop.drop')} />
         <ActivityIndicator color={c.accent} style={{ marginTop: Space.xl }} />
-      </Screen>
-    );
-  }
-
-  if (done) {
-    return (
-      <Screen>
-        <PageHeader title={t('checkout.title')} subtitle={t('shop.drop')} />
-        <Card style={{ alignItems: 'center', paddingVertical: Space.xl }}>
-          <Ionicons name="checkmark-circle" size={54} color={c.primary} />
-          <T variant="h3" style={{ marginTop: Space.md, textAlign: 'center' }}>
-            {t('checkout.doneTitle')}
-          </T>
-          <T variant="small" color={c.textDim} style={{ textAlign: 'center', marginTop: Space.sm }}>
-            {t('checkout.doneBody')}
-          </T>
-          <Pressable onPress={() => router.back()} style={[styles.cta, { marginTop: Space.xl, alignSelf: 'stretch' }]}>
-            <T variant="label" color={c.black} style={{ fontSize: 15 }}>
-              {t('common.done')}
-            </T>
-          </Pressable>
-        </Card>
       </Screen>
     );
   }
