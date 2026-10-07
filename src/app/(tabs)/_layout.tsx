@@ -26,9 +26,13 @@ export default function TabsLayout() {
       />
       <Tabs.Screen
         name="network"
+        options={{ href: null }}
+      />
+      <Tabs.Screen
+        name="tickets"
         options={{
-          title: t('tabs.network'),
-          tabBarIcon: ({ color, size }) => <Ionicons name="globe" size={size} color={color} />,
+          title: 'Billets',
+          tabBarIcon: ({ color, size }) => <Ionicons name="ticket" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
