@@ -14,7 +14,7 @@ import { Palette, Radius, Space } from '@/constants/brand';
 import { useT } from '@/lib/i18n';
 import { getTicketByToken, scanTicketForToday } from '@/lib/tickets';
 
-type Result = { status: 'ok' | 'used' | 'unknown' | 'error'; name?: string; category?: string; msg?: string } | null;
+type Result = { status: 'ok' | 'used' | 'unknown' | 'error'; name?: string; category?: string; categoryCode?: string; msg?: string } | null;
 
 export default function Scanner() {
   const insets = useSafeAreaInsets();
@@ -36,9 +36,10 @@ export default function Scanner() {
       } else {
         const name = tk.holder_name || tk.holder_email || tk.profiles?.full_name || tk.profiles?.alias || '';
         const category = scanCategoryFallback(tk);
+        const categoryCode = tk.ticket_products?.code ?? '';
         const scan = await scanTicketForToday(tk.id);
         if (scan.ok) {
-          setResult({ status: 'ok', name, category: scan.category || category });
+          setResult({ status: 'ok', name, category: scan.category || category, categoryCode: scan.category_code || categoryCode });
           setCount((n) => n + 1);
         } else if ((scan.error === 'already_scanned_today' || scan.error === 'already_used')) {
           const time = scan.scanned_at
@@ -125,7 +126,7 @@ export default function Scanner() {
                   ? t('sc.unknown')
                   : t('sc.error')}
           </T>
-          {!!result.category && <View style={{backgroundColor:'#0E0E0E',borderRadius:12,paddingHorizontal:20,paddingVertical:14,marginTop:16}}><T variant="h2" color={Palette.primary} style={{textAlign:'center'}}>{result.category.toUpperCase()}</T></View>}
+          {!!result.category && <View style={{backgroundColor:result.categoryCode==='black_card'?'#D7B66D':result.categoryCode?.startsWith('vip_')?'#B5FA42':'#252525',borderRadius:12,paddingHorizontal:20,paddingVertical:14,marginTop:16}}><T variant="h2" color={result.categoryCode==='black_card'||result.categoryCode?.startsWith('vip_')?'#101010':'#FFFFFF'} style={{textAlign:'center'}}>{result.category.toUpperCase()}</T></View>}
           {!!result.name && (
             <T variant="h2" color={Palette.black} style={{ marginTop: 4 }}>
               {result.name}
