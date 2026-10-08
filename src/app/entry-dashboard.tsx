@@ -18,22 +18,24 @@ export default function EntryDashboard() {
   const [err, setErr] = useState('');
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [clock, setClock] = useState(Date.now());
-  const inFlight = useRef(false);
+  const [selectedDate, setSelectedDate] = useState<'2027-03-13' | '2027-03-14'>(() => {
+    const nowParis = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });
+    return nowParis >= EVENT_END ? EVENT_END : EVENT_START;
+  });
+  const requestSeq = useRef(0);
   const mounted = useRef(true);
   const today = new Date(clock).toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });
   const eventDay = today >= EVENT_START && today <= EVENT_END;
   const stale = updatedAt === null || clock - updatedAt > 15000;
 
   const load = useCallback(async () => {
-    if (inFlight.current) return;
-    inFlight.current = true;
+    const seq = ++requestSeq.current;
     try {
-      const date = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });
       const [a, b] = await Promise.all([
-        supabase.rpc('entry_dashboard', { p_event: EVENT, p_date: date }),
+        supabase.rpc('entry_dashboard', { p_event: EVENT, p_date: selectedDate }),
         supabase.rpc('entry_dashboard_details', { p_event: EVENT, p_date: date }),
       ]);
-      if (!mounted.current) return;
+      if (!mounted.current || seq !== requestSeq.current) return;
       if (a.error || !a.data?.ok || b.error || !b.data?.ok) {
         setErr(a.error?.message || a.data?.error || b.error?.message || b.data?.error || 'Synchronisation impossible');
         return;
@@ -43,22 +45,31 @@ export default function EntryDashboard() {
       setUpdatedAt(Date.now());
       setErr('');
     } catch {
-      if (mounted.current) setErr('Connexion au serveur indisponible');
-    } finally {
-      inFlight.current = false;
+      if (mounted.current && seq === requestSeq.current) setErr('Connexion au serveur indisponible');
     }
-  }, []);
+  }, [selectedDate]);
 
   useEffect(() => {
+    setData(null);
+    setDetails(null);
+    setUpdatedAt(null);
+    setErr('');
     mounted.current = true;
     void load();
     const refresh = setInterval(() => { void load(); }, 5000);
     const tick = setInterval(() => setClock(Date.now()), 1000);
-    return () => { mounted.current = false; clearInterval(refresh); clearInterval(tick); };
+    return () => { mounted.current = false; requestSeq.current += 1; clearInterval(refresh); clearInterval(tick); };
   }, [load]);
 
   return <Screen>
     <PageHeader title="Contrôle des entrées" subtitle="Juste Debout · supervision" />
+    <View style={styles.dayTabs}>
+      {([{ date: EVENT_START, label: 'SAMEDI 13 MARS' }, { date: EVENT_END, label: 'DIMANCHE 14 MARS' }] as const).map(day => (
+        <Pressable key={day.date} accessibilityRole="button" accessibilityState={{ selected: selectedDate === day.date }} onPress={() => setSelectedDate(day.date)} style={[styles.dayTab, selectedDate === day.date && styles.dayTabActive]}>
+          <T variant="small" color={selectedDate === day.date ? '#101010' : c.text}>{day.label}</T>
+        </Pressable>
+      ))}
+    </View>
     <Card style={{ marginBottom: Space.md }}>
       <T variant="h3" color={err || stale ? c.danger : c.primary}>
         {err || stale ? '● SYNCHRONISATION INDISPONIBLE' : '● DONNÉES ACTUALISÉES'}
@@ -76,18 +87,19 @@ export default function EntryDashboard() {
     {!eventDay && <Card style={{ marginBottom: Space.md }}>
       <T variant="h3">Événement à venir</T>
       <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>
-        Les finales ont lieu les 13 et 14 mars 2027. Les compteurs ci-dessous concernent la date du jour et non les ventes ou réservations.
+        Les finales ont lieu les 13 et 14 mars 2027. Les compteurs affichent la journée sélectionnée, et non les ventes ou les réservations.
       </T>
     </Card>}
     {!data ? <ActivityIndicator color={c.primary} /> : <>
       <View style={styles.grid}>
         <Metric n={data.entries} label="ENTRÉES" />
-        <Metric n={data.remaining} label="RESTANTES" />
+        <Metric n={data.remaining} label="NON ENTRÉES" />
         <Metric n={data.capacity} label="CAPACITÉ" />
       </View>
       <Card>
         <T variant="h3">État du contrôle</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 8 }}>Actualisation toutes les 5 secondes, si le serveur répond.</T>
+        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>« Non entrées » = capacité de 6 000 moins les passages enregistrés ce jour-là. Ce n’est PAS le nombre de billets encore en vente.</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Toute sortie est définitive pour la journée. Un billet déjà scanné est refusé à une nouvelle tentative.</T>
       </Card>
       {details && <>
@@ -112,5 +124,8 @@ function Metric({ n, label }: { n: number; label: string }) {
 }
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', gap: 8, marginBottom: Space.lg },
+  dayTabs: { flexDirection: 'row', gap: 8, marginBottom: Space.md },
+  dayTab: { flex: 1, paddingVertical: 14, paddingHorizontal: 7, borderRadius: 10, alignItems: 'center', borderWidth: 1, borderColor: '#777777' },
+  dayTabActive: { backgroundColor: '#B5FA42', borderColor: '#B5FA42' },
   refresh: { backgroundColor: '#B5FA42', borderRadius: 24, paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center', marginTop: 14 },
 });
