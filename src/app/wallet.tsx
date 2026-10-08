@@ -147,6 +147,11 @@ function TicketCard({
   const ev = event ?? { title: 'Juste Debout', venue: null, city: null, address: null };
   const used = ticket.status === 'used';
   const cancelled = ticket.status === 'cancelled';
+  const categoryCode = ticket.ticket_products?.code ?? '';
+  const premiumBlack = categoryCode === 'black_card';
+  const premiumVip = categoryCode.startsWith('vip_');
+  const categoryColor = premiumBlack ? '#D7B66D' : premiumVip ? '#B5FA42' : '#303030';
+  const categoryTextColor = premiumBlack || premiumVip ? '#101010' : '#FFFFFF';
   return (
     <Card style={{ alignItems: 'center' }}>
       <View style={styles.rowFull}>
@@ -162,9 +167,11 @@ function TicketCard({
         {[ev.venue, ev.city].filter(Boolean).join(' · ')}
       </T>
 
-      <View style={{alignSelf:'stretch',backgroundColor:ticket.ticket_products?.code==='black_card'?'#D7B66D':ticket.ticket_products?.code?.startsWith('vip_')?'#B5FA42':c.surface2,paddingVertical:12,paddingHorizontal:14,borderRadius:10,marginTop:16}}><T variant="label" color={ticket.ticket_products?.code==='black_card'||ticket.ticket_products?.code?.startsWith('vip_')?'#101010':c.text} style={{textAlign:'center'}}>{(ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type,t)).toUpperCase()}</T></View>
+      <View style={{alignSelf:'stretch',backgroundColor:categoryColor,paddingVertical:14,paddingHorizontal:14,borderRadius:10,marginTop:16}}>
+        <T variant="label" color={categoryTextColor} style={{textAlign:'center'}}>{(ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type,t)).toUpperCase()}</T>
+      </View>
       <View style={styles.ticketDetails}>
-        <DetailRow icon="ticket-outline" label="Catégorie" value={ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type, t)} c={c} />
+        <DetailRow icon="ticket-outline" label="Accès" value={ticket.ticket_products?.access_days && ticket.ticket_products.access_days > 1 ? 'Samedi et dimanche · 2 jours' : '1 jour · entrée unique, sortie définitive'} c={c} />
         <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
         <DetailRow icon="location-outline" label="Lieu" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
         <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
