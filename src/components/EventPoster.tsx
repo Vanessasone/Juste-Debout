@@ -14,6 +14,6 @@ export function EventPoster() {
 }
 
 const styles = StyleSheet.create({
-  frame: { width: '100%', maxWidth: 560, alignSelf: 'center', marginVertical: 16, borderRadius: 16, overflow: 'hidden', backgroundColor: '#FFFFFF' },
-  poster: { width: '100%', aspectRatio: 1122 / 1402 },
+  frame: { width: '100%', maxWidth: 560, aspectRatio: 1122 / 1402, alignSelf: 'center', marginVertical: 16, borderRadius: 16, overflow: 'hidden', backgroundColor: '#FFFFFF' },
+  poster: { width: '100%', height: '100%' },
 });
