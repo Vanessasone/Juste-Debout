@@ -12,7 +12,7 @@ export default function BlackCardScreen(){
  useEffect(()=>{getMyBlackCard().then(setCard).catch(()=>setCard(null));},[]);
  if(card===undefined)return <Screen><PageHeader title="Black Card"/><ActivityIndicator/></Screen>;
  return <Screen><PageHeader title="Black Card" subtitle="Juste Debout · Membership"/>
- {!card?<Card><T variant="h3">Aucune Black Card active</T><T variant="small" color={c.textDim} style={{marginTop:6}}>La Black Card est limitée à 70 exemplaires et valable un an à compter de son activation.</T></Card>:<>
+ {!card?<View><View style={styles.blackCard}><View style={styles.glow}/><T variant="caption" color="#D9C27A">JUSTE DEBOUT · BLACK CARD</T><T variant="title" color="#FFFFFF" style={{fontSize:34,marginTop:18}}>BLACK</T><T variant="title" color="#D9C27A" style={{fontSize:34,marginTop:-6}}>CARD</T><View style={{flex:1}}/><T variant="h2" color="#FFFFFF">JD · 0000</T><T variant="caption" color="#A9A9A9" style={{marginTop:6}}>APERÇU · CARTE NON ACTIVE</T></View><Card style={{marginTop:Space.lg}}><T variant="h3">Aucune Black Card active</T><T variant="small" color={c.textDim} style={{marginTop:6}}>La Black Card est limitée à 56 exemplaires et valable un an à compter de son activation.</T></Card></View>:<>
  <View style={styles.blackCard}>
    <View style={styles.glow}/>
    <T variant="caption" color="#D9C27A">JUSTE DEBOUT · BLACK CARD</T>

@@ -9,6 +9,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 
+import { ArrivalAnimation } from '@/components/ArrivalAnimation';
 import { WELCOME_FLAG } from '@/app/welcome';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { I18nProvider } from '@/lib/i18n';
@@ -29,7 +30,7 @@ function RootNavigator() {
     (async () => {
       // auth-callback doit rester accessible sans session : c'est précisément
       // cette route qui crée la session après le retour Google.
-      const publicRoutes = ['login', 'legal', 'auth-callback', 'claim-ticket', 'shop-success'];
+      const publicRoutes = ['login', 'legal', 'auth-callback', 'claim-ticket', 'shop-success', 'ticket-success', 'ticket-cancel'];
       const inPublic = publicRoutes.includes(segments[0]);
       if (!session && !inPublic) {
         router.replace('/login');
@@ -152,6 +153,7 @@ function RootNavigator() {
         <Stack.Screen name="earnings" />
         <Stack.Screen name="live-admin" />
       </Stack>
+      <ArrivalAnimation />
     </>
   );
 }
@@ -166,6 +168,14 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      if (!document.querySelector('link[rel="manifest"]')) {
+        const link = document.createElement('link'); link.rel = 'manifest'; link.href = '/manifest.webmanifest'; document.head.appendChild(link);
+      }
+      if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+        const icon = document.createElement('link'); icon.rel = 'apple-touch-icon'; icon.href = '/app-icon.png'; document.head.appendChild(icon);
+      }
+    }
     if (loaded) SplashScreen.hideAsync();
   }, [loaded]);
 

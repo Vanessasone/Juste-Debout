@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { InstallPrompt } from '@/components/InstallPrompt';
 import { Vitruve, Wordmark } from '@/components/Logo';
 import { T } from '@/components/ui';
 import { JD_TAGLINE, Radius, Space } from '@/constants/brand';
@@ -98,6 +99,8 @@ export default function Login() {
               {JD_TAGLINE}
             </T>
           </View>
+
+          <View style={{ marginTop: Space.lg }}><InstallPrompt /></View>
 
           {/* Titre */}
           <T variant="title" color={c.text} style={{ marginTop: Space.xxxl, fontSize: 30 }}>

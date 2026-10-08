@@ -12,7 +12,7 @@ import { T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
 import { useT } from '@/lib/i18n';
 
-const DISMISS_KEY = 'jd_install_dismissed';
+const DISMISS_KEY = 'jd_install_dismissed_v2';
 
 export function InstallPrompt() {
   const t = useT();
@@ -27,37 +27,43 @@ export function InstallPrompt() {
       w.matchMedia?.('(display-mode: standalone)').matches || w.navigator?.standalone === true;
     if (standalone) return; // déjà installée
     try {
-      if (w.localStorage?.getItem(DISMISS_KEY) === '1') return;
+      const lastDismissed = Number(w.localStorage?.getItem(DISMISS_KEY) || 0);
+      if (lastDismissed && Date.now() - lastDismissed < 7 * 86400000) return;
     } catch {
       /* localStorage indisponible */
     }
 
     const ua = w.navigator?.userAgent || '';
-    if (/iphone|ipad|ipod/i.test(ua)) {
+    if (/iphone|ipad|ipod/i.test(ua) || (w.navigator?.platform === 'MacIntel' && w.navigator?.maxTouchPoints > 1)) {
       setIsIOS(true);
       setVisible(true);
       return;
     }
+    if (/android/i.test(ua)) setVisible(true);
+    const onInstalled = () => { setVisible(false); setDeferred(null); };
+    w.addEventListener('appinstalled', onInstalled);
     const onBip = (e: any) => {
       e.preventDefault();
       setDeferred(e);
       setVisible(true);
     };
     w.addEventListener('beforeinstallprompt', onBip);
-    return () => w.removeEventListener('beforeinstallprompt', onBip);
+    return () => { w.removeEventListener('beforeinstallprompt', onBip); w.removeEventListener('appinstalled', onInstalled); };
   }, []);
 
   const install = async () => {
     if (!deferred) return;
-    deferred.prompt();
-    await deferred.userChoice?.catch(() => {});
-    setDeferred(null);
-    dismiss();
+    try {
+      await deferred.prompt();
+      const choice = await deferred.userChoice;
+      setDeferred(null);
+      if (choice?.outcome === 'accepted') setVisible(false);
+    } catch { setDeferred(null); }
   };
   const dismiss = () => {
     setVisible(false);
     try {
-      (window as any).localStorage?.setItem(DISMISS_KEY, '1');
+      (window as any).localStorage?.setItem(DISMISS_KEY, String(Date.now()));
     } catch {
       /* ignore */
     }
@@ -73,17 +79,17 @@ export function InstallPrompt() {
           {t('install.title')}
         </T>
         <T variant="caption" color={Palette.textDim} style={{ marginTop: 2 }}>
-          {isIOS ? t('install.ios') : t('install.android')}
+          {isIOS ? t('install.ios') : deferred ? t('install.android') : 'Menu ⋮ du navigateur → Ajouter à l’écran d’accueil ou Installer l’application.'}
         </T>
       </View>
       {!isIOS && deferred ? (
-        <Pressable onPress={install} style={styles.cta}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Installer Juste Debout" onPress={install} style={styles.cta}>
           <T variant="label" color={Palette.black}>
             {t('install.cta')}
           </T>
         </Pressable>
       ) : null}
-      <Pressable onPress={dismiss} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Masquer le bandeau pendant 7 jours" onPress={dismiss} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
         <Ionicons name="close" size={18} color={Palette.textMute} />
       </Pressable>
     </View>
