@@ -34,7 +34,7 @@ export async function getTicketProducts(eventId: string, includeInternalTest = f
     .order('sort_order', { ascending: true });
   if (error) throw error;
 
-  const products = (data ?? []) as TicketProduct[];
+  const products = ((data ?? []) as TicketProduct[]).filter(p => !p.code.startsWith('internal_test_'));
   if (!includeInternalTest) return products;
 
   const { data: previewData, error: previewError } = await supabase
@@ -50,7 +50,7 @@ export async function getTicketProducts(eventId: string, includeInternalTest = f
     .from('ticket_products')
     .select(cols)
     .eq('event_id', eventId)
-    .eq('code', 'internal_test_1eur')
+    .eq('code', 'internal_test_4days_1eur')
     .maybeSingle();
   if (testError) throw testError;
   return [...products, ...((previewData ?? []) as TicketProduct[]), ...(testData ? [testData as TicketProduct] : [])];
