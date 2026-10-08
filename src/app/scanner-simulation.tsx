@@ -16,7 +16,7 @@ type Scenario = {
   title: string;
   category: Category;
   ticketLabel: string;
-  day: 'samedi' | 'dimanche';
+  day: 'jeudi' | 'vendredi' | 'samedi' | 'dimanche';
   expected: 'accepted' | 'refused';
   reason?: string;
   previousScan?: string;
@@ -32,6 +32,12 @@ const cases: Scenario[] = [
   { id: 'cancelled', title: 'Billet annulé', category: 'black_card', ticketLabel: 'Black Card', day: 'samedi', expected: 'refused', reason: 'Billet annulé · accès refusé' },
   { id: 'weekend_sat', title: 'Week-end — entrée samedi', category: 'vip', ticketLabel: 'Pass VIP — 2 jours', day: 'samedi', expected: 'accepted', reason: 'Samedi utilisé · dimanche reste disponible' },
   { id: 'weekend_sun', title: 'Week-end — entrée dimanche', category: 'vip', ticketLabel: 'Pass VIP — 2 jours', day: 'dimanche', expected: 'accepted', reason: 'Pass entièrement utilisé après cette entrée' },
+  { id: 'three_fri', title: 'Pass 3 jours — vendredi 12 mars', category: 'standard', ticketLabel: 'Pass 3 jours — 105 €', day: 'vendredi', expected: 'accepted', reason: 'Vendredi validé · samedi et dimanche disponibles' },
+  { id: 'three_thu', title: 'Pass 3 jours — jeudi interdit', category: 'standard', ticketLabel: 'Pass 3 jours — 105 €', day: 'jeudi', expected: 'refused', reason: 'Le pass 3 jours commence le vendredi 12 mars' },
+  { id: 'three_sun', title: 'Pass 3 jours — dimanche final', category: 'standard', ticketLabel: 'Pass 3 jours — 105 €', day: 'dimanche', expected: 'accepted', reason: 'Troisième entrée · pass entièrement utilisé' },
+  { id: 'four_thu', title: 'Pass 4 jours — jeudi 11 mars', category: 'standard', ticketLabel: 'Pass 4 jours — 130 €', day: 'jeudi', expected: 'accepted', reason: 'Jeudi validé · 3 journées encore disponibles' },
+  { id: 'four_sun', title: 'Pass 4 jours — dimanche final', category: 'standard', ticketLabel: 'Pass 4 jours — 130 €', day: 'dimanche', expected: 'accepted', reason: 'Quatrième entrée · pass entièrement utilisé' },
+  { id: 'four_repeat', title: 'Pass 4 jours — deuxième scan vendredi', category: 'standard', ticketLabel: 'Pass 4 jours — 130 €', day: 'vendredi', expected: 'refused', reason: 'Déjà entré(e) aujourd’hui · sortie définitive' },
 ];
 const colors: Record<Category, { background: string; foreground: string }> = {
   standard: { background: '#333333', foreground: '#FFFFFF' },
@@ -76,7 +82,7 @@ export default function ScannerSimulation() {
             >
               <View style={{ flex: 1 }}>
                 <T variant="small" color="#FFFFFF">{item.title}</T>
-                <T variant="caption" color="#AAAAAA">{item.day === 'samedi' ? '13 mars 2027' : '14 mars 2027'}</T>
+                <T variant="caption" color="#AAAAAA">{{ jeudi: '11 mars 2027', vendredi: '12 mars 2027', samedi: '13 mars 2027', dimanche: '14 mars 2027' }[item.day]}</T>
               </View>
               <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={23} color={expanded ? '#B5FA42' : '#FFFFFF'} />
             </Pressable>
