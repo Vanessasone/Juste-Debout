@@ -67,15 +67,8 @@ const pillars: {
   route?: string;
 }[] = [
   { tkey: 'home.pTour', icon: 'earth', emoji: '🌍', route: '/tour' },
-  { tkey: 'home.pLive', icon: 'radio', emoji: '🎙️', route: '/direct' },
-  { tkey: 'home.pPredictions', icon: 'analytics', emoji: '🔮', route: '/pronostics' },
-  { label: 'JD School', icon: 'library', emoji: '🎓', route: '/school' },
   { tkey: 'home.pTickets', icon: 'ticket', emoji: '🎟️', route: '/wallet' },
-  // Formations & Masterclass retirées de l'app JD (destinées à l'app JD School / futur JD+).
-  { label: 'Job Board', icon: 'briefcase', emoji: '💼', route: '/jobs' },
   { tkey: 'home.pPassport', icon: 'ribbon', emoji: '🛂', route: '/passport' },
-  { label: 'Hall of Fame', icon: 'trophy', emoji: '🏆', route: '/hall-of-fame' },
-  { label: 'Fantasy JD', icon: 'game-controller', emoji: '🎮', route: '/fantasy' },
 ];
 
 export default function Home() {
@@ -130,9 +123,11 @@ export default function Home() {
     { label: t('home.ckProfile'), done: profileCompleteness(profile) >= 0.85, route: '/edit-profile' },
     { label: t('home.ckRegister'), done: regCount > 0, route: '/register' },
     { label: t('home.ckTicket'), done: ticketCount > 0, route: '/wallet' },
-    { label: t('home.ckSchool'), done: !!profile?.available_for_school, route: '/school' },
   ];
   const checklistDone = checklist.filter((i) => i.done).length;
+  const visiblePillars = event.status === 'live' && passages.length > 0
+    ? [...pillars, { tkey: 'home.pLive', icon: 'radio', emoji: '🎙️', route: '/direct' }, { tkey: 'home.pPredictions', icon: 'analytics', emoji: '🔮', route: '/pronostics' }]
+    : pillars;
 
   return (
     <Screen>
@@ -332,7 +327,7 @@ export default function Home() {
       <FadeInUp delay={160} distance={20}>
       <Section title={t('home.explore')}>
         <View style={styles.grid}>
-          {pillars.map((p, i) => (
+          {visiblePillars.map((p, i) => (
             <FadeInUp key={p.tkey ?? p.label} delay={i * 45} style={styles.gridItem}>
               <PressableScale
                 style={{ alignItems: 'center' }}
@@ -349,26 +344,6 @@ export default function Home() {
         </View>
       </Section>
       </FadeInUp>
-
-      {/* JD+ */}
-      <Section title={t('home.levelUp')}>
-        <View style={styles.jdplus}>
-          <View style={styles.vitruveWatermark} pointerEvents="none">
-            <Vitruve size={150} color={Palette.primary} opacity={0.05} />
-          </View>
-          <T variant="title" color={Palette.primary} style={{ fontSize: 40 }}>
-            JD+
-          </T>
-          <T variant="small" color={c.textDim} style={{ marginTop: 4, marginRight: 40 }}>
-            {t('home.jdplusDesc')}
-          </T>
-          <View style={styles.jdplusBtn}>
-            <T variant="label" color={c.black}>
-              {t('common.soon')}
-            </T>
-          </View>
-        </View>
-      </Section>
 
       <View style={{ height: Space.md }} />
       <T variant="caption" color={c.textMute} style={{ textAlign: 'center' }}>
