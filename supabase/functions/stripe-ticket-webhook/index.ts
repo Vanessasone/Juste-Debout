@@ -5,6 +5,27 @@ import { createClient } from "npm:@supabase/supabase-js@2.110.1";
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "");
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
+
+async function syncRefund(admin: ReturnType<typeof createClient>, chargeId: string) {
+ const charge = await stripe.charges.retrieve(chargeId);
+ const paymentIntent = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
+ if (!paymentIntent) return;
+ let refunded = 0;
+ for await (const refund of stripe.refunds.list({charge: chargeId, limit:100})) {
+  if (refund.status === "succeeded") refunded += refund.amount;
+ }
+ const {data,error} = await admin.rpc("record_ticket_refund", {
+  p_payment_intent:paymentIntent,p_amount:charge.amount,p_currency:charge.currency,p_refunded_cents:refunded
+ });
+ if (error) throw error;
+ if (!data?.ok) throw new Error("refund_reconciliation_failed");
+}
+async function syncPaymentRefund(admin: ReturnType<typeof createClient>, paymentIntentId: string) {
+ const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+ const chargeId = typeof intent.latest_charge === "string" ? intent.latest_charge : intent.latest_charge?.id;
+ if (chargeId) await syncRefund(admin,chargeId);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response("method_not_allowed", { status: 405 });
 
@@ -43,6 +64,9 @@ Deno.serve(async (req: Request) => {
         if (error) throw error;
         console.log("shop order finalized", orderId);
       } else {
+        const { data: existingOrder, error: orderError } = await admin.from("ticket_orders").select("status").eq("id",orderId).maybeSingle();
+        if (orderError) throw orderError;
+        if (existingOrder?.status === "refunded") return Response.json({received:true,ignored:"already_refunded"});
         const { data, error } = await admin.rpc("finalize_ticket_order", {
           p_order: orderId,
           p_payment_intent: typeof session.payment_intent === "string" ? session.payment_intent : null,
@@ -51,6 +75,7 @@ Deno.serve(async (req: Request) => {
         if (error) throw error;
         if (!data?.ok) throw new Error("ticket_finalization_rejected:" + (data?.error ?? "unknown"));
         console.log("ticket order finalized", orderId, data);
+        if (typeof session.payment_intent === "string") await syncPaymentRefund(admin,session.payment_intent);
       }
     }
 
@@ -68,6 +93,14 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    if (event.type === "charge.refunded") {
+      await syncRefund(admin,(event.data.object as Stripe.Charge).id);
+    }
+    if (["refund.created","refund.updated","refund.failed"].includes(event.type)) {
+      const refund = event.data.object as Stripe.Refund;
+      const chargeId = typeof refund.charge === "string" ? refund.charge : refund.charge?.id;
+      if (chargeId) await syncRefund(admin,chargeId);
+    }
     return Response.json({ received: true });
   } catch (error) {
     console.error(error);
