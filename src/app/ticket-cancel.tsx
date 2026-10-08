@@ -8,7 +8,7 @@ export default function TicketCancel() {
     <Ionicons name="close-circle-outline" size={76} color="#FF7777"/>
     <T variant="title" style={styles.center}>PAIEMENT NON FINALISÉ</T>
     <T variant="small" style={styles.center}>Tu as quitté le paiement. Aucun billet n'est confirmé par cette page. Si tu penses avoir été débité, vérifie tes billets ou contacte la billetterie avant de réessayer.</T>
-    <Pressable accessibilityRole="button" onPress={()=>router.replace('/tickets')} style={styles.button}>
+    <Pressable accessibilityRole="button" onPress={()=>router.replace('/billetterie')} style={styles.button}>
       <T variant="label" color="#101010">RETOURNER À LA BILLETTERIE</T>
     </Pressable>
   </View></Screen>;

@@ -103,7 +103,7 @@ export default function Wallet() {
         <Card>
           <T variant="h3">Aucun billet pour le moment</T>
           <T variant="small" color={c.textDim} style={{marginTop:8,marginBottom:Space.md}}>Tes billets achetés apparaîtront ici avec leur QR code.</T>
-          <GButton label="Accéder à la billetterie" icon="ticket" onPress={() => router.push('/tickets')} />
+          <GButton label="Accéder à la billetterie" icon="ticket" onPress={() => router.push('/billetterie')} />
         </Card>
       ) : tickets.map((tkt) => (
         <Section key={tkt.id} title={tkt.events?.title ?? 'Mon billet'}>
@@ -115,7 +115,7 @@ export default function Wallet() {
             }} />
         </Section>
       ))}
-      <Pressable onPress={() => router.push('/tickets')} style={styles.groupBtn}>
+      <Pressable onPress={() => router.push('/billetterie')} style={styles.groupBtn}>
         <Ionicons name="add-circle-outline" size={20} color={c.primary} />
         <View style={{flex:1}}><T variant="h3">Acheter des billets</T><T variant="caption" color={c.textMute}>Finales Mondiales Paris 2027</T></View>
         <Ionicons name="chevron-forward" size={18} color={c.textMute} />

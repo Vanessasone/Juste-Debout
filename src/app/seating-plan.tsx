@@ -64,7 +64,7 @@ export default function SeatingPlan(){
    <T variant="small" color={c.textDim} style={{marginTop:8}}>{zones[selected].detail}</T>
   </Card>
   <T variant="caption" color={c.textMute} style={{marginTop:Space.md}}>Répartition issue du setup fourni par l’organisation. Plan indicatif, susceptible d’ajustements techniques ; aucun siège individuel n’est attribué.</T>
-  <Pressable onPress={()=>router.push('/tickets')} style={{marginTop:Space.lg,backgroundColor:c.primary,borderRadius:99,padding:16,alignItems:'center'}}>
+  <Pressable onPress={()=>router.push('/billetterie')} style={{marginTop:Space.lg,backgroundColor:c.primary,borderRadius:99,padding:16,alignItems:'center'}}>
    <T variant="label" color={c.black}>CHOISIR MON PASS</T>
   </Pressable>
  </Screen>;

@@ -117,7 +117,7 @@ export default function Login() {
           </T>
 
           {purchase && draft && <T variant="small" color={c.accent} style={{ marginTop: Space.md }}>{draft.productName} · {draft.quantity} pass — ton choix est conservé. Les places seront réservées au lancement du paiement.</T>}
-          <Pressable accessibilityRole="button" onPress={() => router.replace('/tickets')} style={{ marginTop: Space.md }}><T variant="small" color={c.accent}>{purchase ? '← Modifier mes places' : 'Acheter des places sans inscription préalable'}</T></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => router.replace('/billetterie')} style={{ marginTop: Space.md }}><T variant="small" color={c.accent}>{purchase ? '← Modifier mes places' : 'Acheter des places sans inscription préalable'}</T></Pressable>
 
           {/* Sélecteur */}
           <View style={styles.toggle}>
