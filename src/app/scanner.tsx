@@ -5,7 +5,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,6 +13,7 @@ import { T } from '@/components/ui';
 import { Palette, Radius, Space } from '@/constants/brand';
 import { useT } from '@/lib/i18n';
 import { getTicketByToken, scanTicketForToday } from '@/lib/tickets';
+import { supabase } from '@/lib/supabase';
 
 type Result = { status: 'ok' | 'used' | 'unknown' | 'error' | 'network'; name?: string; category?: string; categoryCode?: string; msg?: string } | null;
 
@@ -25,9 +26,29 @@ export default function Scanner() {
   const [count, setCount] = useState(0);
   const [manual, setManual] = useState('');
   const processing = useRef(false);
+  const [health, setHealth] = useState<'checking' | 'ready' | 'offline' | 'forbidden'>('checking');
+  const healthBusy = useRef(false);
+  const probe = useCallback(async () => {
+    if (healthBusy.current) return;
+    healthBusy.current = true;
+    try {
+      const { data, error } = await supabase.rpc('scanner_healthcheck');
+      if (error || !data?.ok) setHealth('offline');
+      else setHealth(data.authorized ? 'ready' : 'forbidden');
+    } catch {
+      setHealth('offline');
+    } finally {
+      healthBusy.current = false;
+    }
+  }, []);
+  useEffect(() => {
+    void probe();
+    const interval = setInterval(() => { void probe(); }, 15000);
+    return () => clearInterval(interval);
+  }, [probe]);
 
   const handleToken = async (token: string) => {
-    if (processing.current || !token.trim()) return;
+    if (processing.current || health !== 'ready' || !token.trim()) return;
     processing.current = true;
     let uncertainNetwork = false;
     try {
@@ -48,7 +69,7 @@ export default function Scanner() {
             : null;
           setResult({ status: 'used', name, category: scan.category || category, categoryCode: scan.category_code || categoryCode, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
         } else if (scan.error === 'wrong_day') {
-          setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet non valable aujourd’hui' });
+          setResult({ status: 'error', name, category: scan.category || category, categoryCode: scan.category_code || categoryCode, msg: 'Billet non valable aujourd’hui' });
         } else if (scan.error === 'cancelled') {
           setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet annulé : accès refusé' });
         } else if (scan.error === 'scanner_forbidden') {
@@ -77,6 +98,8 @@ export default function Scanner() {
     setResult(null);
     setManual('');
     processing.current = false;
+    setHealth('checking');
+    void probe();
   };
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
@@ -87,14 +110,14 @@ export default function Scanner() {
   return (
     <View style={styles.root}>
       {/* Caméra */}
-      {permission?.granted ? (
+      {permission?.granted && health === 'ready' ? (
         <CameraView
           style={StyleSheet.absoluteFill}
           facing="back"
           barcodeScannerSettings={{ barcodeTypes: ['qr'] }}
-          onBarcodeScanned={processing.current ? undefined : ({ data }) => handleToken(data)}
+          onBarcodeScanned={processing.current || health !== 'ready' ? undefined : ({ data }) => handleToken(data)}
         />
-      ) : (
+      ) : !permission?.granted ? (
         <View style={styles.permo}>
           <Ionicons name="camera" size={48} color={Palette.textMute} />
           <T variant="h2" color={Palette.white} style={{ marginTop: Space.md, textAlign: 'center' }}>
@@ -109,10 +132,19 @@ export default function Scanner() {
             {t('sc.computerHint')}
           </T>
         </View>
+      ) : (
+        <View style={styles.permo}>
+          <Ionicons name={health === 'checking' ? 'sync-circle-outline' : 'cloud-offline-outline'} size={54} color={health === 'checking' ? Palette.primary : Palette.danger} />
+          <T variant="h2" color={Palette.white} style={{marginTop:Space.md,textAlign:'center'}}>{health === 'checking' ? 'VÉRIFICATION DU RÉSEAU' : health === 'forbidden' ? 'ACCÈS SCANNER NON AUTORISÉ' : 'SCANNER HORS LIGNE'}</T>
+          <T variant="small" color={Palette.white} style={{marginTop:Space.md,textAlign:'center'}}>Aucune entrée ne peut être validée tant que le serveur ne confirme pas la connexion et les autorisations.</T>
+          <Pressable onPress={() => { setHealth('checking'); void probe(); }} style={styles.permBtn}>
+            <T variant="label" color={Palette.black}>VÉRIFIER À NOUVEAU</T>
+          </Pressable>
+        </View>
       )}
 
       {/* Cadre de visée */}
-      {permission?.granted && !result && (
+      {permission?.granted && health === 'ready' && !result && (
         <View style={styles.reticle} pointerEvents="none">
           <View style={styles.frame} />
           <T variant="label" color={Palette.white} style={{ marginTop: Space.lg }}>
@@ -180,7 +212,7 @@ export default function Scanner() {
       </Pressable>
 
       {/* Saisie manuelle */}
-      <View style={[styles.manual, { paddingBottom: insets.bottom + Space.md }]}>
+      {health === 'ready' && <View style={[styles.manual, { paddingBottom: insets.bottom + Space.md }]}>
         <TextInput
           value={manual}
           onChangeText={setManual}
@@ -197,7 +229,7 @@ export default function Scanner() {
             <Ionicons name="arrow-forward" size={20} color={Palette.black} />
           )}
         </Pressable>
-      </View>
+      </View>}
     </View>
   );
 }
