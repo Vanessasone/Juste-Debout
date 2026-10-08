@@ -2,8 +2,8 @@
  * Écran Connexion / Inscription — Juste Debout.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useState, useMemo } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState, useMemo } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -24,10 +24,15 @@ import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
 import { useColors } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
+import { readTicketDraft, TicketDraft } from '@/lib/ticketPurchase';
 
 type Mode = 'signin' | 'signup';
 
 export default function Login() {
+  const { checkout } = useLocalSearchParams<{ checkout?: string }>();
+  const purchase = checkout === '1';
+  const [draft, setDraft] = useState<TicketDraft | null>(null);
+  useEffect(() => { if (purchase) void readTicketDraft().then(setDraft); }, [purchase]);
   const c = useColors();
   const router = useRouter();
   const t = useT();
@@ -48,6 +53,7 @@ export default function Login() {
       setError(t('auth.missingCreds'));
       return;
     }
+    if (mode === 'signup' && purchase && !name.trim()) { setError('Indique ton nom et ton prénom pour tes billets.'); return; }
     setLoading(true);
     try {
       if (mode === 'signup') {
@@ -104,11 +110,14 @@ export default function Login() {
 
           {/* Titre */}
           <T variant="title" color={c.text} style={{ marginTop: Space.xxxl, fontSize: 30 }}>
-            {mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
+            {purchase ? 'FINALISE TA COMMANDE' : mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
           </T>
           <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>
-            {mode === 'signup' ? t('auth.signupSub') : t('auth.signinSub')}
+            {purchase ? 'Crée ton compte pendant la commande pour recevoir tes billets et les retrouver dans ton wallet. Si tu as déjà un compte, choisis Connexion.' : mode === 'signup' ? t('auth.signupSub') : t('auth.signinSub')}
           </T>
+
+          {purchase && draft && <T variant="small" color={c.accent} style={{ marginTop: Space.md }}>{draft.productName} · {draft.quantity} pass — ton choix est conservé. Les places seront réservées au lancement du paiement.</T>}
+          <Pressable accessibilityRole="button" onPress={() => router.replace('/tickets')} style={{ marginTop: Space.md }}><T variant="small" color={c.accent}>{purchase ? '← Modifier mes places' : 'Acheter des places sans inscription préalable'}</T></Pressable>
 
           {/* Sélecteur */}
           <View style={styles.toggle}>
@@ -185,7 +194,7 @@ export default function Login() {
               <ActivityIndicator color={c.black} />
             ) : (
               <T variant="label" color={c.black} style={{ fontSize: 15 }}>
-                {mode === 'signup' ? t('auth.createAccount') : t('auth.doSignin')}
+                {purchase ? mode === 'signup' ? 'CRÉER MON COMPTE ET CONTINUER' : 'ME CONNECTER ET CONTINUER' : mode === 'signup' ? t('auth.createAccount') : t('auth.doSignin')}
               </T>
             )}
           </Pressable>

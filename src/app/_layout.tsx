@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import * as Notifications from 'expo-notifications';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useGlobalSearchParams, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -12,6 +12,7 @@ import { Platform } from 'react-native';
 import { ArrivalAnimation } from '@/components/ArrivalAnimation';
 import { WELCOME_FLAG } from '@/app/welcome';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { readTicketDraft } from '@/lib/ticketPurchase';
 import { I18nProvider } from '@/lib/i18n';
 import { configureNotifications, registerPushToken } from '@/lib/push';
 import { ThemeProvider, useThemeMode } from '@/lib/theme';
@@ -22,6 +23,7 @@ function RootNavigator() {
   const { session, initializing } = useAuth();
   const { scheme, colors } = useThemeMode();
   const segments = useSegments();
+  const { checkout } = useGlobalSearchParams<{ checkout?: string }>();
   const router = useRouter();
 
   useEffect(() => {
@@ -30,13 +32,21 @@ function RootNavigator() {
     (async () => {
       // auth-callback doit rester accessible sans session : c'est précisément
       // cette route qui crée la session après le retour Google.
-      const publicRoutes = ['login', 'legal', 'auth-callback', 'claim-ticket', 'shop-success', 'ticket-success', 'ticket-cancel'];
+      const publicRoutes = ['login', 'legal', 'auth-callback', 'claim-ticket', 'shop-success', 'ticket-success', 'ticket-cancel', 'tickets', 'seating-plan'];
       const inPublic = publicRoutes.includes(segments[0]);
       if (!session && !inPublic) {
-        router.replace('/login');
+        router.replace(segments[0] === '(tabs)' ? '/tickets' : '/login');
         return;
       }
       if (session) {
+        const purchaseDraft = ['login', 'auth-callback'].includes(segments[0]) ? await readTicketDraft() : null;
+        if (cancelled) return;
+        if ((segments[0] === 'login' && checkout === '1') || purchaseDraft) {
+          await AsyncStorage.setItem(WELCOME_FLAG, '1').catch(() => {});
+          if (!cancelled) router.replace({ pathname: '/tickets', params: { resume: '1' } });
+          return;
+        }
+        if (['tickets', 'seating-plan', 'ticket-success', 'ticket-cancel', 'shop-success'].includes(segments[0])) return;
         const pendingClaim = await AsyncStorage.getItem('jd_pending_claim_token').catch(() => null);
         if (cancelled) return;
         if (pendingClaim && segments[0] !== 'claim-ticket') {
@@ -56,7 +66,7 @@ function RootNavigator() {
     return () => {
       cancelled = true;
     };
-  }, [session, initializing, segments, router]);
+  }, [session, initializing, segments, router, checkout]);
 
   // PWA/web : si une nouvelle version a été déployée pendant que l'app était ouverte,
   // recharge au retour dans l'app pour éviter de conserver un ancien bundle.

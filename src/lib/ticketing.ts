@@ -24,6 +24,11 @@ export type TicketProduct = {
 };
 
 export async function getTicketProducts(eventId: string, includeInternalTest = false): Promise<TicketProduct[]> {
+  if (!includeInternalTest) {
+    const { data, error } = await supabase.rpc('public_ticket_products', { p_event: eventId });
+    if (error) throw error;
+    return (data ?? []) as TicketProduct[];
+  }
   const cols = 'id,event_id,code,name,description,price_cents,currency,active,sales_start,sales_end,min_per_order,max_per_order,group_size,access_days,access_date,access_start_date,audience,promo_eligible,sort_order';
 
   const { data, error } = await supabase

@@ -7,14 +7,14 @@ import { Card, PageHeader, Screen, Section, T } from '@/components/ui';
 import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useColors } from '@/lib/theme';
-import { getEvents } from '@/lib/jdlive';
+import { readTicketDraft, saveTicketDraft, clearTicketDraft } from '@/lib/ticketPurchase';
 import { supabase } from '@/lib/supabase';
 import { getTicketProducts, startTicketCheckout, TicketProduct } from '@/lib/ticketing';
 
-const FINAL_TITLE = 'Juste Debout — Finales Mondiales Paris 2027';
+const PARIS_EVENT_ID = 'eb0025ca-b597-4708-9d47-b24ebbf507b5';
 
 export default function Tickets() {
-  const { test } = useLocalSearchParams<{ test?: string }>();
+  const { test, resume } = useLocalSearchParams<{ test?: string; resume?: string }>();
   const requestedTest = test === '1';
   const [testMode, setTestMode] = useState(false);
   const c = useColors();
@@ -24,6 +24,7 @@ export default function Tickets() {
   const [products, setProducts] = useState<TicketProduct[]>([]);
   const [qty, setQty] = useState<Record<string, number>>({});
   const [promo, setPromo] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,9 +33,7 @@ export default function Tickets() {
   useEffect(() => {
     (async () => {
       try {
-        const events = await getEvents();
-        const event = events.find((e) => e.title === FINAL_TITLE) ?? events.find((e) => e.starts_on === '2027-03-13' && e.ends_on === '2027-03-14');
-        if (!event) throw new Error('Événement introuvable.');
+        const event = { id: PARIS_EVENT_ID };
         setEventId(event.id);
         let authorizedPreview = false;
         if (requestedTest) {
@@ -49,6 +48,15 @@ export default function Tickets() {
         setProducts(ps);
         const initial: Record<string, number> = {};
         ps.forEach((p) => { initial[p.id] = p.min_per_order || 1; });
+        const draft = await readTicketDraft();
+        if (draft?.eventId === event.id) {
+          const product = ps.find(p => p.id === draft.productId && p.active);
+          if (product) {
+            initial[product.id] = Math.max(product.min_per_order, Math.min(product.max_per_order, draft.quantity));
+            setPromo(draft.promoCode || '');
+            setSelectedProduct(product.id);
+          }
+        }
         setQty(initial);
       } catch (e: any) {
         setError(e?.message ?? 'Impossible de charger la billetterie.');
@@ -56,7 +64,7 @@ export default function Tickets() {
         setLoading(false);
       }
     })();
-  }, [requestedTest]);
+  }, [requestedTest, resume]);
 
   useEffect(() => {
     let mounted = true;
@@ -82,11 +90,19 @@ export default function Tickets() {
     setBusy(true);
     setError(null);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        await saveTicketDraft({ eventId, productId: p.id, productName: p.name, quantity: qty[p.id] ?? p.min_per_order, promoCode: promo, createdAt: Date.now() });
+        router.push({ pathname: '/login', params: { checkout: '1' } });
+        setBusy(false);
+        return;
+      }
       await startTicketCheckout({
         eventId,
         items: [{ productId: p.id, quantity: qty[p.id] ?? p.min_per_order }],
         promoCode: promo || null,
       });
+      await clearTicketDraft();
     } catch (e: any) {
       const msg = String(e?.message ?? e ?? '');
       if (msg.includes('sales_not_started')) setError('La billetterie ouvre le 8 octobre à 21h.');
@@ -107,6 +123,8 @@ export default function Tickets() {
   return (
     <Screen>
       <PageHeader title="Billetterie" subtitle="Finales Mondiales · 13–14 mars 2027" />
+      <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>1. Choisis tes places · 2. Tes coordonnées et ton compte · 3. Paiement sécurisé</T>
+      <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>Déjà un compte ? Me connecter</T></Pressable>
 
       <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
         <View style={{flex:1}}><T variant="h3">DÉCOUVRIR LE PLAN DE PLACEMENT</T><T variant="small" color={c.textDim} style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
@@ -157,7 +175,8 @@ export default function Tickets() {
           const soldOut = remaining !== undefined && remaining < q;
           const groupNote = p.code.startsWith('family_') ? '2 adultes + 2 enfants de moins de 12 ans' : p.group_size > 1 ? `${p.group_size} personnes incluses` : p.min_per_order > 1 ? `Minimum ${p.min_per_order} personnes` : null;
           return (
-            <Card key={p.id} style={{ marginBottom: Space.md }}>
+            <Card key={p.id} style={{ marginBottom: Space.md, ...(selectedProduct === p.id ? { borderColor: c.primary, borderWidth: 2 } : {}) }}>
+              {selectedProduct === p.id && <T variant="caption" color={c.accent}>TON CHOIX — QUANTITÉ ET CODE CONSERVÉS</T>}
               <View style={styles.rowBetween}>
                 <View style={{ flex: 1, paddingRight: Space.md }}>
                   <T variant="h2">{p.name}</T>
@@ -179,7 +198,7 @@ export default function Tickets() {
               )}
 
               <Pressable disabled={previewOnly || busy || soldOut || ((vip || bc) && !availability)} onPress={() => buy(p)} style={[styles.buy, (previewOnly || busy || soldOut || ((vip || bc) && !availability)) && { opacity: 0.5 }]}>
-                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? 'Bientôt disponible' : soldOut ? 'Complet' : 'Acheter'}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
+                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? 'Bientôt disponible' : soldOut ? 'Complet' : selectedProduct === p.id ? 'Continuer vers le paiement' : 'Choisir ce pass'}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
               </Pressable>
             </Card>
           );
