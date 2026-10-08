@@ -128,15 +128,17 @@ export default function Tickets() {
         <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>Toute sortie est définitive : aucun retour après le premier scan de la journée.</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Pass 2 jours et Black Card : une entrée samedi et une entrée dimanche.</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Chaque billet possède un QR unique.</T>
+        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Pass 3 jours : 12, 13 et 14 mars · Pass 4 jours : 11, 12, 13 et 14 mars. Ces formules seront proposées après validation des tests.</T>
       </Card>
 
-      {testMode && <T variant="caption" color={c.accent} style={{ marginTop: Space.md }}>MODE TEST INTERNE · billet 1 € visible uniquement via ce lien</T>}
+      {testMode && <Card style={{marginTop:Space.md,borderColor:c.accent}}><T variant="h3">APERÇU INTERNE DES NOUVEAUX PASS</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Les pass 3 et 4 jours sont visibles ici uniquement pour vérification par les administrateurs. Ils restent désactivés et ne peuvent pas être achetés. Le billet technique 1 € reste réservé aux tests.</T></Card>}
 
       <Section title="Choisis ton pass">
         {products.map((p) => {
           const q = qty[p.id] ?? p.min_per_order;
           const price = (p.price_cents / 100).toFixed(0);
           const total = ((p.price_cents * q) / 100).toFixed(0);
+          const previewOnly = !p.active;
           const vip = ['vip_sat','vip_sun','vip_two_days'].includes(p.code);
           const bc = p.code === 'black_card';
           const sat = availability?.days.find(d=>d.date==='2027-03-13')?.remaining;
@@ -149,6 +151,7 @@ export default function Tickets() {
               <View style={styles.rowBetween}>
                 <View style={{ flex: 1, paddingRight: Space.md }}>
                   <T variant="h2">{p.name}</T>
+                  {previewOnly && <T variant="caption" color={c.accent} style={{marginTop:5}}>APERÇU INTERNE — VENTE DÉSACTIVÉE</T>}
                   {!!p.description && <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>{p.description}</T>}
                   {(vip || bc) && <T variant="small" color={soldOut ? c.danger : c.accent} style={{marginTop:6}}>{remaining===undefined ? 'Disponibilité en cours de vérification' : remaining===0 ? 'COMPLET' : `${remaining} place${remaining>1?'s':''} restante${remaining>1?'s':''} sur ${bc?56:112}${vip?' par jour':''}`}</T>}
                   {!!groupNote && <T variant="caption" color={c.accent} style={{ marginTop: 6 }}>{groupNote}</T>}
@@ -165,8 +168,8 @@ export default function Tickets() {
                 </View>
               )}
 
-              <Pressable disabled={busy || soldOut || ((vip || bc) && !availability)} onPress={() => buy(p)} style={[styles.buy, (busy || soldOut || ((vip || bc) && !availability)) && { opacity: 0.5 }]}>
-                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{soldOut ? "Complet" : "Acheter"}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
+              <Pressable disabled={previewOnly || busy || soldOut || ((vip || bc) && !availability)} onPress={() => buy(p)} style={[styles.buy, (previewOnly || busy || soldOut || ((vip || bc) && !availability)) && { opacity: 0.5 }]}>
+                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? 'Bientôt disponible' : soldOut ? 'Complet' : 'Acheter'}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
               </Pressable>
             </Card>
           );
