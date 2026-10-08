@@ -125,7 +125,7 @@ export default function Home() {
     { label: t('home.ckTicket'), done: ticketCount > 0, route: '/wallet' },
   ];
   const checklistDone = checklist.filter((i) => i.done).length;
-  const visiblePillars = event.status === 'live' && passages.length > 0
+  const visiblePillars: typeof pillars = event.status === 'live' && passages.length > 0
     ? [...pillars, { tkey: 'home.pLive', icon: 'radio', emoji: '🎙️', route: '/direct' }, { tkey: 'home.pPredictions', icon: 'analytics', emoji: '🔮', route: '/pronostics' }]
     : pillars;
 
