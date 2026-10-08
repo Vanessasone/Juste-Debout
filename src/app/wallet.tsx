@@ -3,7 +3,7 @@
  */
 import { Ionicons } from '@expo/vector-icons';
 import { useCallback, useMemo, useState } from 'react';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 
@@ -18,6 +18,7 @@ export default function Wallet() {
   const c = useColors();
   const t = useT();
   const router = useRouter();
+  const { payment } = useLocalSearchParams<{ payment?: string }>();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [loading, setLoading] = useState(true);
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -69,6 +70,16 @@ export default function Wallet() {
   return (
     <Screen>
       <PageHeader title={t('wallet.title')} subtitle={t('wallet.subtitle')} />
+
+      {payment === 'success' && <Card style={{ marginBottom: Space.md }}>
+        <T variant="h3" color={c.primary}>RETOUR DU PAIEMENT</T>
+        <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>
+          Le paiement vient d'être effectué sur Stripe. Tes billets apparaissent ici dès la confirmation de la commande par notre serveur.
+        </T>
+        <Pressable accessibilityRole="button" onPress={() => { setLoading(true); void load(); }} style={{ backgroundColor: '#B5FA42', padding: 12, borderRadius: 12, marginTop: 12, alignItems: 'center' }}>
+          <T variant="label" color="#101010">ACTUALISER MES BILLETS</T>
+        </Pressable>
+      </Card>}
 
       {tickets.filter((x) => x.status === 'active').length > 1 && <Card style={{marginBottom:Space.md}}><T variant="h3">Tous tes QR codes au même endroit</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Tu peux conserver tous les billets ici, notamment pour une surprise. L’envoi à chaque invité est facultatif : utilise « Envoyer ce billet » uniquement si tu souhaites le transférer.</T></Card>}
       {tickets.filter((x) => x.status === 'active').length > 1 && (
