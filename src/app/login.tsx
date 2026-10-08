@@ -52,6 +52,22 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
+  const [resendAfter, setResendAfter] = useState(0);
+  const resendConfirmation = async () => {
+    if (loading) return;
+    setError(null); setInfo(null);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) { setError(pr('invalidEmail')); return; }
+    if (Date.now() < resendAfter) { setError(pr('cooldown')); return; }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: 'https://justedeboutapp.com/auth-callback' } });
+      if (error) throw error;
+      setResendAfter(Date.now() + 60000);
+      setInfo(ct('resendInfo'));
+    } catch { setError(pr('error')); }
+    finally { setLoading(false); }
+  };
+
   const submit = async () => {
     setError(null);
     setInfo(null);
@@ -68,7 +84,7 @@ export default function Login() {
           password,
           options: {
             data: { full_name: name.trim() },
-            ...(Platform.OS === 'web' && typeof window !== 'undefined' ? { emailRedirectTo: window.location.origin + '/auth-callback' } : {}),
+            emailRedirectTo: 'https://justedeboutapp.com/auth-callback',
           },
         });
         if (error) throw error;
@@ -178,6 +194,8 @@ export default function Login() {
 
           <Pressable accessibilityRole="button" onPress={() => router.push('/forgot-password')} style={{ paddingVertical: 16, alignItems: 'center' }}><T variant="small" color={c.accent}>{pr('forgot')}</T></Pressable>
 
+          <Pressable accessibilityRole="button" disabled={loading} onPress={() => void resendConfirmation()} style={{ paddingVertical: 16, alignItems: 'center' }}><T variant="small" color={c.accent}>{ct('resendConfirmation')}</T></Pressable>
+
           {error && (
             <View style={styles.alert}>
               <Ionicons name="alert-circle" size={16} color={c.danger} />
@@ -204,7 +222,7 @@ export default function Login() {
               <ActivityIndicator color={c.black} />
             ) : (
               <T variant="label" color={c.black} style={{ fontSize: 15 }}>
-                {purchase ? mode === 'signup' ? 'CRÉER MON COMPTE ET CONTINUER' : 'ME CONNECTER ET CONTINUER' : mode === 'signup' ? t('auth.createAccount') : t('auth.doSignin')}
+                {mode === 'signup' ? t('auth.createAccount') : t('auth.doSignin')}
               </T>
             )}
           </Pressable>

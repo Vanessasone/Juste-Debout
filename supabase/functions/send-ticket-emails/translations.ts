@@ -2,7 +2,7 @@ export const translations = {
   "fr": {
     "emailSubject": "Juste Debout — Votre commande est confirmée",
     "emailReceipt": "Paiement : {amount} · Référence : {reference}",
-    "paidBody": "Ton paiement est confirmé. Crée ton espace ou connecte-toi avec l’adresse e-mail utilisée pour l’achat afin de récupérer tes billets et QR codes.",
+    "paidBody": "Ton paiement est confirmé.\n1. Clique sur « Récupérer mes billets ».\n2. Si tu n’as pas encore de compte, crée ton espace avec exactement la même adresse e-mail que celle utilisée pour l’achat. Si tu as déjà un compte avec cette adresse, connecte-toi.\n3. Après l’inscription, ouvre le second e-mail pour confirmer ton compte (vérifie aussi les indésirables). Tes billets et QR codes apparaîtront dans ton wallet. Aucun nouvel achat n’est nécessaire.",
     "recover": "RÉCUPÉRER MES BILLETS",
     "presels": "Présélections · 11–12 mars",
     "preselVenue": "Autre salle à Paris · adresse communiquée ultérieurement",
@@ -11,12 +11,13 @@ export const translations = {
     "passThree": "Pass 3 jours",
     "passFour": "Pass 4 jours",
     "invitationEmailSubject": "Juste Debout — Un billet vous attend",
-    "claimLogin": "Crée ton compte Juste Debout ou connecte-toi avec l’adresse email qui a reçu cette invitation."
+    "claimLogin": "Crée ton compte Juste Debout ou connecte-toi avec l’adresse email qui a reçu cette invitation.",
+    "purchaseEmail": "Adresse e-mail de l’achat : {email}"
   },
   "en": {
     "emailSubject": "Juste Debout — Your order is confirmed",
     "emailReceipt": "Payment: {amount} · Reference: {reference}",
-    "paidBody": "Your payment is confirmed. Create your account or sign in using the email address used for your purchase to get your tickets and QR codes.",
+    "paidBody": "Your payment is confirmed.\n1. Click “Get my tickets”.\n2. If you do not have an account, create one with exactly the same email address used for your purchase. If you already have an account with that address, sign in.\n3. After signing up, open the second email to confirm your account (check spam too). Your tickets and QR codes will appear in your wallet. You do not need to buy again.",
     "recover": "GET MY TICKETS",
     "presels": "Preselections · 11–12 March",
     "preselVenue": "Another Paris venue · address to be announced",
@@ -25,12 +26,13 @@ export const translations = {
     "passThree": "3-day pass",
     "passFour": "4-day pass",
     "invitationEmailSubject": "Juste Debout — A ticket is waiting for you",
-    "claimLogin": "Create your Juste Debout account or sign in with the email that received this invitation."
+    "claimLogin": "Create your Juste Debout account or sign in with the email that received this invitation.",
+    "purchaseEmail": "Purchase email address: {email}"
   },
   "de": {
     "emailSubject": "Juste Debout — Deine Bestellung ist bestätigt",
     "emailReceipt": "Zahlung: {amount} · Referenz: {reference}",
-    "paidBody": "Deine Zahlung ist bestätigt. Erstelle dein Konto oder melde dich mit der beim Kauf verwendeten E-Mail-Adresse an, um deine Tickets und QR-Codes abzurufen.",
+    "paidBody": "Deine Zahlung ist bestätigt.\n1. Klicke auf „Meine Tickets abrufen“.\n2. Erstelle dein Konto mit genau derselben E-Mail-Adresse wie beim Kauf. Wenn du bereits ein Konto mit dieser Adresse hast, melde dich an.\n3. Öffne nach der Registrierung die zweite E-Mail, um dein Konto zu bestätigen (prüfe auch Spam). Deine Tickets und QR-Codes erscheinen in deinem Wallet. Ein weiterer Kauf ist nicht nötig.",
     "recover": "MEINE TICKETS ABRUFEN",
     "presels": "Vorauswahl · 11.–12. März",
     "preselVenue": "Anderer Ort in Paris · Adresse wird bekanntgegeben",
@@ -39,12 +41,13 @@ export const translations = {
     "passThree": "3-Tages-Pass",
     "passFour": "4-Tages-Pass",
     "invitationEmailSubject": "Juste Debout — Ein Ticket wartet auf dich",
-    "claimLogin": "Erstelle dein Juste-Debout-Konto oder melde dich mit der E-Mail-Adresse dieser Einladung an."
+    "claimLogin": "Erstelle dein Juste-Debout-Konto oder melde dich mit der E-Mail-Adresse dieser Einladung an.",
+    "purchaseEmail": "E-Mail-Adresse des Kaufs: {email}"
   },
   "it": {
     "emailSubject": "Juste Debout — Il tuo ordine è confermato",
     "emailReceipt": "Pagamento: {amount} · Riferimento: {reference}",
-    "paidBody": "Il pagamento è confermato. Crea il tuo account o accedi con l’indirizzo e-mail usato per l’acquisto per recuperare biglietti e codici QR.",
+    "paidBody": "Il pagamento è confermato.\n1. Clicca su « Recupera i miei biglietti ».\n2. Crea il tuo account con esattamente lo stesso indirizzo e-mail usato per l’acquisto. Se hai già un account con quell’indirizzo, accedi.\n3. Dopo l’iscrizione, apri la seconda e-mail per confermare l’account (controlla anche lo spam). Biglietti e codici QR appariranno nel wallet. Non occorre acquistare di nuovo.",
     "recover": "RECUPERA I MIEI BIGLIETTI",
     "presels": "Preselezioni · 11–12 marzo",
     "preselVenue": "Altra sala a Parigi · indirizzo da annunciare",
@@ -53,12 +56,13 @@ export const translations = {
     "passThree": "Pass 3 giorni",
     "passFour": "Pass 4 giorni",
     "invitationEmailSubject": "Juste Debout — Un biglietto ti aspetta",
-    "claimLogin": "Crea il tuo account Juste Debout o accedi con l’e-mail che ha ricevuto questo invito."
+    "claimLogin": "Crea il tuo account Juste Debout o accedi con l’e-mail che ha ricevuto questo invito.",
+    "purchaseEmail": "E-mail dell’acquisto: {email}"
   },
   "es": {
     "emailSubject": "Juste Debout — Tu pedido está confirmado",
     "emailReceipt": "Pago: {amount} · Referencia: {reference}",
-    "paidBody": "Tu pago está confirmado. Crea tu cuenta o inicia sesión con el correo usado en la compra para recuperar tus entradas y códigos QR.",
+    "paidBody": "Tu pago está confirmado.\n1. Pulsa « Recuperar mis entradas ».\n2. Crea tu cuenta con exactamente el mismo correo usado en la compra. Si ya tienes una cuenta con ese correo, inicia sesión.\n3. Tras registrarte, abre el segundo correo para confirmar tu cuenta (revisa también el spam). Tus entradas y códigos QR aparecerán en tu wallet. No necesitas comprar de nuevo.",
     "recover": "RECUPERAR MIS ENTRADAS",
     "presels": "Preselecciones · 11–12 marzo",
     "preselVenue": "Otro recinto en París · dirección por anunciar",
@@ -67,12 +71,13 @@ export const translations = {
     "passThree": "Pase de 3 días",
     "passFour": "Pase de 4 días",
     "invitationEmailSubject": "Juste Debout — Una entrada te espera",
-    "claimLogin": "Crea tu cuenta Juste Debout o inicia sesión con el correo que recibió esta invitación."
+    "claimLogin": "Crea tu cuenta Juste Debout o inicia sesión con el correo que recibió esta invitación.",
+    "purchaseEmail": "Correo de la compra: {email}"
   },
   "pt": {
     "emailSubject": "Juste Debout — A tua encomenda está confirmada",
     "emailReceipt": "Pagamento: {amount} · Referência: {reference}",
-    "paidBody": "O pagamento está confirmado. Cria a tua conta ou inicia sessão com o e-mail usado na compra para obter os bilhetes e códigos QR.",
+    "paidBody": "O pagamento está confirmado.\n1. Clica em « Obter os meus bilhetes ».\n2. Cria a tua conta com exatamente o mesmo e-mail usado na compra. Se já tens uma conta com esse e-mail, inicia sessão.\n3. Após a inscrição, abre o segundo e-mail para confirmar a conta (verifica também o spam). Os bilhetes e códigos QR aparecerão no wallet. Não precisas de comprar novamente.",
     "recover": "OBTER OS MEUS BILHETES",
     "presels": "Pré-seleções · 11–12 março",
     "preselVenue": "Outra sala em Paris · morada a anunciar",
@@ -81,12 +86,13 @@ export const translations = {
     "passThree": "Passe de 3 dias",
     "passFour": "Passe de 4 dias",
     "invitationEmailSubject": "Juste Debout — Um bilhete espera por ti",
-    "claimLogin": "Cria a tua conta Juste Debout ou inicia sessão com o e-mail que recebeu este convite."
+    "claimLogin": "Cria a tua conta Juste Debout ou inicia sessão com o e-mail que recebeu este convite.",
+    "purchaseEmail": "E-mail da compra: {email}"
   },
   "zh": {
     "emailSubject": "Juste Debout — 订单已确认",
     "emailReceipt": "付款：{amount} · 编号：{reference}",
-    "paidBody": "付款已确认。请使用购票时的电子邮箱创建账户或登录，领取门票和二维码。",
+    "paidBody": "付款已确认。\n1. 点击“领取我的门票”。\n2. 如果还没有账户，请使用与购票时完全相同的电子邮箱创建账户。如果已有使用该邮箱的账户，请登录。\n3. 注册后，打开第二封邮件确认账户（也请检查垃圾邮件）。门票和二维码将显示在钱包中，无需再次购买。",
     "recover": "领取我的门票",
     "presels": "预选赛 · 3月11–12日",
     "preselVenue": "巴黎另一场地 · 地址稍后公布",
@@ -95,12 +101,13 @@ export const translations = {
     "passThree": "三日通票",
     "passFour": "四日通票",
     "invitationEmailSubject": "Juste Debout — 有门票等你领取",
-    "claimLogin": "创建Juste Debout账户或使用收到邀请的电子邮箱登录。"
+    "claimLogin": "创建Juste Debout账户或使用收到邀请的电子邮箱登录。",
+    "purchaseEmail": "购票邮箱：{email}"
   },
   "ko": {
     "emailSubject": "Juste Debout — 주문이 확인되었습니다",
     "emailReceipt": "결제: {amount} · 참조: {reference}",
-    "paidBody": "결제가 확인되었습니다. 구매에 사용한 이메일로 계정을 만들거나 로그인하여 티켓과 QR 코드를 받으세요.",
+    "paidBody": "결제가 확인되었습니다.\n1. “내 티켓 받기”를 누르세요.\n2. 계정이 없다면 구매에 사용한 이메일과 정확히 같은 주소로 계정을 만드세요. 같은 이메일의 계정이 있다면 로그인하세요.\n3. 가입 후 두 번째 이메일을 열어 계정을 확인하세요 (스팸함도 확인하세요). 티켓과 QR 코드가 월렛에 표시됩니다. 다시 구매할 필요가 없습니다.",
     "recover": "내 티켓 받기",
     "presels": "예선 · 3월 11–12일",
     "preselVenue": "파리 내 다른 장소 · 주소 추후 공지",
@@ -109,12 +116,13 @@ export const translations = {
     "passThree": "3일 패스",
     "passFour": "4일 패스",
     "invitationEmailSubject": "Juste Debout — 티켓이 기다리고 있습니다",
-    "claimLogin": "Juste Debout 계정을 만들거나 초대를 받은 이메일로 로그인하세요."
+    "claimLogin": "Juste Debout 계정을 만들거나 초대를 받은 이메일로 로그인하세요.",
+    "purchaseEmail": "구매 이메일: {email}"
   },
   "ja": {
     "emailSubject": "Juste Debout — ご注文が確認されました",
     "emailReceipt": "支払い：{amount} · 参照番号：{reference}",
-    "paidBody": "支払いが確認されました。購入時のメールアドレスでアカウントを作成するかログインして、チケットとQRコードを受け取ってください。",
+    "paidBody": "支払いが確認されました。\n1.「チケットを受け取る」を押してください。\n2. アカウントがなければ、購入時と完全に同じメールアドレスで作成してください。同じアドレスのアカウントがある場合はログインしてください。\n3. 登録後、2通目のメールを開いてアカウントを確認してください（迷惑メールも確認）。チケットとQRコードがウォレットに表示されます。再購入は不要です。",
     "recover": "チケットを受け取る",
     "presels": "予選 · 3月11–12日",
     "preselVenue": "パリの別会場 · 住所は後日発表",
@@ -123,6 +131,7 @@ export const translations = {
     "passThree": "3日パス",
     "passFour": "4日パス",
     "invitationEmailSubject": "Juste Debout — チケットを受け取れます",
-    "claimLogin": "Juste Deboutアカウントを作成するか、招待を受けたメールアドレスでログインしてください。"
+    "claimLogin": "Juste Deboutアカウントを作成するか、招待を受けたメールアドレスでログインしてください。",
+    "purchaseEmail": "購入時のメールアドレス：{email}"
   }
 } as const;

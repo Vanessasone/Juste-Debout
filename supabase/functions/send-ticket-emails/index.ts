@@ -44,7 +44,7 @@ Deno.serve(async (req: Request) => {
         };
         subject = ct("emailSubject");
         const amount = new Intl.NumberFormat(locale, {style:"currency", currency:order.currency ?? "EUR"}).format(order.total_cents/100);
-        body = `${ct("emailReceipt", {amount, reference:order.id.slice(0,8).toUpperCase()})}\n\n${ct("paidBody")}`;
+        body = `${ct("emailReceipt", {amount, reference:order.id.slice(0,8).toUpperCase()})}\n\n${ct("purchaseEmail", {email:order.customer_email})}\n\n${ct("paidBody")}`;
         const { data: orderItems, error: orderItemsError } = await admin.from("ticket_order_items")
           .select("product_code,product_name,quantity").eq("order_id",order.id);
         if (orderItemsError) throw orderItemsError;
@@ -58,7 +58,7 @@ Deno.serve(async (req: Request) => {
           body += `\n\n${passDetails}\n${ct("presels")} · ${ct("preselVenue")}\n${ct("finalDays")} · Stade Pierre-de-Coubertin · Paris`;
         }
         action = ct("recover");
-        actionUrl = order.user_id ? "https://justedeboutapp.com/wallet" : `https://justedeboutapp.com/login?recover=1&lang=${encodeURIComponent(locale)}`;
+        actionUrl = `https://justedeboutapp.com/login?recover=1&lang=${encodeURIComponent(locale)}`;
       } else {
         const { data: ticket } = await admin.from("tickets")
           .select("id,order_id,transfer_email,transfer_status,transfer_token,status")
