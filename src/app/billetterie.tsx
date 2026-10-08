@@ -1,3 +1,4 @@
+import { EventPoster } from '@/components/EventPoster';
 import { useI18n } from '@/lib/i18n';
 import { ticketProductText } from '@/lib/ticketProductText';
 import { LanguagePicker } from '@/components/LanguagePicker';
@@ -116,6 +117,7 @@ export default function Tickets() {
         <Ionicons name="map-outline" size={24} color={c.primary}/>
       </Pressable>
       <EarlyBirdCountdown />
+      <EventPoster />
 
       <View style={{ marginTop: Space.lg }}>
         <T variant="caption" color={c.textMute} style={{ marginBottom: 6 }}>{ct('promo')}</T>

@@ -1,3 +1,4 @@
+import { EventPoster } from '@/components/EventPoster';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -148,6 +149,7 @@ export default function Home() {
       <AppSwitcher current="jd" />
 
       <InstallPrompt />
+      <EventPoster />
 
       {/* Bannière DIRECT — visible seulement pendant une diffusion */}
       {live ? (
