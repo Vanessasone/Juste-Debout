@@ -47,10 +47,9 @@ export default function ScannerSimulation() {
   const [selected, setSelected] = useState<Scenario | null>(null);
   const [simulated, setSimulated] = useState(false);
   const choose = (item: Scenario) => { setSelected(item); setSimulated(false); };
-  const resultColor = selected?.expected === 'accepted' ? '#B5FA42' : '#FF7777';
   return (
     <View style={styles.root}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 45, paddingHorizontal: 20 }}>
+      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: insets.bottom + 140, paddingHorizontal: 20 }}>
         <Pressable onPress={() => router.back()} style={styles.back}>
           <Ionicons name="arrow-back" color="#FFFFFF" size={20} />
           <T variant="label" color="#FFFFFF">Retour au scanner</T>
@@ -64,32 +63,42 @@ export default function ScannerSimulation() {
           </View>
         </View>
         <T variant="h3" color="#FFFFFF" style={{ marginTop: 22, marginBottom: 12 }}>Choisir un scénario</T>
-        {cases.map(item => (
-          <Pressable key={item.id} onPress={() => choose(item)} style={[styles.case, selected?.id === item.id && styles.selected]}>
-            <View style={{ flex: 1 }}>
-              <T variant="small" color="#FFFFFF">{item.title}</T>
-              <T variant="caption" color="#AAAAAA">{item.day === 'samedi' ? '13 mars 2027' : '14 mars 2027'}</T>
-            </View>
-            <Ionicons name={item.expected === 'accepted' ? 'checkmark-circle-outline' : 'close-circle-outline'} size={23} color={item.expected === 'accepted' ? '#B5FA42' : '#FF7777'} />
-          </Pressable>
-        ))}
-        {selected && <View style={styles.preview}>
-          <T variant="caption" color="#B5FA42">BILLET FICTIF · {selected.day.toUpperCase()}</T>
-          <View style={[styles.category, { backgroundColor: colors[selected.category].background }]}>
-            <T variant="h3" color={colors[selected.category].foreground} style={{ textAlign: 'center' }}>{selected.ticketLabel.toUpperCase()}</T>
-          </View>
-          <Pressable onPress={() => setSimulated(true)} style={styles.button}>
-            <Ionicons name="scan-outline" size={20} color="#101010" />
-            <T variant="label" color="#101010">SIMULER LE PASSAGE</T>
-          </Pressable>
-          {simulated && <View style={[styles.result, { borderColor: resultColor }]}>
-            <Ionicons name={selected.expected === 'accepted' ? 'checkmark-circle' : 'close-circle'} size={55} color={resultColor} />
-            <T variant="h2" color={resultColor}>{selected.expected === 'accepted' ? 'ENTRÉE AUTORISÉE' : 'ENTRÉE REFUSÉE'}</T>
-            <T variant="small" color="#FFFFFF" style={{ textAlign: 'center' }}>{selected.ticketLabel}</T>
-            {!!selected.reason && <T variant="small" color="#FFFFFF" style={{ marginTop: 8, textAlign: 'center' }}>{selected.reason}</T>}
-            <T variant="caption" color="#AAAAAA" style={{ marginTop: 12 }}>RÉSULTAT SIMULÉ — NON ENREGISTRÉ</T>
-          </View>}
-        </View>}
+        {cases.map(item => {
+          const expanded = selected?.id === item.id;
+          const tone = item.expected === 'accepted' ? '#B5FA42' : '#FF7777';
+          return <View key={item.id} style={{ marginBottom: 8 }}>
+            <Pressable
+              onPress={() => choose(item)}
+              accessibilityRole="button"
+              accessibilityLabel={`Choisir le scénario : ${item.title}`}
+              accessibilityState={{ expanded }}
+              style={[styles.case, expanded && styles.selected]}
+            >
+              <View style={{ flex: 1 }}>
+                <T variant="small" color="#FFFFFF">{item.title}</T>
+                <T variant="caption" color="#AAAAAA">{item.day === 'samedi' ? '13 mars 2027' : '14 mars 2027'}</T>
+              </View>
+              <Ionicons name={expanded ? 'chevron-up' : 'chevron-down'} size={23} color={expanded ? '#B5FA42' : '#FFFFFF'} />
+            </Pressable>
+            {expanded && <View style={styles.preview}>
+              <T variant="caption" color="#B5FA42">BILLET FICTIF · {item.day.toUpperCase()}</T>
+              <View style={[styles.category, { backgroundColor: colors[item.category].background }]}>
+                <T variant="h3" color={colors[item.category].foreground} style={{ textAlign: 'center' }}>{item.ticketLabel.toUpperCase()}</T>
+              </View>
+              <Pressable accessibilityRole="button" onPress={() => setSimulated(true)} style={styles.button}>
+                <Ionicons name="scan-outline" size={20} color="#101010" />
+                <T variant="label" color="#101010">SIMULER LE PASSAGE</T>
+              </Pressable>
+              {simulated && <View style={[styles.result, { borderColor: tone }]}>
+                <Ionicons name={item.expected === 'accepted' ? 'checkmark-circle' : 'close-circle'} size={55} color={tone} />
+                <T variant="h2" color={tone}>{item.expected === 'accepted' ? 'ENTRÉE AUTORISÉE' : 'ENTRÉE REFUSÉE'}</T>
+                <T variant="small" color="#FFFFFF" style={{ textAlign: 'center' }}>{item.ticketLabel}</T>
+                {!!item.reason && <T variant="small" color="#FFFFFF" style={{ marginTop: 8, textAlign: 'center' }}>{item.reason}</T>}
+                <T variant="caption" color="#AAAAAA" style={{ marginTop: 12 }}>RÉSULTAT SIMULÉ — NON ENREGISTRÉ</T>
+              </View>}
+            </View>}
+          </View>;
+        })}
       </ScrollView>
     </View>
   );
@@ -98,9 +107,9 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#090909' },
   back: { flexDirection: 'row', alignItems: 'center', gap: 9, alignSelf: 'flex-start', paddingVertical: 10 },
   warning: { flexDirection: 'row', gap: 12, backgroundColor: '#18200D', borderWidth: 1, borderColor: '#56752D', padding: 16, borderRadius: 14, marginTop: 18 },
-  case: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15, marginBottom: 8, borderRadius: 12, borderWidth: 1, borderColor: '#333333', backgroundColor: '#1B1B1B' },
+  case: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 15, marginBottom: 0, borderRadius: 12, borderWidth: 1, borderColor: '#333333', backgroundColor: '#1B1B1B' },
   selected: { borderColor: '#B5FA42' },
-  preview: { marginTop: 22, padding: 18, backgroundColor: '#171717', borderRadius: 15, borderWidth: 1, borderColor: '#383838' },
+  preview: { marginTop: 8, marginBottom: 10, padding: 18, backgroundColor: '#171717', borderRadius: 15, borderWidth: 1, borderColor: '#383838' },
   category: { padding: 16, marginTop: 12, borderRadius: 9 },
   button: { backgroundColor: '#B5FA42', borderRadius: 28, marginTop: 18, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   result: { alignItems: 'center', gap: 10, padding: 20, marginTop: 18, borderWidth: 2, borderRadius: 14 },
