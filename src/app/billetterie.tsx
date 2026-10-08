@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { Vitruve, Wordmark } from '@/components/Logo';
+import { EarlyBirdCountdown } from '@/components/EarlyBirdCountdown';
 import { Card, PageHeader, Screen, Section, T } from '@/components/ui';
 import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
@@ -122,20 +124,16 @@ export default function Tickets() {
 
   return (
     <Screen>
+      <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
       <PageHeader title="Billetterie" subtitle="Finales Mondiales · 13–14 mars 2027" />
       <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>1. Choisis tes places · 2. Tes coordonnées et ton compte · 3. Paiement sécurisé</T>
       <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>Déjà un compte ? Me connecter</T></Pressable>
 
       <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-        <View style={{flex:1}}><T variant="h3">DÉCOUVRIR LE PLAN DE PLACEMENT</T><T variant="small" color={c.textDim} style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
+        <View style={{flex:1}}><T variant="h3" color="#FFFFFF">DÉCOUVRIR LE PLAN DE PLACEMENT</T><T variant="small" color="#E5E5E5" style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
         <Ionicons name="map-outline" size={24} color={c.primary}/>
       </Pressable>
-      {Date.now() < Date.parse('2026-10-10T19:00:00Z') && <Card style={styles.early}>
-        <T variant="h3">EARLY BIRD · 48H</T>
-        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>
-          Code 48 · Standard : 35 € le samedi ou le dimanche, 60 € les deux jours · du 8 octobre à 21h au 10 octobre à 21h (heure de Paris).
-        </T>
-      </Card>}
+      <EarlyBirdCountdown />
 
       <View style={{ marginTop: Space.lg }}>
         <T variant="caption" color={c.textMute} style={{ marginBottom: 6 }}>CODE PROMO</T>
