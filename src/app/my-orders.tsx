@@ -6,22 +6,24 @@ import { Card, PageHeader, Screen, T } from '@/components/ui';
 import { Space } from '@/constants/brand';
 import { getMyOrders, Order } from '@/lib/orders';
 import { useColors } from '@/lib/theme';
+import { useAuth } from '@/lib/auth';
 
 const money=(n:number,cur:string)=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:cur||'EUR'}).format(n/100);
 const statusText:Record<string,string>={pending:'Paiement en attente',paid:'Payée',shipped:'Expédiée',delivered:'Livrée',cancelled:'Annulée'};
 export default function MyOrders(){
- const c=useColors();const router=useRouter();
+ const c=useColors();const router=useRouter();const {session}=useAuth();
  const [orders,setOrders]=useState<Order[]>([]);
  const [loading,setLoading]=useState(true);
  const [error,setError]=useState('');
  useFocusEffect(useCallback(()=>{
   let active=true;
-  setLoading(true);
+  setOrders([]);setError('');setLoading(true);
   getMyOrders().then(xs=>{if(active){setOrders(xs);setError('');}}).catch(e=>{if(active)setError(e?.message||'Impossible de charger tes commandes.');}).finally(()=>{if(active)setLoading(false);});
   return ()=>{active=false;};
- },[]));
+ },[session?.user.id]));
  return <Screen>
   <PageHeader title="Mes commandes" subtitle="Boutique Juste Debout"/>
+  <T variant="small" color={c.textDim} style={{marginBottom:Space.md}}>Compte connecté : {session?.user.email ?? 'Non connecté'}</T>
   {loading?<ActivityIndicator color={c.primary} style={{marginTop:Space.xl}}/>:error?<Card><T color={c.danger}>{error}</T></Card>:orders.length===0?
    <Card><T variant="h3">Aucune commande</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Tes achats merchandising apparaîtront ici après ta commande.</T></Card>:
    orders.map(o=><Card key={o.id} style={{marginBottom:Space.md}}>

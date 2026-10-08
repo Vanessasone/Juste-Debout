@@ -78,9 +78,13 @@ export async function createOrder(address: Address, items: OrderItemInput[], cur
 
 /** Mes commandes (acheteur). */
 export async function getMyOrders(): Promise<Order[]> {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError) throw authError;
+  if (!user) return [];
   const { data, error } = await supabase
     .from('orders')
     .select('*, order_items(name,unit_price,quantity)')
+    .eq('profile_id', user.id)
     .order('created_at', { ascending: false });
   if (error) throw error;
   return (data ?? []).map((o: any) => ({ ...o, items: o.order_items ?? [] }));
