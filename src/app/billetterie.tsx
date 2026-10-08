@@ -120,8 +120,9 @@ export default function Tickets() {
       <EventPoster />
 
       <View style={{ marginTop: Space.lg }}>
-        <T variant="caption" color={c.textMute} style={{ marginBottom: 6 }}>{ct('promo')}</T>
+        <T variant="h3" color={c.text} style={{ marginBottom: 10 }}>{ct('promo')}</T>
         <TextInput
+          accessibilityLabel={ct('promo')}
           value={promo}
           onChangeText={setPromo}
           autoCapitalize="characters"
