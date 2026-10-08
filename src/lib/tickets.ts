@@ -14,6 +14,7 @@ export type Ticket = {
   payment_method: string | null;
   created_at: string;
   used_at: string | null;
+  scan_history?: Array<{access_date:string;scanned_at:string}>;
   ticket_product_id?: string | null;
   order_item_id?: string | null;
   family_role?: 'adult' | 'child' | null;
@@ -43,7 +44,17 @@ export async function getMyTickets(): Promise<Ticket[]> {
     .eq('profile_id', user.id)
     .order('created_at', { ascending: false });
   if (error) throw error;
-  return (data ?? []) as unknown as Ticket[];
+  const tickets = (data ?? []) as unknown as Ticket[];
+  if (tickets.length === 0) return tickets;
+  const {data: scans,error: scanError} = await supabase.rpc('my_ticket_scan_history');
+  if (scanError) throw scanError;
+  const history = new Map<string,Array<{access_date:string;scanned_at:string}>>();
+  for (const scan of scans ?? []) {
+    const list = history.get(scan.ticket_id) ?? [];
+    list.push({access_date:scan.access_date,scanned_at:scan.scanned_at});
+    history.set(scan.ticket_id,list);
+  }
+  return tickets.map(ticket=>({...ticket,scan_history:history.get(ticket.id) ?? []}));
 }
 
 /** Obtenir son billet pour un événement (réservation ; paiement sur place). */
