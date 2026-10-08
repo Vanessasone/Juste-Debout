@@ -138,7 +138,7 @@ export default function Tickets() {
           const q = qty[p.id] ?? p.min_per_order;
           const price = (p.price_cents / 100).toFixed(0);
           const total = ((p.price_cents * q) / 100).toFixed(0);
-          const previewOnly = !p.active;
+          const previewOnly = !p.active && ['three_days', 'four_days'].includes(p.code);
           const vip = ['vip_sat','vip_sun','vip_two_days'].includes(p.code);
           const bc = p.code === 'black_card';
           const sat = availability?.days.find(d=>d.date==='2027-03-13')?.remaining;
