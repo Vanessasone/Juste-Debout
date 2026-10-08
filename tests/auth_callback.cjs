@@ -33,6 +33,10 @@ async function runCase({ hash = '', search = '', draft = null, session = null, s
 (async () => {
   const session = { user: { id: 'isolated-fixture' } };
   const draft = { productId: 'isolated-pass' };
+  let recovery = await runCase({ hash: '#access_token=fixture-access&refresh_token=fixture-refresh&type=recovery', session });
+  assert.deepEqual(recovery.redirects, ['/reset-password']);
+  recovery = await runCase({ hash: '#access_token=fixture-access&refresh_token=fixture-refresh&type=recovery', sessionError: new Error('expired') });
+  assert.equal(recovery.redirects.length, 0);
   let r = await runCase({ hash: '#access_token=fixture-access&refresh_token=fixture-refresh', draft, session });
   assert.equal(r.calls[0][0], 'tokens');
   assert.deepEqual(r.redirects, ['/recover-tickets']);
@@ -47,5 +51,5 @@ async function runCase({ hash = '', search = '', draft = null, session = null, s
   assert.equal(r.redirects.length, 0);
   r = await runCase({ hash: '#error=access_denied', draft, session });
   assert.equal(r.redirects.length, 0);
-  console.log('6 isolated callback cases passed; no account or payment created.');
+  console.log('8 isolated callback cases passed, including recovery and expired recovery; no account or payment created.');
 })().catch(error => { console.error(error); process.exit(1); });

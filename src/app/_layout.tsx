@@ -31,14 +31,14 @@ function RootNavigator() {
     (async () => {
       // auth-callback doit rester accessible sans session : c'est précisément
       // cette route qui crée la session après le retour Google.
-      const publicRoutes = ['login', 'legal', 'auth-callback', 'claim-ticket', 'shop-success', 'ticket-success', 'ticket-cancel', 'billetterie', 'ticket-details', 'seating-plan'];
+      const publicRoutes = ['login', 'forgot-password', 'reset-password', 'legal', 'auth-callback', 'claim-ticket', 'shop-success', 'ticket-success', 'ticket-cancel', 'billetterie', 'ticket-details', 'seating-plan'];
       const inPublic = publicRoutes.includes(segments[0]);
       if (!session && !inPublic) {
         router.replace(segments[0] === '(tabs)' ? '/billetterie' : '/login');
         return;
       }
       if (session) {
-        if (segments[0] === 'auth-callback') return;
+        if (['auth-callback', 'forgot-password', 'reset-password'].includes(segments[0])) return;
         if (segments[0] === 'recover-tickets') return;
         if (segments[0] === 'login') {
           if (recover === '1') await AsyncStorage.setItem(WELCOME_FLAG,'1').catch(()=>{});

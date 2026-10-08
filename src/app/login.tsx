@@ -1,3 +1,4 @@
+import { usePasswordResetText } from '@/lib/passwordResetText';
 import { useCustomerText } from '@/lib/customerText';
 import { LanguagePicker } from '@/components/LanguagePicker';
 /**
@@ -40,6 +41,7 @@ export default function Login() {
   const router = useRouter();
   const t = useT();
   const ct = useCustomerText();
+  const pr = usePasswordResetText();
   const styles = useMemo(() => makeStyles(c), [c]);
   const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<Mode>('signup');
@@ -173,6 +175,8 @@ export default function Login() {
               autoCapitalize="none"
             />
           </View>
+
+          <Pressable accessibilityRole="button" onPress={() => router.push('/forgot-password')} style={{ paddingVertical: 16, alignItems: 'center' }}><T variant="small" color={c.accent}>{pr('forgot')}</T></Pressable>
 
           {error && (
             <View style={styles.alert}>

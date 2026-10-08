@@ -18,6 +18,7 @@ export default function AuthCallback() {
           setStatus(ct('authLinkError'));
           return;
         }
+        const isRecovery = params.get('type') === 'recovery';
         const access_token = params.get('access_token');
         const refresh_token = params.get('refresh_token');
         const code = new URLSearchParams(window.location.search).get('code');
@@ -31,7 +32,7 @@ export default function AuthCallback() {
           return;
         }
         window.history.replaceState(null, '', '/auth-callback');
-        if (!cancelled) router.replace('/recover-tickets');
+        if (!cancelled) router.replace(isRecovery ? '/reset-password' : '/recover-tickets');
       } catch {
         if (!cancelled) setStatus(ct('authError'));
       }
