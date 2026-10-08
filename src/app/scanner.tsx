@@ -153,6 +153,12 @@ export default function Scanner() {
         </View>
       </View>
 
+      {/* Entraînement isolé : aucune lecture ni écriture de billets réels. */}
+      <Pressable onPress={() => router.push('/scanner-simulation')} style={[styles.simulationLink, { top: insets.top + 64 }]}>
+        <Ionicons name="flask-outline" size={17} color={Palette.primary} />
+        <T variant="caption" color={Palette.primary}>MODE SIMULATION</T>
+      </Pressable>
+
       {/* Saisie manuelle */}
       <View style={[styles.manual, { paddingBottom: insets.bottom + Space.md }]}>
         <TextInput
@@ -240,6 +246,19 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: Radius.pill,
+  },
+  simulationLink: {
+    position: 'absolute',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: Palette.primary,
+    backgroundColor: 'rgba(0,0,0,0.85)',
   },
   manual: {
     position: 'absolute',
