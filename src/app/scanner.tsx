@@ -14,7 +14,7 @@ import { Palette, Radius, Space } from '@/constants/brand';
 import { useT } from '@/lib/i18n';
 import { getTicketByToken, scanTicketForToday } from '@/lib/tickets';
 
-type Result = { status: 'ok' | 'used' | 'unknown' | 'error'; name?: string; msg?: string } | null;
+type Result = { status: 'ok' | 'used' | 'unknown' | 'error'; name?: string; category?: string; msg?: string } | null;
 
 export default function Scanner() {
   const insets = useSafeAreaInsets();
@@ -34,18 +34,19 @@ export default function Scanner() {
       if (!tk) {
         setResult({ status: 'unknown' });
       } else {
-        const name = tk.profiles?.full_name ?? tk.profiles?.alias ?? '';
+        const name = tk.holder_name || tk.holder_email || tk.profiles?.full_name || tk.profiles?.alias || '';
+        const category = scanCategoryFallback(tk);
         const scan = await scanTicketForToday(tk.id);
         if (scan.ok) {
-          setResult({ status: 'ok', name });
+          setResult({ status: 'ok', name, category: scan.category || category });
           setCount((n) => n + 1);
         } else if ((scan.error === 'already_scanned_today' || scan.error === 'already_used')) {
           const time = scan.scanned_at
             ? new Date(scan.scanned_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })
             : null;
-          setResult({ status: 'used', name, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
+          setResult({ status: 'used', name, category: scan.category || category, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
         } else if (scan.error === 'wrong_day') {
-          setResult({ status: 'error', name, msg: 'Billet non valable aujourd’hui' });
+          setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet non valable aujourd’hui' });
         } else if (scan.error === 'cancelled') {
           setResult({ status: 'error', name, msg: 'Billet annulé : accès refusé' });
         } else if (scan.error === 'scanner_forbidden') {
@@ -124,6 +125,7 @@ export default function Scanner() {
                   ? t('sc.unknown')
                   : t('sc.error')}
           </T>
+          {!!result.category && <View style={{backgroundColor:'#0E0E0E',borderRadius:12,paddingHorizontal:20,paddingVertical:14,marginTop:16}}><T variant="h2" color={Palette.primary} style={{textAlign:'center'}}>{result.category.toUpperCase()}</T></View>}
           {!!result.name && (
             <T variant="h2" color={Palette.black} style={{ marginTop: 4 }}>
               {result.name}
@@ -171,6 +173,11 @@ export default function Scanner() {
       </View>
     </View>
   );
+}
+
+function scanCategoryFallback(ticket: Awaited<ReturnType<typeof getTicketByToken>>): string {
+  if (!ticket) return '';
+  return ticket.ticket_products?.name || ticket.type || 'Billet';
 }
 
 const styles = StyleSheet.create({
