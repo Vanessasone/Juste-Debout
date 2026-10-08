@@ -48,11 +48,11 @@ export default function Scanner() {
         } else if (scan.error === 'wrong_day') {
           setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet non valable aujourd’hui' });
         } else if (scan.error === 'cancelled') {
-          setResult({ status: 'error', name, msg: 'Billet annulé : accès refusé' });
+          setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet annulé : accès refusé' });
         } else if (scan.error === 'scanner_forbidden') {
-          setResult({ status: 'error', name, msg: 'Ce compte n’est pas autorisé à scanner les billets' });
+          setResult({ status: 'error', name, category: scan.category || category, msg: 'Ce compte n’est pas autorisé à scanner les billets' });
         } else {
-          setResult({ status: 'error', name, msg: 'Billet refusé : ' + (scan.error ?? 'vérification impossible') });
+          setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet refusé : ' + (scan.error ?? 'vérification impossible') });
         }
       }
     } catch (e: any) {
@@ -62,7 +62,7 @@ export default function Scanner() {
         processing.current = false;
         setResult(null);
         setManual('');
-      }, 2500);
+      }, 5000);
     }
   };
 
