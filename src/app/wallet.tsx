@@ -47,7 +47,7 @@ export default function Wallet() {
     setTransferBusy(true);
     try {
       await prepareTicketTransfer(transferTicket.id, transferEmail);
-      Alert.alert('Invitation préparée', `Ce billet est maintenant réservé à ${transferEmail.trim()}. L'envoi automatique par email sera activé dès que le domaine Juste Debout sera validé.`);
+      Alert.alert('Invitation envoyée', `Le billet a été proposé à ${transferEmail.trim()}. Tu peux annuler tant qu’il n’a pas été récupéré.`);
       setTransferTicket(null); setTransferEmail('');
       await load();
     } catch (e: any) {
@@ -70,6 +70,7 @@ export default function Wallet() {
     <Screen>
       <PageHeader title={t('wallet.title')} subtitle={t('wallet.subtitle')} />
 
+      {tickets.filter((x) => x.status === 'active').length > 1 && <Card style={{marginBottom:Space.md}}><T variant="h3">Tous tes QR codes au même endroit</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Tu peux conserver tous les billets ici, notamment pour une surprise. L’envoi à chaque invité est facultatif : utilise « Envoyer ce billet » uniquement si tu souhaites le transférer.</T></Card>}
       {tickets.filter((x) => x.status === 'active').length > 1 && (
         <Pressable onPress={() => router.push('/manage-tickets')} style={styles.groupBtn}>
           <Ionicons name="people-outline" size={19} color={c.text} />
@@ -161,6 +162,7 @@ function TicketCard({
         {[ev.venue, ev.city].filter(Boolean).join(' · ')}
       </T>
 
+      <View style={{alignSelf:'stretch',backgroundColor:ticket.ticket_products?.code==='black_card'?'#D7B66D':ticket.ticket_products?.code?.startsWith('vip_')?'#B5FA42':c.surface2,paddingVertical:12,paddingHorizontal:14,borderRadius:10,marginTop:16}}><T variant="label" color={ticket.ticket_products?.code==='black_card'||ticket.ticket_products?.code?.startsWith('vip_')?'#101010':c.text} style={{textAlign:'center'}}>{(ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type,t)).toUpperCase()}</T></View>
       <View style={styles.ticketDetails}>
         <DetailRow icon="ticket-outline" label="Catégorie" value={ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type, t)} c={c} />
         <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
