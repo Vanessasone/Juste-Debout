@@ -153,7 +153,7 @@ function TicketCard({
   const used = ticket.status === 'used' || fullyScanned;
   const cancelled = ticket.status === 'cancelled';
   const saturdayUsed = isWeekend && !!saturdayScan && !sundayScan && !cancelled;
-  const accessStatus = cancelled ? t('wallet.cancelled') : used ? 'PASS ENTIÈREMENT UTILISÉ' : saturdayUsed ? 'DIMANCHE DISPONIBLE' : t('wallet.valid');
+  const accessStatus = cancelled ? t('wallet.cancelled') : used ? (isWeekend ? 'PASS ENTIÈREMENT UTILISÉ' : 'UTILISÉ') : saturdayUsed ? 'DIMANCHE DISPONIBLE' : t('wallet.valid');
   const scanTime = (stamp:string) => new Date(stamp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'});
   const categoryCode = ticket.ticket_products?.code ?? '';
   const premiumBlack = categoryCode === 'black_card';
