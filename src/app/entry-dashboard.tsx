@@ -6,7 +6,14 @@ import { supabase } from '@/lib/supabase';
 import { useColors } from '@/lib/theme';
 
 const EVENT = 'eb0025ca-b597-4708-9d47-b24ebbf507b5';
-const EVENT_START = '2027-03-13';
+const EVENT_START = '2027-03-11';
+const EVENT_DAYS = [
+  { date: '2027-03-11', label: 'JEUDI 11 MARS' },
+  { date: '2027-03-12', label: 'VENDREDI 12 MARS' },
+  { date: '2027-03-13', label: 'SAMEDI 13 MARS' },
+  { date: '2027-03-14', label: 'DIMANCHE 14 MARS' },
+] as const;
+type EventDate = typeof EVENT_DAYS[number]['date'];
 const EVENT_END = '2027-03-14';
 type Summary = { ok: boolean; entries: number; remaining: number; capacity: number; error?: string };
 type Details = { ok: boolean; by_hour?: Array<{h:number;entries:number}>; by_category?: Array<{category:string;entries:number}>; error?: string };
@@ -18,9 +25,9 @@ export default function EntryDashboard() {
   const [err, setErr] = useState('');
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [clock, setClock] = useState(Date.now());
-  const [selectedDate, setSelectedDate] = useState<'2027-03-13' | '2027-03-14'>(() => {
+  const [selectedDate, setSelectedDate] = useState<EventDate>(() => {
     const nowParis = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });
-    return nowParis >= EVENT_END ? EVENT_END : EVENT_START;
+    return EVENT_DAYS.find(day => day.date === nowParis)?.date ?? (nowParis > EVENT_END ? EVENT_END : EVENT_START);
   });
   const requestSeq = useRef(0);
   const mounted = useRef(true);
@@ -33,7 +40,7 @@ export default function EntryDashboard() {
     try {
       const [a, b] = await Promise.all([
         supabase.rpc('entry_dashboard', { p_event: EVENT, p_date: selectedDate }),
-        supabase.rpc('entry_dashboard_details', { p_event: EVENT, p_date: date }),
+        supabase.rpc('entry_dashboard_details', { p_event: EVENT, p_date: selectedDate }),
       ]);
       if (!mounted.current || seq !== requestSeq.current) return;
       if (a.error || !a.data?.ok || b.error || !b.data?.ok) {
@@ -64,7 +71,7 @@ export default function EntryDashboard() {
   return <Screen>
     <PageHeader title="Contrôle des entrées" subtitle="Juste Debout · supervision" />
     <View style={styles.dayTabs}>
-      {([{ date: EVENT_START, label: 'SAMEDI 13 MARS' }, { date: EVENT_END, label: 'DIMANCHE 14 MARS' }] as const).map(day => (
+      {EVENT_DAYS.map(day => (
         <Pressable key={day.date} accessibilityRole="button" accessibilityState={{ selected: selectedDate === day.date }} onPress={() => setSelectedDate(day.date)} style={[styles.dayTab, selectedDate === day.date && styles.dayTabActive]}>
           <T variant="small" color={selectedDate === day.date ? '#101010' : c.text}>{day.label}</T>
         </Pressable>
@@ -87,7 +94,7 @@ export default function EntryDashboard() {
     {!eventDay && <Card style={{ marginBottom: Space.md }}>
       <T variant="h3">Événement à venir</T>
       <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>
-        Les finales ont lieu les 13 et 14 mars 2027. Les compteurs affichent la journée sélectionnée, et non les ventes ou les réservations.
+        Présélections les 11 et 12 mars, finales les 13 et 14 mars 2027. Les compteurs affichent la journée sélectionnée, et non les ventes ou les réservations.
       </T>
     </Card>}
     {!data ? (err ? <Card><T color={c.danger}>Compteurs indisponibles. Vérifie ta connexion et tes droits, puis actualise.</T></Card> : <ActivityIndicator color={c.primary} />) : <>
@@ -99,7 +106,7 @@ export default function EntryDashboard() {
       <Card>
         <T variant="h3">État du contrôle</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 8 }}>Actualisation toutes les 5 secondes, si le serveur répond.</T>
-        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>« Non entrées » = capacité de 6 000 moins les passages enregistrés ce jour-là. Ce n’est PAS le nombre de billets encore en vente.</T>
+        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>« Non entrées » = capacité de la journée sélectionnée moins les passages enregistrés ce jour-là. Ce n’est PAS le nombre de billets encore en vente.</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Toute sortie est définitive pour la journée. Un billet déjà scanné est refusé à une nouvelle tentative.</T>
       </Card>
       {details && <>
@@ -124,8 +131,8 @@ function Metric({ n, label }: { n: number; label: string }) {
 }
 const styles = StyleSheet.create({
   grid: { flexDirection: 'row', gap: 8, marginBottom: Space.lg },
-  dayTabs: { flexDirection: 'row', gap: 8, marginBottom: Space.md },
-  dayTab: { flex: 1, paddingVertical: 14, paddingHorizontal: 7, borderRadius: 10, alignItems: 'center', borderWidth: 1, borderColor: '#777777' },
+  dayTabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: Space.md },
+  dayTab: { flexGrow: 1, flexBasis: '45%', paddingVertical: 14, paddingHorizontal: 7, borderRadius: 10, alignItems: 'center', borderWidth: 1, borderColor: '#777777' },
   dayTabActive: { backgroundColor: '#B5FA42', borderColor: '#B5FA42' },
   refresh: { backgroundColor: '#B5FA42', borderRadius: 24, paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center', marginTop: 14 },
 });
