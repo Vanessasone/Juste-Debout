@@ -15,7 +15,8 @@ const FINAL_TITLE = 'Juste Debout — Finales Mondiales Paris 2027';
 
 export default function Tickets() {
   const { test } = useLocalSearchParams<{ test?: string }>();
-  const testMode = test === '1';
+  const requestedTest = test === '1';
+  const [testMode, setTestMode] = useState(false);
   const c = useColors();
   const router = useRouter();
   const styles = useMemo(() => makeStyles(c), [c]);
@@ -35,7 +36,16 @@ export default function Tickets() {
         const event = events.find((e) => e.title === FINAL_TITLE) ?? events.find((e) => e.starts_on === '2027-03-13' && e.ends_on === '2027-03-14');
         if (!event) throw new Error('Événement introuvable.');
         setEventId(event.id);
-        const ps = await getTicketProducts(event.id, testMode);
+        let authorizedPreview = false;
+        if (requestedTest) {
+          const { data: { user }, error: authError } = await supabase.auth.getUser();
+          if (!authError && user) {
+            const { data: profile, error: profileError } = await supabase.from('profiles').select('roles').eq('id', user.id).maybeSingle();
+            authorizedPreview = !profileError && Array.isArray(profile?.roles) && profile.roles.includes('admin');
+          }
+        }
+        setTestMode(authorizedPreview);
+        const ps = await getTicketProducts(event.id, authorizedPreview);
         setProducts(ps);
         const initial: Record<string, number> = {};
         ps.forEach((p) => { initial[p.id] = p.min_per_order || 1; });
@@ -46,7 +56,7 @@ export default function Tickets() {
         setLoading(false);
       }
     })();
-  }, [testMode]);
+  }, [requestedTest]);
 
   useEffect(() => {
     let mounted = true;
@@ -83,8 +93,8 @@ export default function Tickets() {
       else if (msg.includes('minimum_quantity_not_met')) setError('La quantité minimum pour ce tarif n’est pas atteinte.');
       else if (msg.includes('invalid_or_expired_promo')) setError('Ce code promotionnel est invalide ou expiré.');
       else if (msg.includes('vip_sold_out_for_day')) setError('Les places VIP sont complètes pour cette journée.');
-      else if (msg.includes('ticket_products_stock_limit') || msg.includes('sold_out')) setError('Cette catégorie est complète.');
       else if (msg.includes('sold_out_for_day')) setError('Cette journée a atteint sa capacité maximale. Ce pass n’est plus disponible.');
+      else if (msg.includes('ticket_products_stock_limit') || msg.includes('sold_out')) setError('Cette catégorie est complète.');
       else setError('Impossible de lancer le paiement pour le moment.');
       setBusy(false);
     }
@@ -102,12 +112,12 @@ export default function Tickets() {
         <View style={{flex:1}}><T variant="h3">DÉCOUVRIR LE PLAN DE PLACEMENT</T><T variant="small" color={c.textDim} style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
         <Ionicons name="map-outline" size={24} color={c.primary}/>
       </Pressable>
-      <Card style={styles.early}>
+      {Date.now() < Date.parse('2026-10-10T19:00:00Z') && <Card style={styles.early}>
         <T variant="h3">EARLY BIRD · 48H</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>
-          Code 48 · -5 € sur le Pass Samedi ou Dimanche · -10 € sur le Pass 2 jours · jusqu’au 10 octobre à 21h.
+          Code 48 · Standard : 35 € le samedi ou le dimanche, 60 € les deux jours · du 8 octobre à 21h au 10 octobre à 21h (heure de Paris).
         </T>
-      </Card>
+      </Card>}
 
       <View style={{ marginTop: Space.lg }}>
         <T variant="caption" color={c.textMute} style={{ marginBottom: 6 }}>CODE PROMO</T>
@@ -128,7 +138,7 @@ export default function Tickets() {
         <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>Toute sortie est définitive : aucun retour après le premier scan de la journée.</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Pass 2 jours et Black Card : une entrée samedi et une entrée dimanche.</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Chaque billet possède un QR unique.</T>
-        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Pass 3 jours : 12, 13 et 14 mars · Pass 4 jours : 11, 12, 13 et 14 mars. Ces formules seront proposées après validation des tests.</T>
+        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Pass 3 jours : 12, 13 et 14 mars · Pass 4 jours : 11, 12, 13 et 14 mars. Ces formules ne sont pas encore ouvertes à la vente.</T>
       </Card>
 
       {testMode && <Card style={{marginTop:Space.md,borderColor:c.accent}}><T variant="h3">APERÇU INTERNE DES NOUVEAUX PASS</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Les pass 3 et 4 jours sont visibles ici uniquement pour vérification par les administrateurs. Ils restent désactivés et ne peuvent pas être achetés. Le billet technique 1 € reste réservé aux tests.</T></Card>}
