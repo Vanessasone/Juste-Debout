@@ -65,7 +65,7 @@ export async function obtainTicket(eventId: string, type = 'spectator'): Promise
 export async function getTicketByToken(token: string): Promise<Ticket | null> {
   const { data, error } = await supabase
     .from('tickets')
-    .select('*, events(title), profiles(full_name,alias)')
+    .select('*, events(title), profiles(full_name,alias), ticket_products(name,code,access_days,access_date,group_size)')
     .eq('qr_token', token.trim())
     .maybeSingle();
   if (error) throw error;
