@@ -149,11 +149,16 @@ function TicketCard({
   const scans = ticket.scan_history ?? [];
   const saturdayScan = scans.find(x => x.access_date === '2027-03-13');
   const sundayScan = scans.find(x => x.access_date === '2027-03-14');
-  const fullyScanned = isWeekend && !!saturdayScan && !!sundayScan;
+  const multiStart = ticket.ticket_products?.access_start_date;
+  const multiDays = ticket.ticket_products?.access_days ?? 1;
+  const expectedDates = multiStart && multiDays > 2 ? Array.from({length:multiDays},(_,i)=>{const d=new Date(multiStart+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+i);return d.toISOString().slice(0,10);}) : [];
+  const multiScannedCount = expectedDates.filter(d=>scans.some(x=>x.access_date===d)).length;
+  const fullyScanned = expectedDates.length ? multiScannedCount===expectedDates.length : isWeekend && !!saturdayScan && !!sundayScan;
   const used = ticket.status === 'used' || fullyScanned;
   const cancelled = ticket.status === 'cancelled';
-  const saturdayUsed = isWeekend && !!saturdayScan && !sundayScan && !cancelled;
-  const accessStatus = cancelled ? t('wallet.cancelled') : used ? (isWeekend ? 'PASS ENTIÈREMENT UTILISÉ' : 'UTILISÉ') : saturdayUsed ? 'DIMANCHE DISPONIBLE' : t('wallet.valid');
+  const saturdayUsed = !expectedDates.length && isWeekend && !!saturdayScan && !sundayScan && !cancelled;
+  const multiPartial = expectedDates.length>0 && multiScannedCount>0 && !fullyScanned && !cancelled;
+  const accessStatus = cancelled ? t('wallet.cancelled') : used ? (isWeekend ? 'PASS ENTIÈREMENT UTILISÉ' : 'UTILISÉ') : multiPartial ? `${multiScannedCount}/${multiDays} JOURS UTILISÉS` : saturdayUsed ? 'DIMANCHE DISPONIBLE' : t('wallet.valid');
   const scanTime = (stamp:string) => new Date(stamp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'});
   const categoryCode = ticket.ticket_products?.code ?? '';
   const premiumBlack = categoryCode === 'black_card';
@@ -179,10 +184,11 @@ function TicketCard({
         <T variant="label" color={categoryTextColor} style={{textAlign:'center'}}>{(ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type,t)).toUpperCase()}</T>
       </View>
       <View style={styles.ticketDetails}>
-        <DetailRow icon="ticket-outline" label="Accès" value={ticket.ticket_products?.access_days && ticket.ticket_products.access_days > 1 ? 'Samedi et dimanche · 2 jours' : '1 jour · entrée unique, sortie définitive'} c={c} />
+        <DetailRow icon="ticket-outline" label="Accès" value={multiDays > 2 ? `${multiDays} jours · une entrée par jour, sortie définitive` : multiDays===2 ? 'Samedi et dimanche · 2 jours' : '1 jour · entrée unique, sortie définitive'} c={c} />
         <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
+        {expectedDates.length>0 && scans.filter(x=>expectedDates.includes(x.access_date)).map(x=><DetailRow key={x.access_date} icon="checkmark-circle-outline" label={new Date(x.access_date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})} value={`Entrée utilisée à ${scanTime(x.scanned_at)} · sortie définitive`} c={c} />)}
         {saturdayUsed && <DetailRow icon="checkmark-circle-outline" label="Samedi" value={`Entrée utilisée à ${scanTime(saturdayScan!.scanned_at)} · sortie définitive. Dimanche disponible.`} c={c} />}
-        {sundayScan && <DetailRow icon="checkmark-circle-outline" label="Dimanche" value={`Entrée utilisée à ${scanTime(sundayScan.scanned_at)} · sortie définitive`} c={c} />}
+        {!expectedDates.length && sundayScan && <DetailRow icon="checkmark-circle-outline" label="Dimanche" value={`Entrée utilisée à ${scanTime(sundayScan.scanned_at)} · sortie définitive`} c={c} />}
         {!isWeekend && scans.length>0 && <DetailRow icon="checkmark-circle-outline" label="Entrée" value={`Utilisée à ${scanTime(scans[0].scanned_at)} · sortie définitive`} c={c} />}
         <DetailRow icon="location-outline" label="Lieu" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
         <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
@@ -258,6 +264,11 @@ function ticketDateLabel(ticket: Ticket): string {
   const product = ticket.ticket_products;
   const event = ticket.events;
   const date = product?.access_date;
+  if (product?.access_start_date && (product.access_days ?? 1)>2) {
+    const start=new Date(product.access_start_date+'T12:00:00Z');
+    const end=new Date(start);end.setUTCDate(start.getUTCDate()+product.access_days-1);
+    return `${start.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})} au ${end.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}`;
+  }
   if (date) return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   if (!event?.starts_on) return 'À confirmer';
   const start = new Date(event.starts_on + 'T12:00:00');
