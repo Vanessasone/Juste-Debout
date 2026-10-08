@@ -26,7 +26,7 @@ export default function Tickets() {
   const c = useColors();
   const router = useRouter();
   const ct = useCustomerText();
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [eventId, setEventId] = useState<string | null>(null);
   const [products, setProducts] = useState<TicketProduct[]>([]);
@@ -166,7 +166,7 @@ export default function Tickets() {
                   <Pressable onPress={() => changeQty(p, -1)} style={styles.qtyBtn}><Ionicons name="remove" size={18} color={c.text} /></Pressable>
                   <T variant="h3" style={{ minWidth: 36, textAlign: 'center' }}>{q}</T>
                   <Pressable onPress={() => changeQty(p, 1)} style={styles.qtyBtn}><Ionicons name="add" size={18} color={c.text} /></Pressable>
-                  <T variant="small" color={c.textDim} style={{ marginLeft: 8 }}>Total {total} €</T>
+                  <T variant="small" color={c.textDim} style={{ marginLeft: 8 }}>{t('checkout.total')} {total} €</T>
                 </View>
               )}
 

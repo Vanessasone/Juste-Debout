@@ -35,7 +35,7 @@ export default function TicketDetails() {
   const input={backgroundColor:c.surface,color:c.text,borderWidth:1,borderColor:c.border,borderRadius:14,padding:16,fontSize:16};
   return <Screen><PageHeader title={ct('details')} subtitle={ct('detailSteps')} />
     <T style={{marginBottom:20}}>{ct('noAccount')}</T>
-    {draft?<Card><T variant="h3">{ticketProductText(draft.productCode ?? '', locale, {name:draft.productName}).name}</T><T style={{marginTop:8}}>{draft.quantity} pass{draft.promoCode?` · Code ${draft.promoCode}`:''}</T></Card>:<ActivityIndicator />}
+    {draft?<Card><T variant="h3">{ticketProductText(draft.productCode ?? '', locale, {name:draft.productName}).name}</T><T style={{marginTop:8}}>{ct('passCount', {n:draft.quantity})}{draft.promoCode?` · ${ct('promo')} ${draft.promoCode}`:''}</T></Card>:<ActivityIndicator />}
     <View style={{gap:12,marginTop:20}}>
       <T>{ct('name')}</T><TextInput accessibilityLabel={ct('name')} value={name} onChangeText={setName} autoComplete="name" maxLength={120} style={input} />
       <T>{ct('email')}</T><TextInput accessibilityLabel={ct('email')} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" maxLength={254} style={input} />

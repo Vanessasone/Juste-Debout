@@ -171,7 +171,8 @@
     "planDisclaimer": "Répartition issue du setup fourni par l’organisation. Plan indicatif, susceptible d’ajustements techniques ; aucun siège individuel n’est attribué.",
     "shopPaidBody": "Ton paiement est confirmé. Merci pour ta commande Juste Debout !",
     "shopPendingBody": "Nous vérifions le statut de ta commande. Ne recommence pas le paiement : consulte tes commandes ou contacte le support si nécessaire.",
-    "dateLabel": "Date"
+    "dateLabel": "Date",
+    "passCount": "{n} pass"
   },
   "en": {
     "paid": "PAYMENT CONFIRMED",
@@ -345,7 +346,8 @@
     "planDisclaimer": "Layout based on the setup provided by the organisers. Illustrative plan, subject to technical adjustments; no individual seats are assigned.",
     "shopPaidBody": "Your payment is confirmed. Thank you for your Juste Debout order!",
     "shopPendingBody": "We are checking your order’s status. Do not pay again: check your orders or contact support if needed.",
-    "dateLabel": "Date"
+    "dateLabel": "Date",
+    "passCount": "{n} passes"
   },
   "de": {
     "paid": "ZAHLUNG BESTÄTIGT",
@@ -519,7 +521,8 @@
     "planDisclaimer": "Aufteilung nach den Vorgaben des Veranstalters. Orientierungsplan, technische Anpassungen möglich; keine individuell zugewiesenen Sitzplätze.",
     "shopPaidBody": "Deine Zahlung ist bestätigt. Danke für deine Juste-Debout-Bestellung!",
     "shopPendingBody": "Wir prüfen den Bestellstatus. Zahle nicht erneut: Prüfe deine Bestellungen oder kontaktiere bei Bedarf den Support.",
-    "dateLabel": "Datum"
+    "dateLabel": "Datum",
+    "passCount": "{n} Pässe"
   },
   "it": {
     "paid": "PAGAMENTO CONFERMATO",
@@ -693,7 +696,8 @@
     "planDisclaimer": "Disposizione basata sul setup fornito dall’organizzazione. Pianta indicativa, soggetta ad adeguamenti tecnici; nessun posto individuale assegnato.",
     "shopPaidBody": "Il pagamento è confermato. Grazie per il tuo ordine Juste Debout!",
     "shopPendingBody": "Stiamo verificando lo stato dell’ordine. Non pagare di nuovo: consulta gli ordini o contatta l’assistenza.",
-    "dateLabel": "Data"
+    "dateLabel": "Data",
+    "passCount": "{n} pass"
   },
   "es": {
     "paid": "PAGO CONFIRMADO",
@@ -867,7 +871,8 @@
     "planDisclaimer": "Distribución según el montaje de la organización. Plano orientativo, sujeto a ajustes técnicos; no se asignan asientos individuales.",
     "shopPaidBody": "Tu pago está confirmado. ¡Gracias por tu pedido Juste Debout!",
     "shopPendingBody": "Verificamos el estado del pedido. No vuelvas a pagar: consulta tus pedidos o contacta con soporte.",
-    "dateLabel": "Fecha"
+    "dateLabel": "Fecha",
+    "passCount": "{n} pases"
   },
   "pt": {
     "paid": "PAGAMENTO CONFIRMADO",
@@ -1041,7 +1046,8 @@
     "planDisclaimer": "Distribuição segundo o setup da organização. Plano indicativo, sujeito a ajustes técnicos; não são atribuídos lugares individuais.",
     "shopPaidBody": "O pagamento está confirmado. Obrigado pela encomenda Juste Debout!",
     "shopPendingBody": "Estamos a verificar a encomenda. Não pagues novamente: consulta as encomendas ou contacta o apoio.",
-    "dateLabel": "Data"
+    "dateLabel": "Data",
+    "passCount": "{n} passes"
   },
   "zh": {
     "paid": "付款已确认",
@@ -1215,7 +1221,8 @@
     "planDisclaimer": "布局依据主办方提供的配置。此图仅为示意，可能因技术需求调整，不分配具体座位。",
     "shopPaidBody": "付款已确认，感谢你的Juste Debout订单！",
     "shopPendingBody": "正在核实订单状态。请勿重复付款：查看订单或联系支持。",
-    "dateLabel": "日期"
+    "dateLabel": "日期",
+    "passCount": "{n}张通票"
   },
   "ko": {
     "paid": "결제 확인 완료",
@@ -1389,7 +1396,8 @@
     "planDisclaimer": "주최 측이 제공한 배치를 기준으로 합니다. 기술상 조정될 수 있는 참고도이며 개별 좌석은 배정되지 않습니다.",
     "shopPaidBody": "결제가 확인되었습니다. Juste Debout 주문 감사합니다!",
     "shopPendingBody": "주문 상태를 확인 중입니다. 다시 결제하지 말고 주문을 확인하거나 지원팀에 문의하세요.",
-    "dateLabel": "날짜"
+    "dateLabel": "날짜",
+    "passCount": "패스 {n}개"
   },
   "ja": {
     "paid": "支払い確認済み",
@@ -1563,6 +1571,7 @@
     "planDisclaimer": "主催者提供の配置に基づく参考図です。技術上の調整が行われる場合があり、個別座席の指定はありません。",
     "shopPaidBody": "支払いが確認されました。Juste Deboutのご注文ありがとうございます！",
     "shopPendingBody": "注文状況を確認中です。再度支払わず、注文を確認するかサポートにお問い合わせください。",
-    "dateLabel": "日付"
+    "dateLabel": "日付",
+    "passCount": "{n}枚のパス"
   }
 }
