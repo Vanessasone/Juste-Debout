@@ -1,43 +1,43 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
+import { readTicketDraft } from '@/lib/ticketPurchase';
 
 export default function AuthCallback() {
   const router = useRouter();
-  const [status, setStatus] = useState('Finalisation de la connexion Google…');
-
+  const [status, setStatus] = useState('Finalisation de ta connexion…');
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         if (typeof window === 'undefined') return;
-        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
-        const access_token = hash.get('access_token');
-        const refresh_token = hash.get('refresh_token');
-
-        if (!access_token || !refresh_token) {
-          setStatus('Connexion Google reçue, mais aucun jeton de session n’a été retourné.');
+        const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+        if (params.get('error')) {
+          setStatus('Ce lien de confirmation est invalide ou expiré. Reviens à la connexion pour continuer.');
           return;
         }
-
-        const { data, error } = await supabase.auth.setSession({ access_token, refresh_token });
-        if (error) {
-          setStatus('Session Supabase refusée : ' + error.message);
+        const access_token = params.get('access_token');
+        const refresh_token = params.get('refresh_token');
+        const code = new URLSearchParams(window.location.search).get('code');
+        const { data, error } = access_token && refresh_token
+          ? await supabase.auth.setSession({ access_token, refresh_token })
+          : code ? await supabase.auth.exchangeCodeForSession(code)
+          : await supabase.auth.getSession();
+        if (cancelled) return;
+        if (error || !data.session) {
+          setStatus('La connexion n’a pas pu être confirmée. Reviens à la connexion avec ton e-mail.');
           return;
         }
-        if (!data.session) {
-          setStatus('Google a répondu, mais aucune session Supabase n’a été créée.');
-          return;
-        }
-
         window.history.replaceState(null, '', '/auth-callback');
-        router.replace('/(tabs)');
-      } catch (e: any) {
-        setStatus('Erreur OAuth : ' + (e?.message ?? String(e)));
+        const draft = await readTicketDraft();
+        if (!cancelled) router.replace(draft ? { pathname: '/billetterie', params: { resume: '1' } } : '/(tabs)');
+      } catch {
+        if (!cancelled) setStatus('Impossible de finaliser la connexion. Réessaie depuis la page de connexion.');
       }
     })();
+    return () => { cancelled = true; };
   }, [router]);
-
-  return <View style={styles.root}><ActivityIndicator /><Text style={styles.text}>{status}</Text></View>;
+  return <View style={styles.root}><ActivityIndicator /><Text style={styles.text}>{status}</Text><Pressable accessibilityRole="button" onPress={() => router.replace({ pathname: '/login', params: { checkout: '1' } })} style={{ padding: 16, marginTop: 16 }}><Text style={{ color: '#B5FA42' }}>Revenir à la connexion</Text></Pressable></View>;
 }
 const styles = StyleSheet.create({root:{flex:1,alignItems:'center',justifyContent:'center',padding:24,backgroundColor:'#0A0A0A'},text:{color:'#fff',marginTop:16,textAlign:'center'}});

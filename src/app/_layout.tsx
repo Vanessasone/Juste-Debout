@@ -39,6 +39,7 @@ function RootNavigator() {
         return;
       }
       if (session) {
+        if (segments[0] === 'auth-callback') return;
         const purchaseDraft = ['login', 'auth-callback'].includes(segments[0]) ? await readTicketDraft() : null;
         if (cancelled) return;
         if ((segments[0] === 'login' && checkout === '1') || purchaseDraft) {

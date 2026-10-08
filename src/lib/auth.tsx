@@ -18,7 +18,7 @@ import { supabase } from '@/lib/supabase';
  * Web uniquement.
  */
 async function consumeSsoFromUrl(): Promise<void> {
-  if (typeof window === 'undefined' || !window.location?.hash) return;
+  if (typeof window === 'undefined' || !window.location?.hash || window.location.pathname === '/auth-callback') return;
 
   // Les callbacks OAuth web PKCE (?code=...) sont consommés automatiquement
   // par supabase-js (detectSessionInUrl=true). Ici on ne gère que le handoff

@@ -60,7 +60,10 @@ export default function Login() {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
-          options: { data: { full_name: name.trim() } },
+          options: {
+            data: { full_name: name.trim() },
+            ...(Platform.OS === 'web' && typeof window !== 'undefined' ? { emailRedirectTo: window.location.origin + '/auth-callback' } : {}),
+          },
         });
         if (error) throw error;
         // Selon les réglages Supabase, l'email peut demander une confirmation.
