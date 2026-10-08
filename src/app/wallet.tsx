@@ -1,3 +1,6 @@
+import { useCustomerText, customerText } from '@/lib/customerText';
+import { useI18n } from '@/lib/i18n';
+import { ticketProductText } from '@/lib/ticketProductText';
 /**
  * Portefeuille — les billets de l'utilisateur avec leur QR d'entrée.
  */
@@ -17,6 +20,8 @@ import { useColors } from '@/lib/theme';
 export default function Wallet() {
   const c = useColors();
   const t = useT();
+  const ct = useCustomerText();
+  const { locale } = useI18n();
   const router = useRouter();
   const { payment } = useLocalSearchParams<{ payment?: string }>();
   const styles = useMemo(() => makeStyles(c), [c]);
@@ -48,11 +53,11 @@ export default function Wallet() {
     setTransferBusy(true);
     try {
       await prepareTicketTransfer(transferTicket.id, transferEmail);
-      Alert.alert('Invitation envoyée', `Le billet a été proposé à ${transferEmail.trim()}. Tu peux annuler tant qu’il n’a pas été récupéré.`);
+      Alert.alert(ct('inviteSent'), ct('inviteSentBody', {email:transferEmail.trim()}));
       setTransferTicket(null); setTransferEmail('');
       await load();
     } catch (e: any) {
-      Alert.alert('Impossible de transférer', e?.message ?? 'Réessaie plus tard.');
+      Alert.alert(ct('inviteError'), ct('retry'));
     } finally { setTransferBusy(false); }
   };
 
@@ -72,22 +77,22 @@ export default function Wallet() {
       <PageHeader title={t('wallet.title')} subtitle={t('wallet.subtitle')} />
 
       {payment === 'success' && <Card style={{ marginBottom: Space.md }}>
-        <T variant="h3" color={c.primary}>RETOUR DU PAIEMENT</T>
+        <T variant="h3" color={c.primary}>{ct('paymentReturn')}</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>
-          Le paiement vient d'être effectué sur Stripe. Tes billets apparaissent ici dès la confirmation de la commande par notre serveur.
+          {ct('walletPending')}
         </T>
         <Pressable accessibilityRole="button" onPress={() => { setLoading(true); void load(); }} style={{ backgroundColor: '#B5FA42', padding: 12, borderRadius: 12, marginTop: 12, alignItems: 'center' }}>
-          <T variant="label" color="#101010">ACTUALISER MES BILLETS</T>
+          <T variant="label" color="#101010">{ct('refreshTickets')}</T>
         </Pressable>
       </Card>}
 
-      {tickets.filter((x) => x.status === 'active').length > 1 && <Card style={{marginBottom:Space.md}}><T variant="h3">Tous tes QR codes au même endroit</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Tu peux conserver tous les billets ici, notamment pour une surprise. L’envoi à chaque invité est facultatif : utilise « Envoyer ce billet » uniquement si tu souhaites le transférer.</T></Card>}
+      {tickets.filter((x) => x.status === 'active').length > 1 && <Card style={{marginBottom:Space.md}}><T variant="h3">{ct('allQr')}</T><T variant="small" color={c.textDim} style={{marginTop:6}}>{ct('allQrBody')}</T></Card>}
       {tickets.filter((x) => x.status === 'active').length > 1 && (
         <Pressable onPress={() => router.push('/manage-tickets')} style={styles.groupBtn}>
           <Ionicons name="people-outline" size={19} color={c.text} />
           <View style={{flex:1}}>
-            <T variant="h3">Gérer mes billets / mon groupe</T>
-            <T variant="caption" color={c.textMute}>Importer une liste et attribuer plusieurs billets</T>
+            <T variant="h3">{ct('manage')}</T>
+            <T variant="caption" color={c.textMute}>{ct('importList')}</T>
           </View>
           <Ionicons name="chevron-forward" size={18} color={c.textMute} />
         </Pressable>
@@ -101,37 +106,37 @@ export default function Wallet() {
 
       {tickets.length === 0 ? (
         <Card>
-          <T variant="h3">Aucun billet pour le moment</T>
-          <T variant="small" color={c.textDim} style={{marginTop:8,marginBottom:Space.md}}>Tes billets achetés apparaîtront ici avec leur QR code.</T>
-          <GButton label="Accéder à la billetterie" icon="ticket" onPress={() => router.push('/billetterie')} />
+          <T variant="h3">{ct('noTickets')}</T>
+          <T variant="small" color={c.textDim} style={{marginTop:8,marginBottom:Space.md}}>{ct('ticketsHere')}</T>
+          <GButton label={ct('boxoffice')} icon="ticket" onPress={() => router.push('/billetterie')} />
         </Card>
       ) : tickets.map((tkt) => (
-        <Section key={tkt.id} title={tkt.events?.title ?? 'Mon billet'}>
+        <Section key={tkt.id} title={tkt.events?.title ?? ct('myTicket')}>
           <TicketCard ticket={tkt} event={tkt.events ?? null} c={c} styles={styles}
             onTransfer={() => { setTransferTicket(tkt); setTransferEmail(tkt.transfer_email ?? ''); }}
             onCancelTransfer={async () => {
               try { await cancelTicketTransfer(tkt.id); await load(); }
-              catch (err:any) { Alert.alert('Impossible d’annuler', err?.message ?? 'Réessaie plus tard.'); }
+              catch (err:any) { Alert.alert(ct('cancelError'), ct('retry')); }
             }} />
         </Section>
       ))}
       <Pressable onPress={() => router.push('/billetterie')} style={styles.groupBtn}>
         <Ionicons name="add-circle-outline" size={20} color={c.primary} />
-        <View style={{flex:1}}><T variant="h3">Acheter des billets</T><T variant="caption" color={c.textMute}>Finales Mondiales Paris 2027</T></View>
+        <View style={{flex:1}}><T variant="h3">{ct('buyTickets')}</T><T variant="caption" color={c.textMute}>{ct('finals')}</T></View>
         <Ionicons name="chevron-forward" size={18} color={c.textMute} />
       </Pressable>
       <Pressable onPress={() => router.push('/my-orders')} style={styles.groupBtn}>
         <Ionicons name="receipt-outline" size={20} color={c.primary} />
-        <View style={{flex:1}}><T variant="h3">Mes commandes boutique</T><T variant="caption" color={c.textMute}>Paiements, articles et livraisons</T></View>
+        <View style={{flex:1}}><T variant="h3">{ct('myOrders')}</T><T variant="caption" color={c.textMute}>{ct('orderSubtitle')}</T></View>
         <Ionicons name="chevron-forward" size={18} color={c.textMute} />
       </Pressable>
       <Modal visible={!!transferTicket} transparent animationType="slide" onRequestClose={() => setTransferTicket(null)}>
         <View style={styles.modalBackdrop}><View style={styles.modalCard}>
-          <T variant="h2">Envoyer ce billet</T>
-          <T variant="small" color={c.textDim} style={{marginTop:6}}>Le destinataire doit se connecter avec l’adresse email utilisée pour l’invitation.</T>
+          <T variant="h2">{ct('sendTicket')}</T>
+          <T variant="small" color={c.textDim} style={{marginTop:6}}>{ct('inviteRecipient')}</T>
           <TextInput value={transferEmail} onChangeText={setTransferEmail} autoCapitalize="none" keyboardType="email-address" placeholder="email@exemple.com" placeholderTextColor={c.textMute} style={styles.input}/>
-          <GButton label={transferBusy ? 'Un instant…' : 'Préparer l’invitation'} icon="mail" onPress={sendTransfer}/>
-          <Pressable onPress={() => setTransferTicket(null)} style={{padding:14,alignItems:'center'}}><T variant="small" color={c.textDim}>Fermer</T></Pressable>
+          <GButton label={transferBusy ? ct('wait') : ct('prepareInvite')} icon="mail" onPress={sendTransfer}/>
+          <Pressable onPress={() => setTransferTicket(null)} style={{padding:14,alignItems:'center'}}><T variant="small" color={c.textDim}>{ct('close')}</T></Pressable>
         </View></View>
       </Modal>
     </Screen>
@@ -154,6 +159,8 @@ function TicketCard({
   onCancelTransfer: () => void;
 }) {
   const t = useT();
+  const ct = useCustomerText();
+  const { locale } = useI18n();
   const router = useRouter();
   const ev = event ?? { title: 'Juste Debout', venue: null, city: null, address: null };
   const isWeekend = (ticket.ticket_products?.access_days ?? 1) > 1;
@@ -169,8 +176,8 @@ function TicketCard({
   const cancelled = ticket.status === 'cancelled';
   const saturdayUsed = !expectedDates.length && isWeekend && !!saturdayScan && !sundayScan && !cancelled;
   const multiPartial = expectedDates.length>0 && multiScannedCount>0 && !fullyScanned && !cancelled;
-  const accessStatus = cancelled ? t('wallet.cancelled') : used ? (isWeekend ? 'PASS ENTIÈREMENT UTILISÉ' : 'UTILISÉ') : multiPartial ? `${multiScannedCount}/${multiDays} JOURS UTILISÉS` : saturdayUsed ? 'DIMANCHE DISPONIBLE' : t('wallet.valid');
-  const scanTime = (stamp:string) => new Date(stamp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'});
+  const accessStatus = cancelled ? t('wallet.cancelled') : used ? (isWeekend ? ct('fullyUsed') : ct('used')) : multiPartial ? ct('daysUsed', {n:multiScannedCount, days:multiDays}) : saturdayUsed ? ct('sundayAvailable') : t('wallet.valid');
+  const scanTime = (stamp:string) => new Date(stamp).toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'});
   const categoryCode = ticket.ticket_products?.code ?? '';
   const premiumBlack = categoryCode === 'black_card';
   const premiumVip = categoryCode.startsWith('vip_');
@@ -188,25 +195,25 @@ function TicketCard({
         />
       </View>
       <T variant="small" color={c.textDim} style={{ alignSelf: 'flex-start', marginTop: 2 }}>
-        {expectedDates.length > 0 ? 'Paris · plusieurs lieux selon les journées' : [ev.venue, ev.city].filter(Boolean).join(' · ')}
+        {expectedDates.length > 0 ? ct('multipleVenues') : [ev.venue, ev.city].filter(Boolean).join(' · ')}
       </T>
 
       <View style={{alignSelf:'stretch',backgroundColor:categoryColor,paddingVertical:14,paddingHorizontal:14,borderRadius:10,marginTop:16}}>
-        <T variant="label" color={categoryTextColor} style={{textAlign:'center'}}>{(ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type,t)).toUpperCase()}</T>
+        <T variant="label" color={categoryTextColor} style={{textAlign:'center'}}>{ticketProductText(categoryCode, locale, {name: ticket.ticket_products?.name ?? ticketTypeLabel(ticket.type,t)}).name.toUpperCase()}</T>
       </View>
       <View style={styles.ticketDetails}>
-        <DetailRow icon="ticket-outline" label="Accès" value={multiDays > 2 ? `${multiDays} jours · une entrée par jour, sortie définitive` : multiDays===2 ? 'Samedi et dimanche · 2 jours' : '1 jour · entrée unique, sortie définitive'} c={c} />
-        <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
-        {expectedDates.length>0 && scans.filter(x=>expectedDates.includes(x.access_date)).map(x=><DetailRow key={x.access_date} icon="checkmark-circle-outline" label={new Date(x.access_date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})} value={`Entrée utilisée à ${scanTime(x.scanned_at)} · sortie définitive`} c={c} />)}
-        {saturdayUsed && <DetailRow icon="checkmark-circle-outline" label="Samedi" value={`Entrée utilisée à ${scanTime(saturdayScan!.scanned_at)} · sortie définitive. Dimanche disponible.`} c={c} />}
-        {!expectedDates.length && sundayScan && <DetailRow icon="checkmark-circle-outline" label="Dimanche" value={`Entrée utilisée à ${scanTime(sundayScan.scanned_at)} · sortie définitive`} c={c} />}
-        {!isWeekend && scans.length>0 && <DetailRow icon="checkmark-circle-outline" label="Entrée" value={`Utilisée à ${scanTime(scans[0].scanned_at)} · sortie définitive`} c={c} />}
+        <DetailRow icon="ticket-outline" label={ct('accessLabel')} value={multiDays > 2 ? ct('accessMulti', {n:multiDays}) : multiDays===2 ? ct('accessTwo') : ct('accessOne')} c={c} />
+        <DetailRow icon="calendar-outline" label={ct('dateLabel')} value={ticketDateLabel(ticket, locale)} c={c} />
+        {expectedDates.length>0 && scans.filter(x=>expectedDates.includes(x.access_date)).map(x=><DetailRow key={x.access_date} icon="checkmark-circle-outline" label={new Date(x.access_date+'T12:00:00').toLocaleDateString(locale,{weekday:'long',day:'numeric',month:'long'})} value={ct('scannedAt', {time:scanTime(x.scanned_at)})} c={c} />)}
+        {saturdayUsed && <DetailRow icon="checkmark-circle-outline" label={new Date('2027-03-13T12:00:00Z').toLocaleDateString(locale,{weekday:'long'})} value={`${ct('scannedAt', {time:scanTime(saturdayScan!.scanned_at)})} · ${ct('sundayAvailable')}`} c={c} />}
+        {!expectedDates.length && sundayScan && <DetailRow icon="checkmark-circle-outline" label={new Date('2027-03-14T12:00:00Z').toLocaleDateString(locale,{weekday:'long'})} value={ct('scannedAt', {time:scanTime(sundayScan.scanned_at)})} c={c} />}
+        {!isWeekend && scans.length>0 && <DetailRow icon="checkmark-circle-outline" label={ct('accessLabel')} value={ct('scannedAt', {time:scanTime(scans[0].scanned_at)})} c={c} />}
         {expectedDates.length > 0 ? <>
-          <DetailRow icon="location-outline" label="Présélections · 11–12 mars" value="Autre salle à Paris · adresse communiquée ultérieurement" c={c} />
-          <DetailRow icon="location-outline" label="Finales · 13–14 mars" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'Stade Pierre-de-Coubertin · Paris' } c={c} />
-        </> : <DetailRow icon="location-outline" label="Lieu" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />}
-        <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
-        <DetailRow icon="receipt-outline" label="Référence" value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
+          <DetailRow icon="location-outline" label={ct('presels')} value={ct('preselVenue')} c={c} />
+          <DetailRow icon="location-outline" label={ct('finalDays')} value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'Stade Pierre-de-Coubertin · Paris' } c={c} />
+        </> : <DetailRow icon="location-outline" label={ct('location')} value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || ct('unknownVenue')} c={c} />}
+        <DetailRow icon="person-outline" label={ct('holder')} value={ticket.holder_name || ticket.holder_email || ct('buyer')} c={c} />
+        <DetailRow icon="receipt-outline" label={ct('reference')} value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
       </View>
 
       <View style={[styles.qrBox, used && { opacity: 0.3 }]}>
@@ -224,31 +231,31 @@ function TicketCard({
       {ticket.ticket_products?.code?.startsWith('family_') && ticket.order_item_id && (
         <Pressable onPress={() => router.push({pathname:'/family-tickets',params:{item:ticket.order_item_id!}})} style={styles.groupBtn}>
           <Ionicons name="people-outline" size={18} color={c.primary}/>
-          <T variant="label">Attribuer les 2 adultes et 2 enfants</T>
+          <T variant="label">{ct('assignFamily')}</T>
         </Pressable>
       )}
       {ticket.ticket_products?.code === 'black_card' && (
         <Pressable onPress={() => router.push('/black-card')} style={styles.blackCardBtn}>
           <Ionicons name="diamond-outline" size={17} color="#D9C27A" />
-          <T variant="label" color="#D9C27A">Voir ma Black Card</T>
+          <T variant="label" color="#D9C27A">{ct('viewBlack')}</T>
         </Pressable>
       )}
             {ticket.status === 'active' && ticket.transfer_status !== 'pending' && (
         <Pressable onPress={onTransfer} style={styles.transferBtn}>
           <Ionicons name="paper-plane-outline" size={17} color={c.black} />
-          <T variant="label" color={c.black}>Envoyer ce billet</T>
+          <T variant="label" color={c.black}>{ct('sendTicket')}</T>
         </Pressable>
       )}
       {ticket.transfer_status === 'pending' && ticket.transfer_email ? (
         <View style={styles.pendingBox}>
           <View style={{flex:1}}>
-            <T variant="caption" color={c.accent}>INVITATION EN ATTENTE</T>
+            <T variant="caption" color={c.accent}>{ct('invitePending')}</T>
             <T variant="small" color={c.text} style={{marginTop:3}}>{ticket.transfer_email}</T>
           </View>
-          <Pressable onPress={onCancelTransfer} style={styles.cancelInvite}><T variant="caption" color={c.danger}>ANNULER</T></Pressable>
+          <Pressable onPress={onCancelTransfer} style={styles.cancelInvite}><T variant="caption" color={c.danger}>{ct('cancel')}</T></Pressable>
         </View>
       ) : ticket.transfer_status === 'accepted' ? (
-        <T variant="caption" color={c.primary} style={{marginBottom:Space.sm}}>✓ BILLET RÉCUPÉRÉ PAR LE DESTINATAIRE</T>
+        <T variant="caption" color={c.primary} style={{marginBottom:Space.sm}}>{ct('inviteAccepted')}</T>
       ) : null}
       <View style={styles.rowFull}>
         <T variant="caption" color={c.textMute}>
@@ -274,23 +281,23 @@ function DetailRow({ icon, label, value, c }: { icon: keyof typeof Ionicons.glyp
   );
 }
 
-function ticketDateLabel(ticket: Ticket): string {
+function ticketDateLabel(ticket: Ticket, locale: string): string {
   const product = ticket.ticket_products;
   const event = ticket.events;
   const date = product?.access_date;
   if (product?.access_start_date && (product.access_days ?? 1)>2) {
     const start=new Date(product.access_start_date+'T12:00:00Z');
     const end=new Date(start);end.setUTCDate(start.getUTCDate()+product.access_days-1);
-    return `${start.toLocaleDateString('fr-FR',{day:'numeric',month:'long'})} au ${end.toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'})}`;
+    return `${start.toLocaleDateString(locale,{day:'numeric',month:'long'})} – ${end.toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric'})}`;
   }
-  if (date) return new Date(date + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-  if (!event?.starts_on) return 'À confirmer';
+  if (date) return new Date(date + 'T12:00:00').toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  if (!event?.starts_on) return customerText(locale, 'unknownVenue');
   const start = new Date(event.starts_on + 'T12:00:00');
   const end = event.ends_on ? new Date(event.ends_on + 'T12:00:00') : null;
   if ((product?.access_days ?? 1) > 1 && end && event.ends_on !== event.starts_on) {
-    return `${start.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })} + ${end.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
+    return `${start.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })} + ${end.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`;
   }
-  return start.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return start.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 function ticketTypeLabel(type: string, t: (k: string) => string): string {

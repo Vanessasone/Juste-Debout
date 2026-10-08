@@ -15,6 +15,7 @@ async function runCase({ hash = '', search = '', draft = null, session = null, s
     if (name === 'react/jsx-runtime') return { jsx: () => null, jsxs: () => null };
     if (name === 'react-native') return { StyleSheet: { create: v => v } };
     if (name === 'expo-router') return { useRouter: () => ({ replace: route => redirects.push(route) }) };
+    if (name === '@/lib/customerText') return { useCustomerText: () => key => key };
     if (name === '@/lib/supabase') return { supabase: { auth } };
     if (name === '@/lib/ticketPurchase') return { readTicketDraft: async () => draft };
     throw new Error('Unexpected import ' + name);

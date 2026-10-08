@@ -1,4 +1,8 @@
+import { useI18n } from '@/lib/i18n';
+import { ticketProductText } from '@/lib/ticketProductText';
+import { LanguagePicker } from '@/components/LanguagePicker';
 import { Ionicons } from '@expo/vector-icons';
+import { useCustomerText } from '@/lib/customerText';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -21,6 +25,8 @@ export default function Tickets() {
   const [testMode, setTestMode] = useState(false);
   const c = useColors();
   const router = useRouter();
+  const ct = useCustomerText();
+  const { locale } = useI18n();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [eventId, setEventId] = useState<string | null>(null);
   const [products, setProducts] = useState<TicketProduct[]>([]);
@@ -61,7 +67,7 @@ export default function Tickets() {
         }
         setQty(initial);
       } catch (e: any) {
-        setError(e?.message ?? 'Impossible de charger la billetterie.');
+        setError(ct('loadError'));
       } finally {
         setLoading(false);
       }
@@ -89,29 +95,30 @@ export default function Tickets() {
 
   const buy = async (p: TicketProduct) => {
     if (!eventId) return;
-    await saveTicketDraft({ eventId, productId: p.id, productName: p.name, quantity: qty[p.id] ?? p.min_per_order, promoCode: promo, createdAt: Date.now() });
+    await saveTicketDraft({ eventId, productId: p.id, productName: ticketProductText(p.code, locale, p).name, productCode: p.code, quantity: qty[p.id] ?? p.min_per_order, promoCode: promo, createdAt: Date.now() });
     router.push('/ticket-details');
   };
 
   if (loading) {
-    return <Screen scroll={false}><PageHeader title="Billetterie" subtitle="Paris · 13–14 mars 2027" /><View style={styles.center}><ActivityIndicator color={c.accent} /></View></Screen>;
+    return <Screen scroll={false}><PageHeader title={ct('boxoffice')} subtitle={ct('finals')} /><View style={styles.center}><ActivityIndicator color={c.accent} /></View></Screen>;
   }
 
   return (
     <Screen>
+      <LanguagePicker />
       <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
-      <PageHeader title="Billetterie" subtitle="Finales Mondiales · 13–14 mars 2027" />
-      <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>1. Choisis tes places · 2. Tes coordonnées · 3. Paiement sécurisé</T>
-      <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>Déjà un compte ? Me connecter</T></Pressable>
+      <PageHeader title={ct('boxoffice')} subtitle={ct('finals')} />
+      <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>{ct('steps')}</T>
+      <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>{ct('login')}</T></Pressable>
 
       <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-        <View style={{flex:1}}><T variant="h3" color="#FFFFFF">DÉCOUVRIR LE PLAN DE PLACEMENT</T><T variant="small" color="#E5E5E5" style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
+        <View style={{flex:1}}><T variant="h3" color="#FFFFFF">{ct('plan')}</T><T variant="small" color="#E5E5E5" style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
         <Ionicons name="map-outline" size={24} color={c.primary}/>
       </Pressable>
       <EarlyBirdCountdown />
 
       <View style={{ marginTop: Space.lg }}>
-        <T variant="caption" color={c.textMute} style={{ marginBottom: 6 }}>CODE PROMO</T>
+        <T variant="caption" color={c.textMute} style={{ marginBottom: 6 }}>{ct('promo')}</T>
         <TextInput
           value={promo}
           onChangeText={setPromo}
@@ -126,9 +133,10 @@ export default function Tickets() {
 
       {testMode && <Card style={{marginTop:Space.md,borderColor:c.accent}}><T variant="h3">APERÇU INTERNE DES NOUVEAUX PASS</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Les pass 3 et 4 jours sont visibles ici uniquement pour vérification par les administrateurs. Ils restent désactivés et ne peuvent pas être achetés. Le billet technique 1 € reste réservé aux tests.</T></Card>}
 
-      <Section title="Choisis ton pass">
+      <Section title={ct('choose')}>
         {products.map((p) => {
           const q = qty[p.id] ?? p.min_per_order;
+          const display = ticketProductText(p.code, locale, p);
           const price = (p.price_cents / 100).toFixed(0);
           const total = ((p.price_cents * q) / 100).toFixed(0);
           const previewOnly = !p.active && ['three_days', 'four_days'].includes(p.code);
@@ -138,16 +146,16 @@ export default function Tickets() {
           const sun = availability?.days.find(d=>d.date==='2027-03-14')?.remaining;
           const remaining = bc ? availability?.black_card.remaining : p.code==='vip_sat' ? sat : p.code==='vip_sun' ? sun : vip && sat!==undefined && sun!==undefined ? Math.min(sat,sun) : undefined;
           const soldOut = remaining !== undefined && remaining < q;
-          const groupNote = p.code.startsWith('family_') ? '2 adultes + 2 enfants de moins de 12 ans' : p.group_size > 1 ? `${p.group_size} personnes incluses` : p.min_per_order > 1 ? `Minimum ${p.min_per_order} personnes` : null;
+          const groupNote = p.code.startsWith('family_') ? ct('family') : p.group_size > 1 ? ct('people', { n: p.group_size }) : p.min_per_order > 1 ? ct('minimum', { n: p.min_per_order }) : null;
           return (
             <Card key={p.id} style={{ marginBottom: Space.md, ...(selectedProduct === p.id ? { borderColor: c.primary, borderWidth: 2 } : {}) }}>
-              {selectedProduct === p.id && <T variant="caption" color={c.accent}>TON CHOIX — QUANTITÉ ET CODE CONSERVÉS</T>}
+              {selectedProduct === p.id && <T variant="caption" color={c.accent}>{ct('selected')}</T>}
               <View style={styles.rowBetween}>
                 <View style={{ flex: 1, paddingRight: Space.md }}>
-                  <T variant="h2">{p.name}</T>
-                  {previewOnly && <T variant="caption" color={c.accent} style={{marginTop:5}}>APERÇU INTERNE — VENTE DÉSACTIVÉE</T>}
-                  {!!p.description && <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>{p.description}</T>}
-                  {(vip || bc) && <T variant="small" color={soldOut ? c.danger : c.accent} style={{marginTop:6}}>{remaining===undefined ? 'Disponibilité en cours de vérification' : remaining===0 ? 'COMPLET' : `${remaining} place${remaining>1?'s':''} restante${remaining>1?'s':''} sur ${bc?56:112}${vip?' par jour':''}`}</T>}
+                  <T variant="h2">{display.name}</T>
+                  {previewOnly && <T variant="caption" color={c.accent} style={{marginTop:5}}>{ct('preview')}</T>}
+                  {!!p.description && <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>{display.description}</T>}
+                  {(vip || bc) && <T variant="small" color={soldOut ? c.danger : c.accent} style={{marginTop:6}}>{remaining===undefined ? ct('availability') : remaining===0 ? ct('full') : `${ct('places', { n: remaining, max: bc ? 56 : 112 })}${vip ? ` · ${ct('perDay')}` : ''}`}</T>}
                   {!!groupNote && <T variant="caption" color={c.accent} style={{ marginTop: 6 }}>{groupNote}</T>}
                 </View>
                 <T variant="title" color={c.accent} style={{ fontSize: 24 }}>{price} €</T>
@@ -163,7 +171,7 @@ export default function Tickets() {
               )}
 
               <Pressable disabled={previewOnly || busy || soldOut || ((vip || bc) && !availability)} onPress={() => buy(p)} style={[styles.buy, (previewOnly || busy || soldOut || ((vip || bc) && !availability)) && { opacity: 0.5 }]}>
-                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? 'Bientôt disponible' : soldOut ? 'Complet' : selectedProduct === p.id ? 'Continuer' : 'Choisir ce pass'}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
+                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? ct('soon') : soldOut ? ct('full') : selectedProduct === p.id ? ct('continue') : ct('choosePass')}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
               </Pressable>
             </Card>
           );

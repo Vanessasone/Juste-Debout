@@ -1,3 +1,4 @@
+import { useCustomerText } from '@/lib/customerText';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
@@ -7,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 
 export default function ShopSuccess() {
   const router = useRouter();
+  const ct=useCustomerText();
   const { session_id } = useLocalSearchParams<{ session_id?: string }>();
   const [state, setState] = useState<'checking'|'paid'|'pending'|'unknown'>('checking');
 
@@ -37,15 +39,15 @@ export default function ShopSuccess() {
       {state === 'checking' ? <ActivityIndicator color="#B7FF00" size="large"/> :
         <Ionicons name={state === 'paid' ? 'checkmark-circle' : 'time-outline'} size={72} color="#B7FF00" />}
       <T variant="title" style={styles.center}>
-        {state === 'paid' ? 'COMMANDE CONFIRMÉE' : state === 'checking' ? 'VÉRIFICATION DU PAIEMENT' : 'PAIEMENT EN COURS DE VÉRIFICATION'}
+        {state === 'paid' ? ct('paid') : state === 'checking' ? ct('checking') : ct('checkPayment')}
       </T>
       <T variant="small" style={styles.center}>
         {state === 'paid'
-          ? 'Ton paiement est confirmé. Merci pour ta commande Juste Debout !'
-          : 'Nous vérifions le statut de ta commande. Ne recommence pas le paiement : consulte tes commandes ou contacte le support si nécessaire.'}
+          ? ct('shopPaidBody')
+          : ct('shopPendingBody')}
       </T>
       <Pressable onPress={() => router.replace('/my-orders')} style={styles.button}>
-        <T variant="label" color="#000000">VOIR MES COMMANDES</T>
+        <T variant="label" color="#000000">{ct('myOrders')}</T>
       </Pressable>
     </View>
   </Screen>;

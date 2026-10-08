@@ -1,3 +1,4 @@
+import { useCustomerText } from '@/lib/customerText';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -6,6 +7,7 @@ import { Palette, Space } from '@/constants/brand';
 const DISMISS_KEY = 'jd_install_dismissed_v3';
 
 export function InstallPrompt() {
+  const ct = useCustomerText();
   const [visible, setVisible] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const [guide, setGuide] = useState(false);
@@ -50,33 +52,33 @@ export function InstallPrompt() {
   };
   if (!visible) return null;
   const steps: { icon: React.ComponentProps<typeof Ionicons>['name']; title: string; detail: string }[] = isIOS ? [
-    { icon: 'compass-outline', title: 'Ouvre le site dans Safari', detail: 'Si le lien est ouvert dans une autre application, touche la boussole pour passer dans Safari.' },
-    { icon: 'share-outline', title: 'Touche le bouton Partager', detail: 'C’est le carré avec une flèche vers le haut, dans la barre du navigateur.' },
-    { icon: 'add-circle-outline', title: 'Choisis « Sur l’écran d’accueil »', detail: 'Fais défiler les options si nécessaire. Selon la version iOS, ouvre « Plus ». Puis confirme avec « Ajouter ».' },
+    { icon: 'compass-outline', title: ct('safari'), detail: ct('safariHelp') },
+    { icon: 'share-outline', title: ct('share'), detail: ct('shareHelp') },
+    { icon: 'add-circle-outline', title: ct('addHome'), detail: ct('addHomeHelp') },
   ] : [
-    { icon: 'logo-chrome', title: 'Ouvre le site dans Chrome', detail: 'Va sur justedeboutapp.com dans le navigateur de ton téléphone.' },
-    { icon: 'ellipsis-vertical', title: 'Ouvre le menu ⋮', detail: 'Il se trouve généralement en haut à droite du navigateur.' },
-    { icon: 'add-circle-outline', title: 'Installe Juste Debout', detail: 'Choisis « Installer l’application » ou « Ajouter à l’écran d’accueil », puis confirme.' },
+    { icon: 'logo-chrome', title: ct('chrome'), detail: ct('chromeHelp') },
+    { icon: 'ellipsis-vertical', title: ct('menu'), detail: ct('menuHelp') },
+    { icon: 'add-circle-outline', title: ct('install'), detail: ct('androidHelp') },
   ];
   return (
     <View style={styles.wrap}>
       <View style={styles.header}>
         <Ionicons name="phone-portrait-outline" size={28} color={Palette.primary} />
-        <Text style={styles.title}>Juste Debout sur ton téléphone</Text>
-        <Pressable accessibilityRole="button" accessibilityLabel="Masquer pendant 7 jours" onPress={dismiss} style={styles.close}>
+        <Text style={styles.title}>{ct('installTitle')}</Text>
+        <Pressable accessibilityRole="button" accessibilityLabel={ct('hideInstall')} onPress={dismiss} style={styles.close}>
           <Ionicons name="close" size={24} color="#FFFFFF" />
         </Pressable>
       </View>
-      <Text style={styles.description}>Garde tes billets à portée de main : ajoute l’appli à ton écran d’accueil.</Text>
+      <Text style={styles.description}>{ct('installBody')}</Text>
       <Pressable accessibilityRole="button" onPress={deferred && !isIOS ? install : () => setGuide(true)} style={styles.button}>
         <Ionicons name={deferred && !isIOS ? 'download-outline' : 'add-circle-outline'} size={22} color="#000000" />
-        <Text style={styles.buttonText}>{deferred && !isIOS ? 'Installer l’application' : 'Comment installer ?'}</Text>
+        <Text style={styles.buttonText}>{deferred && !isIOS ? ct('install') : ct('howInstall')}</Text>
       </Pressable>
       <Modal visible={guide} transparent animationType="fade" onRequestClose={() => setGuide(false)}>
         <View style={styles.overlay}>
           <ScrollView style={styles.modal} contentContainerStyle={styles.modalContent}>
-            <Text accessibilityRole="header" style={styles.guideTitle}>Installer sur {isIOS ? 'iPhone / iPad' : 'Android'}</Text>
-            <Text style={styles.description}>Trois étapes, sans passer par un store.</Text>
+            <Text accessibilityRole="header" style={styles.guideTitle}>{ct('installOn', { device: isIOS ? 'iPhone / iPad' : 'Android' })}</Text>
+            <Text style={styles.description}>{ct('installSteps')}</Text>
             {steps.map((step, index) => (
               <View key={step.title} style={styles.step}>
                 <View style={styles.stepIcon}><Ionicons name={step.icon} size={28} color={Palette.primary} /></View>
@@ -86,9 +88,9 @@ export function InstallPrompt() {
                 </View>
               </View>
             ))}
-            <Text style={styles.description}>L’icône Juste Debout apparaîtra sur ton écran d’accueil.</Text>
+            <Text style={styles.description}>{ct('installedIcon')}</Text>
             <Pressable accessibilityRole="button" onPress={() => setGuide(false)} style={styles.button}>
-              <Text style={styles.buttonText}>J’ai compris</Text>
+              <Text style={styles.buttonText}>{ct('understood')}</Text>
             </Pressable>
           </ScrollView>
         </View>

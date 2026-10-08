@@ -1,3 +1,5 @@
+import { useCustomerText } from '@/lib/customerText';
+import { LanguagePicker } from '@/components/LanguagePicker';
 /**
  * Écran Connexion / Inscription — Juste Debout.
  */
@@ -20,7 +22,7 @@ import { Vitruve, Wordmark } from '@/components/Logo';
 import { T } from '@/components/ui';
 import { JD_TAGLINE, Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
-import { useT } from '@/lib/i18n';
+import { useT, useI18n, LANGUAGES } from '@/lib/i18n';
 import { useColors } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
 import { readTicketDraft, TicketDraft } from '@/lib/ticketPurchase';
@@ -28,13 +30,16 @@ import { readTicketDraft, TicketDraft } from '@/lib/ticketPurchase';
 type Mode = 'signin' | 'signup';
 
 export default function Login() {
-  const { recover } = useLocalSearchParams<{ recover?: string }>();
+  const { recover, lang } = useLocalSearchParams<{ recover?: string; lang?: string }>();
+  const { setLocale } = useI18n();
+  useEffect(() => { if (lang && LANGUAGES.some(l => l.code === lang)) void setLocale(lang); }, [lang, setLocale]);
   const purchase = recover === '1';
   const [draft, setDraft] = useState<TicketDraft | null>(null);
   useEffect(() => { if (purchase) void readTicketDraft().then(setDraft); }, [purchase]);
   const c = useColors();
   const router = useRouter();
   const t = useT();
+  const ct = useCustomerText();
   const styles = useMemo(() => makeStyles(c), [c]);
   const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<Mode>('signup');
@@ -52,7 +57,7 @@ export default function Login() {
       setError(t('auth.missingCreds'));
       return;
     }
-    if (mode === 'signup' && purchase && !name.trim()) { setError('Indique ton nom et ton prénom pour tes billets.'); return; }
+    if (mode === 'signup' && purchase && !name.trim()) { setError(ct('invalidContact')); return; }
     setLoading(true);
     try {
       if (mode === 'signup') {
@@ -67,7 +72,7 @@ export default function Login() {
         if (error) throw error;
         // Selon les réglages Supabase, l'email peut demander une confirmation.
         if (!data.session) {
-          setInfo('Si cette adresse est nouvelle, un e-mail de confirmation a été envoyé. Vérifie aussi les indésirables. Si tu as déjà un compte, connecte-toi : aucun nouvel e-mail de confirmation n’est envoyé.');
+          setInfo(ct('signupInfo'));
           setMode('signin');
         }
       } else {
@@ -97,6 +102,7 @@ export default function Login() {
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
+          <LanguagePicker />
           {/* Marque */}
           <View style={{ alignItems: 'center' }}>
             <Vitruve size={72} color={c.accent} />
@@ -111,13 +117,13 @@ export default function Login() {
 
           {/* Titre */}
           <T variant="title" color={c.text} style={{ marginTop: Space.xxxl, fontSize: 30 }}>
-            {purchase ? 'RÉCUPÈRE TES BILLETS' : mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
+            {purchase ? ct('recover') : mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
           </T>
           <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>
-            {purchase ? 'Crée ton espace ou connecte-toi avec l’adresse e-mail utilisée pour l’achat. Tes billets et QR codes seront rattachés à ton wallet après confirmation de cette adresse.' : mode === 'signup' ? t('auth.signupSub') : t('auth.signinSub')}
+            {purchase ? ct('guestLogin') : mode === 'signup' ? t('auth.signupSub') : t('auth.signinSub')}
           </T>
 
-          <Pressable accessibilityRole="button" onPress={() => router.replace('/billetterie')} style={{ marginTop: Space.md }}><T variant="small" color={c.accent}>{purchase ? '← Modifier mes places' : 'Acheter des places sans inscription préalable'}</T></Pressable>
+          <Pressable accessibilityRole="button" onPress={() => router.replace('/billetterie')} style={{ marginTop: Space.md }}><T variant="small" color={c.accent}>{purchase ? ct('edit') : ct('guestBuy')}</T></Pressable>
 
           {/* Sélecteur */}
           <View style={styles.toggle}>

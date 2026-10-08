@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCustomerText } from '@/lib/customerText';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,9 +7,10 @@ import { Screen, T } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 import { clearTicketDraft } from '@/lib/ticketPurchase';
 
-type PaymentState = 'checking' | 'paid' | 'pending' | 'login' | 'unknown';
+type PaymentState = 'checking' | 'paid' | 'pending' | 'unknown';
 export default function TicketSuccess() {
   const router = useRouter();
+  const ct = useCustomerText();
   const { session_id } = useLocalSearchParams<{ session_id?: string }>();
   const [state, setState] = useState<PaymentState>('checking');
 
@@ -42,16 +44,13 @@ export default function TicketSuccess() {
         ? <ActivityIndicator size="large" color="#B5FA42" />
         : <Ionicons name={paid ? 'checkmark-circle' : 'time-outline'} size={76} color="#B5FA42" />}
       <T variant="title" style={styles.center}>
-        {paid ? 'PAIEMENT CONFIRMÉ' : state === 'checking' ? 'VÉRIFICATION DE TON PAIEMENT' : state === 'login' ? 'CONNECTE-TOI POUR VOIR TON BILLET' : 'PAIEMENT À VÉRIFIER'}
+        {paid ? ct('paid') : state === 'checking' ? ct('checking') : ct('checkPayment')}
       </T>
       <T variant="small" style={styles.center}>
-        {paid
-          ? 'Ton paiement est confirmé. Crée ton espace ou connecte-toi avec l’adresse e-mail utilisée pour l’achat afin de récupérer tes billets et QR codes.'
-          : state === 'login' ? 'Le paiement a été transmis à Stripe. Connecte-toi avec le compte utilisé pour la commande afin de retrouver tes billets. Ne paie pas une deuxième fois.'
-          : 'Nous ne pouvons pas encore confirmer le statut de cette commande sur cet écran. Ne paie pas une deuxième fois : consulte ton portefeuille ou contacte la billetterie.'}
+        {paid ? ct('paidBody') : ct('pendingBody')}
       </T>
       <Pressable accessibilityRole="button" onPress={() => { void supabase.auth.getUser().then(({data:{user}})=>router.replace(user ? '/recover-tickets' : {pathname:'/login',params:{recover:'1'}})); }} style={styles.button}>
-        <T variant="label" color="#101010">{'RÉCUPÉRER MES BILLETS'}</T>
+        <T variant="label" color="#101010">{ct('recover')}</T>
       </Pressable>
     </View>
   </Screen>;

@@ -1,3 +1,4 @@
+import { useCustomerText } from '@/lib/customerText';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
@@ -8,6 +9,7 @@ import { WELCOME_FLAG } from '@/app/welcome';
 
 export default function RecoverTickets() {
   const router=useRouter();
+  const ct = useCustomerText();
   const [error,setError]=useState(false);
   const recover=async()=>{
     setError(false);
@@ -16,7 +18,7 @@ export default function RecoverTickets() {
   };
   useEffect(()=>{void recover();},[]);
   return <Screen scroll={false}><View style={{flex:1,justifyContent:'center',alignItems:'center',gap:20,padding:24}}>
-    <T variant="title" style={{textAlign:'center'}}>RÉCUPÉRER MES BILLETS</T>
-    {error ? <><T style={{textAlign:'center'}}>Confirme l’adresse e-mail utilisée lors de l’achat pour récupérer tes billets. Ne paie pas une deuxième fois.</T><GButton label="Réessayer" onPress={()=>void recover()} /><GButton label="Voir mon wallet" onPress={()=>router.replace('/wallet')} /></> : <ActivityIndicator />}
+    <T variant="title" style={{textAlign:'center'}}>{ct('recover')}</T>
+    {error ? <><T style={{textAlign:'center'}}>{ct('verifyEmail')}</T><GButton label={ct('retry')} onPress={()=>void recover()} /><GButton label={ct('wallet')} onPress={()=>router.replace('/wallet')} /></> : <ActivityIndicator />}
   </View></Screen>;
 }

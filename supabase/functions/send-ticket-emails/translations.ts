@@ -1,0 +1,110 @@
+export const translations = {
+  "fr": {
+    "emailSubject": "Juste Debout — Votre commande est confirmée",
+    "emailReceipt": "Paiement : {amount} · Référence : {reference}",
+    "paidBody": "Ton paiement est confirmé. Crée ton espace ou connecte-toi avec l’adresse e-mail utilisée pour l’achat afin de récupérer tes billets et QR codes.",
+    "recover": "RÉCUPÉRER MES BILLETS",
+    "presels": "Présélections · 11–12 mars",
+    "preselVenue": "Autre salle à Paris · adresse communiquée ultérieurement",
+    "finalDays": "Finales · 13–14 mars",
+    "accessMulti": "{n} jours · une entrée par jour, sortie définitive",
+    "passThree": "Pass 3 jours",
+    "passFour": "Pass 4 jours"
+  },
+  "en": {
+    "emailSubject": "Juste Debout — Your order is confirmed",
+    "emailReceipt": "Payment: {amount} · Reference: {reference}",
+    "paidBody": "Your payment is confirmed. Create your account or sign in using the email address used for your purchase to get your tickets and QR codes.",
+    "recover": "GET MY TICKETS",
+    "presels": "Preselections · 11–12 March",
+    "preselVenue": "Another Paris venue · address to be announced",
+    "finalDays": "Finals · 13–14 March",
+    "accessMulti": "{n} days · one entry per day, no re-entry after leaving",
+    "passThree": "3-day pass",
+    "passFour": "4-day pass"
+  },
+  "de": {
+    "emailSubject": "Juste Debout — Deine Bestellung ist bestätigt",
+    "emailReceipt": "Zahlung: {amount} · Referenz: {reference}",
+    "paidBody": "Deine Zahlung ist bestätigt. Erstelle dein Konto oder melde dich mit der beim Kauf verwendeten E-Mail-Adresse an, um deine Tickets und QR-Codes abzurufen.",
+    "recover": "MEINE TICKETS ABRUFEN",
+    "presels": "Vorauswahl · 11.–12. März",
+    "preselVenue": "Anderer Ort in Paris · Adresse wird bekanntgegeben",
+    "finalDays": "Finale · 13.–14. März",
+    "accessMulti": "{n} Tage · ein Einlass pro Tag, kein Wiedereinlass nach Verlassen",
+    "passThree": "3-Tages-Pass",
+    "passFour": "4-Tages-Pass"
+  },
+  "it": {
+    "emailSubject": "Juste Debout — Il tuo ordine è confermato",
+    "emailReceipt": "Pagamento: {amount} · Riferimento: {reference}",
+    "paidBody": "Il pagamento è confermato. Crea il tuo account o accedi con l’indirizzo e-mail usato per l’acquisto per recuperare biglietti e codici QR.",
+    "recover": "RECUPERA I MIEI BIGLIETTI",
+    "presels": "Preselezioni · 11–12 marzo",
+    "preselVenue": "Altra sala a Parigi · indirizzo da annunciare",
+    "finalDays": "Finali · 13–14 marzo",
+    "accessMulti": "{n} giorni · un ingresso al giorno, nessun rientro dopo l’uscita",
+    "passThree": "Pass 3 giorni",
+    "passFour": "Pass 4 giorni"
+  },
+  "es": {
+    "emailSubject": "Juste Debout — Tu pedido está confirmado",
+    "emailReceipt": "Pago: {amount} · Referencia: {reference}",
+    "paidBody": "Tu pago está confirmado. Crea tu cuenta o inicia sesión con el correo usado en la compra para recuperar tus entradas y códigos QR.",
+    "recover": "RECUPERAR MIS ENTRADAS",
+    "presels": "Preselecciones · 11–12 marzo",
+    "preselVenue": "Otro recinto en París · dirección por anunciar",
+    "finalDays": "Finales · 13–14 marzo",
+    "accessMulti": "{n} días · una entrada al día, sin reentrada tras salir",
+    "passThree": "Pase de 3 días",
+    "passFour": "Pase de 4 días"
+  },
+  "pt": {
+    "emailSubject": "Juste Debout — A tua encomenda está confirmada",
+    "emailReceipt": "Pagamento: {amount} · Referência: {reference}",
+    "paidBody": "O pagamento está confirmado. Cria a tua conta ou inicia sessão com o e-mail usado na compra para obter os bilhetes e códigos QR.",
+    "recover": "OBTER OS MEUS BILHETES",
+    "presels": "Pré-seleções · 11–12 março",
+    "preselVenue": "Outra sala em Paris · morada a anunciar",
+    "finalDays": "Finais · 13–14 março",
+    "accessMulti": "{n} dias · uma entrada por dia, sem reentrada após sair",
+    "passThree": "Passe de 3 dias",
+    "passFour": "Passe de 4 dias"
+  },
+  "zh": {
+    "emailSubject": "Juste Debout — 订单已确认",
+    "emailReceipt": "付款：{amount} · 编号：{reference}",
+    "paidBody": "付款已确认。请使用购票时的电子邮箱创建账户或登录，领取门票和二维码。",
+    "recover": "领取我的门票",
+    "presels": "预选赛 · 3月11–12日",
+    "preselVenue": "巴黎另一场地 · 地址稍后公布",
+    "finalDays": "决赛 · 3月13–14日",
+    "accessMulti": "{n}天 · 每天仅一次入场，离场后不可再次进入",
+    "passThree": "三日通票",
+    "passFour": "四日通票"
+  },
+  "ko": {
+    "emailSubject": "Juste Debout — 주문이 확인되었습니다",
+    "emailReceipt": "결제: {amount} · 참조: {reference}",
+    "paidBody": "결제가 확인되었습니다. 구매에 사용한 이메일로 계정을 만들거나 로그인하여 티켓과 QR 코드를 받으세요.",
+    "recover": "내 티켓 받기",
+    "presels": "예선 · 3월 11–12일",
+    "preselVenue": "파리 내 다른 장소 · 주소 추후 공지",
+    "finalDays": "결승 · 3월 13–14일",
+    "accessMulti": "{n}일 · 하루 한 번 입장, 퇴장 후 재입장 불가",
+    "passThree": "3일 패스",
+    "passFour": "4일 패스"
+  },
+  "ja": {
+    "emailSubject": "Juste Debout — ご注文が確認されました",
+    "emailReceipt": "支払い：{amount} · 参照番号：{reference}",
+    "paidBody": "支払いが確認されました。購入時のメールアドレスでアカウントを作成するかログインして、チケットとQRコードを受け取ってください。",
+    "recover": "チケットを受け取る",
+    "presels": "予選 · 3月11–12日",
+    "preselVenue": "パリの別会場 · 住所は後日発表",
+    "finalDays": "決勝 · 3月13–14日",
+    "accessMulti": "{n}日間 · 1日1回入場、退場後の再入場不可",
+    "passThree": "3日パス",
+    "passFour": "4日パス"
+  }
+} as const;

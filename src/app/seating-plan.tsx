@@ -1,3 +1,4 @@
+import { useCustomerText } from '@/lib/customerText';
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -19,17 +20,17 @@ function SeatBlock({x,y,angle=0,color,rows=6,cols=8}:{x:number;y:number;angle?:n
  </G>;
 }
 export default function SeatingPlan(){
- const c=useColors();const router=useRouter();const [selected,setSelected]=useState<Zone>('bc');
+ const c=useColors();const router=useRouter();const ct=useCustomerText();const [selected,setSelected]=useState<Zone>('bc');
  const label=(txt:string,x:number,y:number,size=12,color='#F5F5F5')=><SvgText x={x} y={y} fill={color} fontSize={size} fontWeight="bold" textAnchor="middle">{txt}</SvgText>;
  return <Screen>
-  <PageHeader title="Plan de placement" subtitle="Juste Debout Paris · 13–14 mars 2027"/>
-  <T variant="small" color={c.textDim} style={{marginBottom:Space.md}}>Sélectionne une catégorie pour découvrir son emplacement dans la salle.</T>
+  <PageHeader title={ct('seatingTitle')} subtitle={ct('finals')}/>
+  <T variant="small" color={c.textDim} style={{marginBottom:Space.md}}>{ct('seatingIntro')}</T>
   <View style={{backgroundColor:'#0A0C0F',borderRadius:18,overflow:'hidden',borderWidth:1,borderColor:'#343A42'}}>
-   <Svg viewBox="0 0 380 435" width="100%" accessibilityLabel="Plan des tribunes Juste Debout. Black Card en haut à gauche, VIP en haut à droite et sur les côtés, standard en bas.">
+   <Svg viewBox="0 0 380 435" width="100%" accessibilityLabel={ct('seatingTitle')}>
     <Rect width="380" height="435" fill="#0D0F12"/>
     <Path d="M90 70 L190 28 L290 70 L335 185 L330 335 L50 335 L45 185 Z" fill="#171A1F" stroke="#33373C" strokeWidth="2"/>
     <Rect x={132} y={36} width={116} height={35} rx={4} fill="#292D33" stroke="#565D66"/>
-    {label("SCÈNE / DJ",190,58,13)}
+    {label(ct('stage'),190,58,13)}
     <Path d="M190 74 L190 146" stroke="#444" strokeWidth="2" strokeDasharray="5,6"/>
     <SeatBlock x={82} y={95} angle={-35} color="#D7B66D" rows={5} cols={7}/>
     <SeatBlock x={248} y={92} angle={35} color="#A5FA39" rows={5} cols={7}/>
@@ -51,7 +52,7 @@ export default function SeatingPlan(){
     <Rect x={142} y={356} width={96} height={26} rx={5} fill="#20252A" stroke="#C7CDD2"/>
     {label("STANDARD",190,374,12)}
     <Line x1={24} x2={356} y1={407} y2={407} stroke="#343A42"/>
-    {label("PLAN INDICATIF · NON NUMÉROTÉ",190,424,10,'#8C929A')}
+    {label(ct('planNote'),190,424,10,'#8C929A')}
    </Svg>
   </View>
   <View style={{flexDirection:'row',gap:8,marginTop:Space.md}}>
@@ -61,11 +62,11 @@ export default function SeatingPlan(){
   </View>
   <Card style={{marginTop:Space.md}}>
    <T variant="h3" color={zones[selected].color}>{zones[selected].title}</T>
-   <T variant="small" color={c.textDim} style={{marginTop:8}}>{zones[selected].detail}</T>
+   <T variant="small" color={c.textDim} style={{marginTop:8}}>{ct(selected === 'bc' ? 'zoneBc' : selected === 'vip' ? 'zoneVip' : 'zoneStandard')}</T>
   </Card>
-  <T variant="caption" color={c.textMute} style={{marginTop:Space.md}}>Répartition issue du setup fourni par l’organisation. Plan indicatif, susceptible d’ajustements techniques ; aucun siège individuel n’est attribué.</T>
+  <T variant="caption" color={c.textMute} style={{marginTop:Space.md}}>{ct('planDisclaimer')}</T>
   <Pressable onPress={()=>router.push('/billetterie')} style={{marginTop:Space.lg,backgroundColor:c.primary,borderRadius:99,padding:16,alignItems:'center'}}>
-   <T variant="label" color={c.black}>CHOISIR MON PASS</T>
+   <T variant="label" color={c.black}>{ct('choose')}</T>
   </Pressable>
  </Screen>;
 }

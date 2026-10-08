@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 export const TICKET_DRAFT_KEY = 'jd_ticket_purchase_draft_v1';
-export type TicketDraft = { eventId: string; productId: string; productName: string; quantity: number; promoCode: string; createdAt: number };
+export type TicketDraft = { eventId: string; productId: string; productName: string; productCode?: string; quantity: number; promoCode: string; createdAt: number };
 export async function readTicketDraft(): Promise<TicketDraft | null> {
   try {
     const raw = await AsyncStorage.getItem(TICKET_DRAFT_KEY);
