@@ -163,6 +163,14 @@ export default function Tickets() {
                 <T variant="title" color={c.accent} style={{ fontSize: 24 }}>{price} €</T>
               </View>
 
+              {(vip || bc) && <View style={{ marginTop: Space.md, gap: 8 }}>
+                <T variant="h3">{ct(bc ? 'includedBlack' : 'includedVip')}</T>
+                {(bc
+                  ? ['benefit1','benefit2','benefit3','benefit4','benefit5','benefit6','benefit7','benefit8','benefit9'] as const
+                  : ['vipBenefit1','vipBenefit2','vipBenefit3','vipBenefit4'] as const
+                ).map(key => <T key={key} variant="small" color={c.textDim}>• {ct(key)}</T>)}
+              </View>}
+
               {(p.max_per_order > 1 || p.min_per_order > 1) && (
                 <View style={styles.qtyRow}>
                   <Pressable onPress={() => changeQty(p, -1)} style={styles.qtyBtn}><Ionicons name="remove" size={18} color={c.text} /></Pressable>

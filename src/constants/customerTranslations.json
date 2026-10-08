@@ -222,7 +222,12 @@
     "assignTickets": "ATTRIBUER {n} BILLETS",
     "remainWallet": "{n} billets resteront dans ton wallet.",
     "invitationEmailSubject": "Juste Debout — Un billet vous attend",
-    "groupFailed": "{n} billets n’ont pas pu être attribués. Vérifie le suivi et réessaie."
+    "groupFailed": "{n} billets n’ont pas pu être attribués. Vérifie le suivi et réessaie.",
+    "includedVip": "Inclus dans le VIP",
+    "vipBenefit1": "Placement privilégié dans les zones VIP du plan de placement",
+    "vipBenefit2": "Entrée coupe-file",
+    "vipBenefit3": "Accès au lounge VIP privé et à l’espace photo",
+    "vipBenefit4": "Une boisson et un snack inclus"
   },
   "en": {
     "paid": "PAYMENT CONFIRMED",
@@ -447,7 +452,12 @@
     "assignTickets": "ASSIGN {n} TICKETS",
     "remainWallet": "{n} tickets will stay in your wallet.",
     "invitationEmailSubject": "Juste Debout — A ticket is waiting for you",
-    "groupFailed": "{n} tickets could not be assigned. Check the status and try again."
+    "groupFailed": "{n} tickets could not be assigned. Check the status and try again.",
+    "includedVip": "Included in VIP",
+    "vipBenefit1": "Preferred seating in the VIP areas shown on the seating plan",
+    "vipBenefit2": "Priority entry",
+    "vipBenefit3": "Access to the private VIP lounge and photo area",
+    "vipBenefit4": "One drink and one snack included"
   },
   "de": {
     "paid": "ZAHLUNG BESTÄTIGT",
@@ -672,7 +682,12 @@
     "assignTickets": "{n} TICKETS ZUWEISEN",
     "remainWallet": "{n} Tickets bleiben in deinem Wallet.",
     "invitationEmailSubject": "Juste Debout — Ein Ticket wartet auf dich",
-    "groupFailed": "{n} Tickets konnten nicht zugewiesen werden. Prüfe den Status und versuche es erneut."
+    "groupFailed": "{n} Tickets konnten nicht zugewiesen werden. Prüfe den Status und versuche es erneut.",
+    "includedVip": "Im VIP enthalten",
+    "vipBenefit1": "Bevorzugte Plätze in den VIP-Bereichen des Sitzplans",
+    "vipBenefit2": "Bevorzugter Einlass",
+    "vipBenefit3": "Zugang zur privaten VIP-Lounge und zum Fotobereich",
+    "vipBenefit4": "Ein Getränk und ein Snack inklusive"
   },
   "it": {
     "paid": "PAGAMENTO CONFERMATO",
@@ -897,7 +912,12 @@
     "assignTickets": "ASSEGNA {n} BIGLIETTI",
     "remainWallet": "{n} biglietti resteranno nel tuo wallet.",
     "invitationEmailSubject": "Juste Debout — Un biglietto ti aspetta",
-    "groupFailed": "Impossibile assegnare {n} biglietti. Controlla lo stato e riprova."
+    "groupFailed": "Impossibile assegnare {n} biglietti. Controlla lo stato e riprova.",
+    "includedVip": "Incluso nel VIP",
+    "vipBenefit1": "Posti privilegiati nelle zone VIP della piantina",
+    "vipBenefit2": "Ingresso prioritario",
+    "vipBenefit3": "Accesso alla lounge VIP privata e all’area foto",
+    "vipBenefit4": "Una bevanda e uno snack inclusi"
   },
   "es": {
     "paid": "PAGO CONFIRMADO",
@@ -1122,7 +1142,12 @@
     "assignTickets": "ASIGNAR {n} ENTRADAS",
     "remainWallet": "{n} entradas se quedarán en tu wallet.",
     "invitationEmailSubject": "Juste Debout — Una entrada te espera",
-    "groupFailed": "No se pudieron asignar {n} entradas. Revisa el seguimiento y reintenta."
+    "groupFailed": "No se pudieron asignar {n} entradas. Revisa el seguimiento y reintenta.",
+    "includedVip": "Incluido en VIP",
+    "vipBenefit1": "Asientos privilegiados en las zonas VIP del plano",
+    "vipBenefit2": "Entrada prioritaria",
+    "vipBenefit3": "Acceso al lounge VIP privado y al espacio de fotos",
+    "vipBenefit4": "Una bebida y un snack incluidos"
   },
   "pt": {
     "paid": "PAGAMENTO CONFIRMADO",
@@ -1347,7 +1372,12 @@
     "assignTickets": "ATRIBUIR {n} BILHETES",
     "remainWallet": "{n} bilhetes ficarão na tua carteira.",
     "invitationEmailSubject": "Juste Debout — Um bilhete espera por ti",
-    "groupFailed": "Não foi possível atribuir {n} bilhetes. Verifica o acompanhamento e tenta novamente."
+    "groupFailed": "Não foi possível atribuir {n} bilhetes. Verifica o acompanhamento e tenta novamente.",
+    "includedVip": "Incluído no VIP",
+    "vipBenefit1": "Lugares privilegiados nas áreas VIP do mapa",
+    "vipBenefit2": "Entrada prioritária",
+    "vipBenefit3": "Acesso ao lounge VIP privado e ao espaço de fotos",
+    "vipBenefit4": "Uma bebida e um snack incluídos"
   },
   "zh": {
     "paid": "付款已确认",
@@ -1572,7 +1602,12 @@
     "assignTickets": "分配{n}张门票",
     "remainWallet": "票夹将保留{n}张门票。",
     "invitationEmailSubject": "Juste Debout — 有门票等你领取",
-    "groupFailed": "{n}张门票未能分配，请检查状态并重试。"
+    "groupFailed": "{n}张门票未能分配，请检查状态并重试。",
+    "includedVip": "VIP权益",
+    "vipBenefit1": "座位图所示VIP区域的优选座位",
+    "vipBenefit2": "优先入场",
+    "vipBenefit3": "私人VIP休息室和拍照区",
+    "vipBenefit4": "包含一份饮品和一份小食"
   },
   "ko": {
     "paid": "결제 확인 완료",
@@ -1797,7 +1832,12 @@
     "assignTickets": "티켓 {n}장 배정",
     "remainWallet": "월렛에 티켓 {n}장이 남습니다.",
     "invitationEmailSubject": "Juste Debout — 티켓이 기다리고 있습니다",
-    "groupFailed": "티켓 {n}장을 배정하지 못했습니다. 현황을 확인하고 다시 시도하세요."
+    "groupFailed": "티켓 {n}장을 배정하지 못했습니다. 현황을 확인하고 다시 시도하세요.",
+    "includedVip": "VIP 포함 혜택",
+    "vipBenefit1": "좌석 배치도의 VIP 구역 우선 좌석",
+    "vipBenefit2": "우선 입장",
+    "vipBenefit3": "전용 VIP 라운지 및 포토존 이용",
+    "vipBenefit4": "음료 1잔과 간식 1개 포함"
   },
   "ja": {
     "paid": "支払い確認済み",
@@ -2022,6 +2062,11 @@
     "assignTickets": "{n}枚のチケットを割り当てる",
     "remainWallet": "ウォレットに{n}枚のチケットが残ります。",
     "invitationEmailSubject": "Juste Debout — チケットを受け取れます",
-    "groupFailed": "{n}枚のチケットを割り当てられませんでした。状況を確認して再試行してください。"
+    "groupFailed": "{n}枚のチケットを割り当てられませんでした。状況を確認して再試行してください。",
+    "includedVip": "VIPに含まれる特典",
+    "vipBenefit1": "座席図のVIPエリアの優先席",
+    "vipBenefit2": "優先入場",
+    "vipBenefit3": "専用VIPラウンジとフォトエリアの利用",
+    "vipBenefit4": "ドリンク1杯とスナック1個付き"
   }
 }
