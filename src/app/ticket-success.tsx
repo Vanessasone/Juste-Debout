@@ -49,7 +49,7 @@ export default function TicketSuccess() {
       <T variant="small" style={styles.center}>
         {paid ? ct('paidBody') : ct('pendingBody')}
       </T>
-      <Pressable accessibilityRole="button" onPress={() => { void supabase.auth.getUser().then(({data:{user}})=>router.replace(user ? '/recover-tickets' : {pathname:'/login',params:{recover:'1'}})); }} style={styles.button}>
+      <Pressable accessibilityRole="button" onPress={() => router.replace({ pathname: '/login', params: { recover: '1' } })} style={styles.button}>
         <T variant="label" color="#101010">{ct('recover')}</T>
       </Pressable>
     </View>
