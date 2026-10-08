@@ -25,6 +25,14 @@ export default function Scanner() {
   const [permission, requestPermission] = useCameraPermissions();
   const [result, setResult] = useState<Result>(null);
   const [count, setCount] = useState(0);
+  const [eventId, setEventId] = useState('eb0025ca-b597-4708-9d47-b24ebbf507b5');
+  const [events, setEvents] = useState<Array<{id: string; title: string}>>([]);
+  const [eventsOpen, setEventsOpen] = useState(false);
+  useEffect(() => {
+    void serverRequest(signal => supabase.rpc('scanner_events').abortSignal(signal), 8000)
+      .then(({data, error}) => { if (!error && data?.ok) setEvents(data.events); })
+      .catch(() => {});
+  }, []);
   const [manual, setManual] = useState('');
   const processing = useRef(false);
   const [health, setHealth] = useState<'checking' | 'ready' | 'offline' | 'forbidden'>('checking');
@@ -61,7 +69,7 @@ export default function Scanner() {
         const name = tk.holder_name || tk.holder_email || tk.profiles?.full_name || tk.profiles?.alias || '';
         const category = scanCategoryFallback(tk);
         const categoryCode = tk.ticket_products?.code ?? '';
-        const scan = await scanTicketForToday(tk.id);
+        const scan = await scanTicketForToday(tk.id, eventId);
         if (scan.ok) {
           accepted = true;
           setResult({ status: 'ok', name, category: scan.category || category, categoryCode: scan.category_code || categoryCode });
@@ -73,6 +81,12 @@ export default function Scanner() {
           setResult({ status: 'used', name, category: scan.category || category, categoryCode: scan.category_code || categoryCode, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
         } else if (scan.error === 'wrong_day') {
           setResult({ status: 'error', name, category: scan.category || category, categoryCode: scan.category_code || categoryCode, msg: 'Billet non valable aujourd’hui' });
+        } else if (scan.error === 'wrong_event' || scan.error === 'event_not_included') {
+          setResult({ status: 'error', name, category, msg: 'Ce billet ne donne pas accès à l’événement sélectionné' });
+        } else if (scan.error === 'membership_not_active') {
+          setResult({ status: 'error', name, category, msg: 'Black Card expirée ou inactive : accès refusé' });
+        } else if (scan.error === 'event_full' || scan.error === 'capacity_unconfigured') {
+          setResult({ status: 'error', name, category, msg: 'Admission impossible : jauge atteinte ou non configurée' });
         } else if (scan.error === 'cancelled') {
           setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet annulé : accès refusé' });
         } else if (scan.error === 'scanner_forbidden') {
@@ -208,6 +222,15 @@ export default function Scanner() {
         </View>
       </View>
 
+      {health === 'ready' && events.length > 1 && !result && <View style={[styles.eventSelector, {top: insets.top + 106}]}>
+        <Pressable disabled={processing.current} accessibilityRole="button" onPress={() => setEventsOpen(!eventsOpen)}>
+          <T variant="small" color="#FFFFFF">{events.find(event => event.id === eventId)?.title || 'Choisir l’événement'} ▾</T>
+        </Pressable>
+        {eventsOpen && events.map(event => <Pressable key={event.id} disabled={processing.current} accessibilityRole="button" onPress={() => { setEventId(event.id); setCount(0); setEventsOpen(false); }} style={{paddingVertical: 12}}>
+          <T variant="small" color={event.id === eventId ? Palette.primary : '#FFFFFF'}>{event.title}</T>
+        </Pressable>)}
+      </View>}
+
       {/* Entraînement isolé : aucune lecture ni écriture de billets réels. */}
       <Pressable onPress={() => router.push('/scanner-simulation')} style={[styles.simulationLink, { top: insets.top + 64 }]}>
         <Ionicons name="flask-outline" size={17} color={Palette.primary} />
@@ -315,6 +338,7 @@ const styles = StyleSheet.create({
     borderColor: Palette.primary,
     backgroundColor: 'rgba(0,0,0,0.85)',
   },
+  eventSelector: {position: 'absolute', left: Space.lg, right: Space.lg, backgroundColor: '#171717', borderRadius: 12, padding: 12, zIndex: 10},
   networkButton: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
     marginTop: 24, paddingVertical: 16, paddingHorizontal: 18,

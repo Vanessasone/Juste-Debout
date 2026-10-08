@@ -5,6 +5,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { Vitruve, Wordmark } from '@/components/Logo';
 import { Card, PageHeader, Screen, T } from '@/components/ui';
 import { Radius, Space } from '@/constants/brand';
+import { BLACK_CARD_BENEFITS } from '@/constants/blackCardBenefits';
 import { BlackCardMembership, getMyBlackCard } from '@/lib/blackCard';
 import { useColors } from '@/lib/theme';
 
@@ -53,6 +54,11 @@ export default function BlackCardScreen() {
           <View style={styles.benefit}><Ionicons name="ticket-outline" size={20} color={c.primary} /><T variant="small" style={{ flex: 1 }}>Ce QR reprend ton billet acheté. Les accès sont contrôlés selon les événements et dates inclus.</T></View>
           <View style={styles.benefit}><Ionicons name="calendar-outline" size={20} color={c.primary} /><T variant="small" style={{ flex: 1 }}>Membership valable 1 an à compter de l’activation</T></View>
         </> : <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>La Black Card est limitée à 56 exemplaires et valable un an à compter de son activation.</T>}
+      </Card>
+      <Card style={{ marginTop: Space.lg }}>
+        <T variant="h3">Inclus dans la Black Card</T>
+        {BLACK_CARD_BENEFITS.map(benefit => <T key={benefit} variant="small" color={c.textDim} style={{marginTop: 12}}>• {benefit}</T>)}
+        <T variant="small" color={c.textDim} style={{marginTop: 16}}>Les événements inclus seront rattachés à ce même QR à mesure que leur programmation sera publiée. Les remises concernent des prestations payantes.</T>
       </Card>
     </>}
     <Modal visible={qrOpen && !!card?.qr_token} transparent animationType="fade" onRequestClose={() => setQrOpen(false)}>

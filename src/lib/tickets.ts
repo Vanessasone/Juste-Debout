@@ -127,9 +127,9 @@ export async function cancelTicketTransfer(ticketId: string): Promise<void> {
 }
 
 
-export async function scanTicketForToday(id: string): Promise<{ ok: boolean; error?: string; scan_count?: number; access_days?: number; scanned_at?: string; category?: string; category_code?: string }> {
+export async function scanTicketForToday(id: string, eventId?: string): Promise<{ ok: boolean; error?: string; scan_count?: number; access_days?: number; scanned_at?: string; category?: string; category_code?: string }> {
   const { data, error } = await serverRequest(signal =>
-    supabase.rpc('scan_ticket', { p_ticket: id }).abortSignal(signal));
+    (eventId ? supabase.rpc('scan_ticket_at_event', { p_ticket: id, p_event: eventId }) : supabase.rpc('scan_ticket', { p_ticket: id })).abortSignal(signal));
   if (error) throw error;
   return data;
 }
