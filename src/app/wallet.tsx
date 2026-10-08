@@ -183,7 +183,7 @@ function TicketCard({
         <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
         {saturdayUsed && <DetailRow icon="checkmark-circle-outline" label="Samedi" value={`Entrée utilisée à ${scanTime(saturdayScan!.scanned_at)} · sortie définitive. Dimanche disponible.`} c={c} />}
         {sundayScan && <DetailRow icon="checkmark-circle-outline" label="Dimanche" value={`Entrée utilisée à ${scanTime(sundayScan.scanned_at)} · sortie définitive`} c={c} />}
-        {!isWeekend && scans.length>0 && <DetailRow icon="checkmark-circle-outline" label="Entrée" value={`Utilisée à ${scanTime(scans[0].scanned_at)} · sortie définitive`} c={c} />
+        {!isWeekend && scans.length>0 && <DetailRow icon="checkmark-circle-outline" label="Entrée" value={`Utilisée à ${scanTime(scans[0].scanned_at)} · sortie définitive`} c={c} />}
         <DetailRow icon="location-outline" label="Lieu" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
         <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
         <DetailRow icon="receipt-outline" label="Référence" value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
