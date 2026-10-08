@@ -51,6 +51,7 @@ export default function Scanner() {
     if (processing.current || health !== 'ready' || !token.trim()) return;
     processing.current = true;
     let uncertainNetwork = false;
+    let accepted = false;
     try {
       const tk = await getTicketByToken(token);
       if (!tk) {
@@ -61,6 +62,7 @@ export default function Scanner() {
         const categoryCode = tk.ticket_products?.code ?? '';
         const scan = await scanTicketForToday(tk.id);
         if (scan.ok) {
+          accepted = true;
           setResult({ status: 'ok', name, category: scan.category || category, categoryCode: scan.category_code || categoryCode });
           setCount((n) => n + 1);
         } else if ((scan.error === 'already_scanned_today' || scan.error === 'already_used')) {
@@ -89,7 +91,7 @@ export default function Scanner() {
           processing.current = false;
           setResult(null);
           setManual('');
-        }, 5000);
+        }, accepted ? 2000 : 5000);
       }
     }
   };
