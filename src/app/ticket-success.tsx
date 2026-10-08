@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Screen, T } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
 
-type PaymentState = 'checking' | 'paid' | 'pending' | 'unknown';
+type PaymentState = 'checking' | 'paid' | 'pending' | 'login' | 'unknown';
 export default function TicketSuccess() {
   const router = useRouter();
   const { session_id } = useLocalSearchParams<{ session_id?: string }>();
@@ -21,7 +21,7 @@ export default function TicketSuccess() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (cancelled) return;
-        if (!user) { setState('unknown'); return; }
+        if (!user) { setState('login'); return; }
         const { data, error } = await supabase.from('ticket_orders')
           .select('status').eq('stripe_checkout_session_id', session_id)
           .eq('user_id', user.id).maybeSingle();
@@ -46,15 +46,16 @@ export default function TicketSuccess() {
         ? <ActivityIndicator size="large" color="#B5FA42" />
         : <Ionicons name={paid ? 'checkmark-circle' : 'time-outline'} size={76} color="#B5FA42" />}
       <T variant="title" style={styles.center}>
-        {paid ? 'PAIEMENT CONFIRMÉ' : state === 'checking' ? 'VÉRIFICATION DE TON PAIEMENT' : 'VÉRIFICATION EN COURS'}
+        {paid ? 'PAIEMENT CONFIRMÉ' : state === 'checking' ? 'VÉRIFICATION DE TON PAIEMENT' : state === 'login' ? 'CONNECTE-TOI POUR VOIR TON BILLET' : 'PAIEMENT À VÉRIFIER'}
       </T>
       <T variant="small" style={styles.center}>
         {paid
           ? 'Ton paiement Juste Debout est confirmé. Tes billets et QR codes sont disponibles dans ton portefeuille.'
+          : state === 'login' ? 'Le paiement a été transmis à Stripe. Connecte-toi avec le compte utilisé pour la commande afin de retrouver tes billets. Ne paie pas une deuxième fois.'
           : 'Nous ne pouvons pas encore confirmer le statut de cette commande sur cet écran. Ne paie pas une deuxième fois : consulte ton portefeuille ou contacte la billetterie.'}
       </T>
-      <Pressable accessibilityRole="button" onPress={() => router.replace('/wallet')} style={styles.button}>
-        <T variant="label" color="#101010">ACCÉDER À MES BILLETS</T>
+      <Pressable accessibilityRole="button" onPress={() => router.replace(state === 'login' ? '/login' : '/wallet')} style={styles.button}>
+        <T variant="label" color="#101010">{state === 'login' ? 'ME CONNECTER' : 'ACCÉDER À MES BILLETS'}</T>
       </Pressable>
     </View>
   </Screen>;
