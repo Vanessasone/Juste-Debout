@@ -44,8 +44,8 @@ export default function EntryDashboard() {
       setDetails(b.data as Details);
       setUpdatedAt(Date.now());
       setErr('');
-    } catch {
-      if (mounted.current && seq === requestSeq.current) setErr('Connexion au serveur indisponible');
+    } catch (e: unknown) {
+      if (mounted.current && seq === requestSeq.current) setErr('Erreur : ' + (e instanceof Error ? e.message : String(e)).slice(0, 180));
     }
   }, [selectedDate]);
 
@@ -90,7 +90,7 @@ export default function EntryDashboard() {
         Les finales ont lieu les 13 et 14 mars 2027. Les compteurs affichent la journée sélectionnée, et non les ventes ou les réservations.
       </T>
     </Card>}
-    {!data ? <ActivityIndicator color={c.primary} /> : <>
+    {!data ? (err ? <Card><T color={c.danger}>Compteurs indisponibles. Vérifie ta connexion et tes droits, puis actualise.</T></Card> : <ActivityIndicator color={c.primary} />) : <>
       <View style={styles.grid}>
         <Metric n={data.entries} label="ENTRÉES" />
         <Metric n={data.remaining} label="NON ENTRÉES" />
