@@ -151,14 +151,6 @@ export default function Tickets() {
 
       {error && <T variant="small" color={c.danger} style={{ marginTop: Space.md }}>{error}</T>}
 
-      <Card style={{ marginTop: Space.lg }}>
-        <T variant="h3">À savoir avant d’acheter</T>
-        <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>Toute sortie est définitive : aucun retour après le premier scan de la journée.</T>
-        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Pass 2 jours et Black Card : une entrée samedi et une entrée dimanche.</T>
-        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Chaque billet possède un QR unique.</T>
-        <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>Pass 3 jours : 12, 13 et 14 mars · Pass 4 jours : 11, 12, 13 et 14 mars. Ces formules ne sont pas encore ouvertes à la vente.</T>
-      </Card>
-
       {testMode && <Card style={{marginTop:Space.md,borderColor:c.accent}}><T variant="h3">APERÇU INTERNE DES NOUVEAUX PASS</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Les pass 3 et 4 jours sont visibles ici uniquement pour vérification par les administrateurs. Ils restent désactivés et ne peuvent pas être achetés. Le billet technique 1 € reste réservé aux tests.</T></Card>}
 
       <Section title="Choisis ton pass">
