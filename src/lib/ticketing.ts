@@ -53,7 +53,7 @@ export async function getTicketProducts(eventId: string, includeInternalTest = f
     .eq('code', 'internal_test_1eur')
     .maybeSingle();
   if (testError) throw testError;
-  return [...products, ...(previewData ?? []) as TicketProduct[], ...(testData ? [testData as TicketProduct] : [])];
+  return [...products, ...((previewData ?? []) as TicketProduct[]), ...(testData ? [testData as TicketProduct] : [])];
 }
 
 export async function startTicketCheckout(input: {
