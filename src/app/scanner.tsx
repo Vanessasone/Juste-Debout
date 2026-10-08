@@ -14,6 +14,7 @@ import { Palette, Radius, Space } from '@/constants/brand';
 import { useT } from '@/lib/i18n';
 import { getTicketByToken, scanTicketForToday } from '@/lib/tickets';
 import { supabase } from '@/lib/supabase';
+import { serverRequest } from '@/lib/serverRequest';
 
 type Result = { status: 'ok' | 'used' | 'unknown' | 'error' | 'network'; name?: string; category?: string; categoryCode?: string; msg?: string } | null;
 
@@ -32,7 +33,7 @@ export default function Scanner() {
     if (healthBusy.current) return;
     healthBusy.current = true;
     try {
-      const { data, error } = await supabase.rpc('scanner_healthcheck');
+      const { data, error } = await serverRequest(signal => supabase.rpc('scanner_healthcheck').abortSignal(signal), 8000);
       if (error || !data?.ok) setHealth('offline');
       else setHealth(data.authorized ? 'ready' : 'forbidden');
     } catch {

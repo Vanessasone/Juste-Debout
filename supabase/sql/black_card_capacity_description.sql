@@ -1,0 +1,1 @@
+update public.ticket_products set description=replace(description,'70 exemplaires maximum','56 exemplaires maximum'),updated_at=now() where event_id='eb0025ca-b597-4708-9d47-b24ebbf507b5' and code='black_card' and description like '%70 exemplaires maximum%';

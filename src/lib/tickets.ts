@@ -3,6 +3,7 @@
  * (Sans paiement pour l'instant : billet « à régler sur place » ; Stripe viendra ensuite.)
  */
 import { supabase } from '@/lib/supabase';
+import { serverRequest } from '@/lib/serverRequest';
 
 export type Ticket = {
   id: string;
@@ -74,11 +75,11 @@ export async function obtainTicket(eventId: string, type = 'spectator'): Promise
 
 /** Recherche d'un billet par son jeton QR (staff/admin — scanner d'entrée). */
 export async function getTicketByToken(token: string): Promise<Ticket | null> {
-  const { data, error } = await supabase
+  const { data, error } = await serverRequest(signal => supabase
     .from('tickets')
     .select('*, events(title), profiles(full_name,alias), ticket_products(name,code,access_days,access_date,access_start_date,group_size)')
     .eq('qr_token', token.trim())
-    .maybeSingle();
+    .abortSignal(signal).maybeSingle());
   if (error) throw error;
   return (data as unknown as Ticket) ?? null;
 }
@@ -127,8 +128,8 @@ export async function cancelTicketTransfer(ticketId: string): Promise<void> {
 
 
 export async function scanTicketForToday(id: string): Promise<{ ok: boolean; error?: string; scan_count?: number; access_days?: number; scanned_at?: string; category?: string; category_code?: string }> {
-  const today = new Date().toISOString().slice(0, 10);
-  const { data, error } = await supabase.rpc('scan_ticket', { p_ticket: id, p_access_date: today });
+  const { data, error } = await serverRequest(signal =>
+    supabase.rpc('scan_ticket', { p_ticket: id }).abortSignal(signal));
   if (error) throw error;
   return data;
 }
