@@ -16,7 +16,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { InstallPrompt } from '@/components/InstallPrompt';
 import { Vitruve, Wordmark } from '@/components/Logo';
 import { T } from '@/components/ui';
 import { JD_TAGLINE, Radius, Space } from '@/constants/brand';
@@ -29,8 +28,8 @@ import { readTicketDraft, TicketDraft } from '@/lib/ticketPurchase';
 type Mode = 'signin' | 'signup';
 
 export default function Login() {
-  const { checkout } = useLocalSearchParams<{ checkout?: string }>();
-  const purchase = checkout === '1';
+  const { recover } = useLocalSearchParams<{ recover?: string }>();
+  const purchase = recover === '1';
   const [draft, setDraft] = useState<TicketDraft | null>(null);
   useEffect(() => { if (purchase) void readTicketDraft().then(setDraft); }, [purchase]);
   const c = useColors();
@@ -68,7 +67,7 @@ export default function Login() {
         if (error) throw error;
         // Selon les réglages Supabase, l'email peut demander une confirmation.
         if (!data.session) {
-          setInfo(t('auth.accountCreated'));
+          setInfo('Si cette adresse est nouvelle, un e-mail de confirmation a été envoyé. Vérifie aussi les indésirables. Si tu as déjà un compte, connecte-toi : aucun nouvel e-mail de confirmation n’est envoyé.');
           setMode('signin');
         }
       } else {
@@ -109,17 +108,15 @@ export default function Login() {
             </T>
           </View>
 
-          <View style={{ marginTop: Space.lg }}><InstallPrompt /></View>
 
           {/* Titre */}
           <T variant="title" color={c.text} style={{ marginTop: Space.xxxl, fontSize: 30 }}>
-            {purchase ? 'FINALISE TA COMMANDE' : mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
+            {purchase ? 'RÉCUPÈRE TES BILLETS' : mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
           </T>
           <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>
-            {purchase ? 'Crée ton compte pendant la commande pour recevoir tes billets et les retrouver dans ton wallet. Si tu as déjà un compte, choisis Connexion.' : mode === 'signup' ? t('auth.signupSub') : t('auth.signinSub')}
+            {purchase ? 'Crée ton espace ou connecte-toi avec l’adresse e-mail utilisée pour l’achat. Tes billets et QR codes seront rattachés à ton wallet après confirmation de cette adresse.' : mode === 'signup' ? t('auth.signupSub') : t('auth.signinSub')}
           </T>
 
-          {purchase && draft && <T variant="small" color={c.accent} style={{ marginTop: Space.md }}>{draft.productName} · {draft.quantity} pass — ton choix est conservé. Les places seront réservées au lancement du paiement.</T>}
           <Pressable accessibilityRole="button" onPress={() => router.replace('/billetterie')} style={{ marginTop: Space.md }}><T variant="small" color={c.accent}>{purchase ? '← Modifier mes places' : 'Acheter des places sans inscription préalable'}</T></Pressable>
 
           {/* Sélecteur */}

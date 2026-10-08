@@ -34,14 +34,14 @@ async function runCase({ hash = '', search = '', draft = null, session = null, s
   const draft = { productId: 'isolated-pass' };
   let r = await runCase({ hash: '#access_token=fixture-access&refresh_token=fixture-refresh', draft, session });
   assert.equal(r.calls[0][0], 'tokens');
-  assert.deepEqual(r.redirects, [{ pathname: '/billetterie', params: { resume: '1' } }]);
+  assert.deepEqual(r.redirects, ['/recover-tickets']);
   r = await runCase({ search: '?code=fixture-code', draft, session });
   assert.equal(r.calls[0][0], 'code');
-  assert.equal(r.redirects[0].pathname, '/billetterie');
+  assert.equal(r.redirects[0], '/recover-tickets');
   r = await runCase({ draft, session });
-  assert.equal(r.redirects[0].pathname, '/billetterie');
+  assert.equal(r.redirects[0], '/recover-tickets');
   r = await runCase({ session });
-  assert.deepEqual(r.redirects, ['/(tabs)']);
+  assert.deepEqual(r.redirects, ['/recover-tickets']);
   r = await runCase({ draft });
   assert.equal(r.redirects.length, 0);
   r = await runCase({ hash: '#error=access_denied', draft, session });

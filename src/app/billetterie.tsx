@@ -9,9 +9,9 @@ import { Card, PageHeader, Screen, Section, T } from '@/components/ui';
 import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useColors } from '@/lib/theme';
-import { readTicketDraft, saveTicketDraft, clearTicketDraft } from '@/lib/ticketPurchase';
+import { readTicketDraft, saveTicketDraft } from '@/lib/ticketPurchase';
 import { supabase } from '@/lib/supabase';
-import { getTicketProducts, startTicketCheckout, TicketProduct } from '@/lib/ticketing';
+import { getTicketProducts, TicketProduct } from '@/lib/ticketing';
 
 const PARIS_EVENT_ID = 'eb0025ca-b597-4708-9d47-b24ebbf507b5';
 
@@ -89,33 +89,8 @@ export default function Tickets() {
 
   const buy = async (p: TicketProduct) => {
     if (!eventId) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        await saveTicketDraft({ eventId, productId: p.id, productName: p.name, quantity: qty[p.id] ?? p.min_per_order, promoCode: promo, createdAt: Date.now() });
-        router.push({ pathname: '/login', params: { checkout: '1' } });
-        setBusy(false);
-        return;
-      }
-      await startTicketCheckout({
-        eventId,
-        items: [{ productId: p.id, quantity: qty[p.id] ?? p.min_per_order }],
-        promoCode: promo || null,
-      });
-      await clearTicketDraft();
-    } catch (e: any) {
-      const msg = String(e?.message ?? e ?? '');
-      if (msg.includes('sales_not_started')) setError('La billetterie ouvre le 8 octobre à 21h.');
-      else if (msg.includes('minimum_quantity_not_met')) setError('La quantité minimum pour ce tarif n’est pas atteinte.');
-      else if (msg.includes('invalid_or_expired_promo')) setError('Ce code promotionnel est invalide ou expiré.');
-      else if (msg.includes('vip_sold_out_for_day')) setError('Les places VIP sont complètes pour cette journée.');
-      else if (msg.includes('sold_out_for_day')) setError('Cette journée a atteint sa capacité maximale. Ce pass n’est plus disponible.');
-      else if (msg.includes('ticket_products_stock_limit') || msg.includes('sold_out')) setError('Cette catégorie est complète.');
-      else setError('Impossible de lancer le paiement pour le moment.');
-      setBusy(false);
-    }
+    await saveTicketDraft({ eventId, productId: p.id, productName: p.name, quantity: qty[p.id] ?? p.min_per_order, promoCode: promo, createdAt: Date.now() });
+    router.push('/ticket-details');
   };
 
   if (loading) {
@@ -126,7 +101,7 @@ export default function Tickets() {
     <Screen>
       <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
       <PageHeader title="Billetterie" subtitle="Finales Mondiales · 13–14 mars 2027" />
-      <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>1. Choisis tes places · 2. Tes coordonnées et ton compte · 3. Paiement sécurisé</T>
+      <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>1. Choisis tes places · 2. Tes coordonnées · 3. Paiement sécurisé</T>
       <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>Déjà un compte ? Me connecter</T></Pressable>
 
       <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
@@ -188,7 +163,7 @@ export default function Tickets() {
               )}
 
               <Pressable disabled={previewOnly || busy || soldOut || ((vip || bc) && !availability)} onPress={() => buy(p)} style={[styles.buy, (previewOnly || busy || soldOut || ((vip || bc) && !availability)) && { opacity: 0.5 }]}>
-                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? 'Bientôt disponible' : soldOut ? 'Complet' : selectedProduct === p.id ? 'Continuer vers le paiement' : 'Choisir ce pass'}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
+                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? 'Bientôt disponible' : soldOut ? 'Complet' : selectedProduct === p.id ? 'Continuer' : 'Choisir ce pass'}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
               </Pressable>
             </Card>
           );

@@ -65,9 +65,11 @@ export async function startTicketCheckout(input: {
   eventId: string;
   items: Array<{ productId: string; quantity: number }>;
   promoCode?: string | null;
+  guest?: { email: string; name: string; locale: string };
 }): Promise<{ orderId: string; url: string }> {
-  const { data, error } = await supabase.functions.invoke('create-ticket-checkout', {
+  const { data, error } = await supabase.functions.invoke(input.guest ? 'create-guest-ticket-checkout' : 'create-ticket-checkout', {
     body: {
+      ...input.guest,
       eventId: input.eventId,
       items: input.items,
       promoCode: input.promoCode?.trim() || null,

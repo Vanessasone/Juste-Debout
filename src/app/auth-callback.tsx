@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
-import { readTicketDraft } from '@/lib/ticketPurchase';
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -30,14 +29,13 @@ export default function AuthCallback() {
           return;
         }
         window.history.replaceState(null, '', '/auth-callback');
-        const draft = await readTicketDraft();
-        if (!cancelled) router.replace(draft ? { pathname: '/billetterie', params: { resume: '1' } } : '/(tabs)');
+        if (!cancelled) router.replace('/recover-tickets');
       } catch {
         if (!cancelled) setStatus('Impossible de finaliser la connexion. Réessaie depuis la page de connexion.');
       }
     })();
     return () => { cancelled = true; };
   }, [router]);
-  return <View style={styles.root}><ActivityIndicator /><Text style={styles.text}>{status}</Text><Pressable accessibilityRole="button" onPress={() => router.replace({ pathname: '/login', params: { checkout: '1' } })} style={{ padding: 16, marginTop: 16 }}><Text style={{ color: '#B5FA42' }}>Revenir à la connexion</Text></Pressable></View>;
+  return <View style={styles.root}><ActivityIndicator /><Text style={styles.text}>{status}</Text><Pressable accessibilityRole="button" onPress={() => router.replace({ pathname: '/login', params: { recover: '1' } })} style={{ padding: 16, marginTop: 16 }}><Text style={{ color: '#B5FA42' }}>Revenir à la connexion</Text></Pressable></View>;
 }
 const styles = StyleSheet.create({root:{flex:1,alignItems:'center',justifyContent:'center',padding:24,backgroundColor:'#0A0A0A'},text:{color:'#fff',marginTop:16,textAlign:'center'}});
