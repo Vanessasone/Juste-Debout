@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npx expo export --platform web && node scripts/add-share-metadata.cjs",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/((?!_expo/|assets/|email/|favicon\\.ico|manifest\\.webmanifest|app-icon\\.png).*)",
