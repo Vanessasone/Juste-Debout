@@ -145,8 +145,16 @@ function TicketCard({
   const t = useT();
   const router = useRouter();
   const ev = event ?? { title: 'Juste Debout', venue: null, city: null, address: null };
-  const used = ticket.status === 'used';
+  const isWeekend = (ticket.ticket_products?.access_days ?? 1) > 1;
+  const scans = ticket.scan_history ?? [];
+  const saturdayScan = scans.find(x => x.access_date === '2027-03-13');
+  const sundayScan = scans.find(x => x.access_date === '2027-03-14');
+  const fullyScanned = isWeekend && !!saturdayScan && !!sundayScan;
+  const used = ticket.status === 'used' || fullyScanned;
   const cancelled = ticket.status === 'cancelled';
+  const saturdayUsed = isWeekend && !!saturdayScan && !sundayScan && !cancelled;
+  const accessStatus = cancelled ? t('wallet.cancelled') : used ? 'PASS ENTIÈREMENT UTILISÉ' : saturdayUsed ? 'DIMANCHE DISPONIBLE' : t('wallet.valid');
+  const scanTime = (stamp:string) => new Date(stamp).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'});
   const categoryCode = ticket.ticket_products?.code ?? '';
   const premiumBlack = categoryCode === 'black_card';
   const premiumVip = categoryCode.startsWith('vip_');
@@ -159,7 +167,7 @@ function TicketCard({
           {ev.title}
         </T>
         <Tag
-          label={used ? t('wallet.used') : cancelled ? t('wallet.cancelled') : t('wallet.valid')}
+          label={accessStatus}
           color={used ? c.textMute : cancelled ? c.danger : c.primary}
         />
       </View>
@@ -173,6 +181,9 @@ function TicketCard({
       <View style={styles.ticketDetails}>
         <DetailRow icon="ticket-outline" label="Accès" value={ticket.ticket_products?.access_days && ticket.ticket_products.access_days > 1 ? 'Samedi et dimanche · 2 jours' : '1 jour · entrée unique, sortie définitive'} c={c} />
         <DetailRow icon="calendar-outline" label="Date" value={ticketDateLabel(ticket)} c={c} />
+        {saturdayUsed && <DetailRow icon="checkmark-circle-outline" label="Samedi" value={`Entrée utilisée à ${scanTime(saturdayScan!.scanned_at)} · sortie définitive. Dimanche disponible.`} c={c} />}
+        {sundayScan && <DetailRow icon="checkmark-circle-outline" label="Dimanche" value={`Entrée utilisée à ${scanTime(sundayScan.scanned_at)} · sortie définitive`} c={c} />}
+        {!isWeekend && scans.length>0 && <DetailRow icon="checkmark-circle-outline" label="Entrée" value={`Utilisée à ${scanTime(scans[0].scanned_at)} · sortie définitive`} c={c} />
         <DetailRow icon="location-outline" label="Lieu" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
         <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
         <DetailRow icon="receipt-outline" label="Référence" value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
