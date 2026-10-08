@@ -14,7 +14,7 @@ import { Palette, Radius, Space } from '@/constants/brand';
 import { useT } from '@/lib/i18n';
 import { getTicketByToken, scanTicketForToday } from '@/lib/tickets';
 
-type Result = { status: 'ok' | 'used' | 'unknown' | 'error'; name?: string; category?: string; categoryCode?: string; msg?: string } | null;
+type Result = { status: 'ok' | 'used' | 'unknown' | 'error' | 'network'; name?: string; category?: string; categoryCode?: string; msg?: string } | null;
 
 export default function Scanner() {
   const insets = useSafeAreaInsets();
@@ -29,6 +29,7 @@ export default function Scanner() {
   const handleToken = async (token: string) => {
     if (processing.current || !token.trim()) return;
     processing.current = true;
+    let uncertainNetwork = false;
     try {
       const tk = await getTicketByToken(token);
       if (!tk) {
@@ -45,7 +46,7 @@ export default function Scanner() {
           const time = scan.scanned_at
             ? new Date(scan.scanned_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris' })
             : null;
-          setResult({ status: 'used', name, category: scan.category || category, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
+          setResult({ status: 'used', name, category: scan.category || category, categoryCode: scan.category_code || categoryCode, msg: time ? `Déjà entré(e) à ${time} · sortie définitive` : 'Entrée déjà utilisée aujourd’hui · sortie définitive' });
         } else if (scan.error === 'wrong_day') {
           setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet non valable aujourd’hui' });
         } else if (scan.error === 'cancelled') {
@@ -56,15 +57,26 @@ export default function Scanner() {
           setResult({ status: 'error', name, category: scan.category || category, msg: 'Billet refusé : ' + (scan.error ?? 'vérification impossible') });
         }
       }
-    } catch (e: any) {
-      setResult({ status: 'error', msg: e?.message ?? 'Erreur' });
+    } catch (_e: unknown) {
+      // En cas de timeout, l'écriture serveur a pu réussir : ne jamais supposer un refus ou une acceptation.
+      // Bloquer la caméra jusqu'à vérification explicite après rétablissement du réseau.
+      uncertainNetwork = true;
+      setResult({ status: 'network', msg: 'Impossible de confirmer ce billet auprès du serveur. NE PAS LAISSER ENTRER. Rétablir Internet, puis scanner à nouveau pour vérifier le statut.' });
     } finally {
-      setTimeout(() => {
-        processing.current = false;
-        setResult(null);
-        setManual('');
-      }, 5000);
+      if (!uncertainNetwork) {
+        setTimeout(() => {
+          processing.current = false;
+          setResult(null);
+          setManual('');
+        }, 5000);
+      }
     }
+  };
+
+  const clearUncertain = () => {
+    setResult(null);
+    setManual('');
+    processing.current = false;
   };
 
   const goBack = () => (router.canGoBack() ? router.back() : router.replace('/(tabs)'));
@@ -124,7 +136,9 @@ export default function Scanner() {
                 ? t('sc.used')
                 : result.status === 'unknown'
                   ? t('sc.unknown')
-                  : t('sc.error')}
+                  : result.status === 'network'
+                    ? 'VÉRIFICATION IMPOSSIBLE'
+                    : t('sc.error')}
           </T>
           {!!result.category && <View style={{backgroundColor:result.categoryCode==='black_card'?'#D7B66D':result.categoryCode?.startsWith('vip_')?'#B5FA42':'#252525',borderRadius:12,paddingHorizontal:20,paddingVertical:14,marginTop:16}}><T variant="h2" color={result.categoryCode==='black_card'||result.categoryCode?.startsWith('vip_')?'#101010':'#FFFFFF'} style={{textAlign:'center'}}>{result.category.toUpperCase()}</T></View>}
           {!!result.name && (
@@ -136,6 +150,12 @@ export default function Scanner() {
             <T variant="label" color={Palette.black} style={{ marginTop: 10, textAlign: 'center' }}>
               {result.msg}
             </T>
+          )}
+          {result.status === 'network' && (
+            <Pressable accessibilityRole="button" onPress={clearUncertain} style={styles.networkButton}>
+              <Ionicons name="refresh" size={19} color="#FFFFFF" />
+              <T variant="label" color="#FFFFFF">RÉESSAYER APRÈS CONNEXION</T>
+            </Pressable>
           )}
         </View>
       )}
@@ -259,6 +279,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Palette.primary,
     backgroundColor: 'rgba(0,0,0,0.85)',
+  },
+  networkButton: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    marginTop: 24, paddingVertical: 16, paddingHorizontal: 18,
+    borderRadius: 12, backgroundColor: '#171717', borderWidth: 2, borderColor: '#FFFFFF',
   },
   manual: {
     position: 'absolute',
