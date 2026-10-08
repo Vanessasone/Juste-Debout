@@ -1,0 +1,54 @@
+{
+  "database": "isolated PostgreSQL 18",
+  "production_data_used": false,
+  "results": [
+    {
+      "case": "standard_stock",
+      "simultaneous_requests": 20,
+      "accepted": 1,
+      "refused": 19,
+      "final_reserved": 1,
+      "limit": 1,
+      "max_duration_seconds": 1.541,
+      "errors": [
+        "sold_out"
+      ]
+    },
+    {
+      "case": "standard_daily",
+      "simultaneous_requests": 20,
+      "accepted": 1,
+      "refused": 19,
+      "final_reserved": 1,
+      "limit": 1,
+      "max_duration_seconds": 1.569,
+      "errors": [
+        "sold_out_for_day"
+      ]
+    },
+    {
+      "case": "vip_mixed",
+      "simultaneous_requests": 20,
+      "accepted": 1,
+      "refused": 19,
+      "final_reserved": 112,
+      "limit": 112,
+      "max_duration_seconds": 1.603,
+      "errors": [
+        "vip_sold_out_for_day:2027-03-13"
+      ]
+    },
+    {
+      "case": "black_card",
+      "simultaneous_requests": 20,
+      "accepted": 1,
+      "refused": 19,
+      "final_reserved": 56,
+      "limit": 56,
+      "max_duration_seconds": 1.52,
+      "errors": [
+        "sold_out"
+      ]
+    }
+  ]
+}
