@@ -1,0 +1,30 @@
+begin;
+do $$
+declare tid uuid; owner_id uuid; recipient_id uuid; recipient_mail text; result json; token uuid;
+begin
+ select t.id,t.profile_id into tid,owner_id from public.tickets t join public.ticket_products p on p.id=t.ticket_product_id where t.status='active' and t.profile_id is not null and p.code<>'black_card' limit 1;
+ select u.id,u.email into recipient_id,recipient_mail from auth.users u join public.profiles p on p.id=u.id where u.id<>owner_id and u.email_confirmed_at is not null limit 1;
+ if tid is null or recipient_id is null then raise exception 'missing_fixture'; end if;
+ if has_function_privilege('anon','public.prepare_ticket_transfer(uuid,text)','EXECUTE') or has_function_privilege('anon','public.cancel_ticket_transfer(uuid)','EXECUTE') or has_function_privilege('anon','public.accept_ticket_transfer(uuid)','EXECUTE') then raise exception 'anonymous_execute_allowed'; end if;
+ perform set_config('request.jwt.claim.sub','',true);
+ result:=public.prepare_ticket_transfer(tid,recipient_mail);if result->>'error'<>'login_required' then raise exception 'anonymous_prepare';end if;
+ result:=public.cancel_ticket_transfer(tid);if result->>'error'<>'login_required' then raise exception 'anonymous_cancel';end if;
+ perform set_config('request.jwt.claim.sub',recipient_id::text,true);
+ result:=public.prepare_ticket_transfer(tid,recipient_mail);if result->>'error'<>'forbidden' then raise exception 'wrong_owner_prepare';end if;
+ result:=public.cancel_ticket_transfer(tid);if result->>'error'<>'forbidden' then raise exception 'wrong_owner_cancel';end if;
+ perform set_config('request.jwt.claim.sub',owner_id::text,true);
+ result:=public.prepare_ticket_transfer(tid,'invalid');if result->>'error'<>'invalid_email' then raise exception 'invalid_email';end if;
+ result:=public.prepare_ticket_transfer(tid,recipient_mail);if not (result->>'ok')::boolean then raise exception 'owner_prepare';end if;token:=(result->>'token')::uuid;
+ result:=public.accept_ticket_transfer(token);if result->>'error'<>'wrong_recipient' then raise exception 'wrong_email_accept';end if;
+ perform set_config('request.jwt.claim.sub',recipient_id::text,true);
+ result:=public.accept_ticket_transfer(token);if not (result->>'ok')::boolean then raise exception 'recipient_accept';end if;
+ result:=public.accept_ticket_transfer(token);if result->>'error'<>'transfer_not_found' then raise exception 'duplicate_claim';end if;
+ perform set_config('request.jwt.claim.sub',owner_id::text,true);
+ result:=public.prepare_ticket_transfer(tid,recipient_mail);if result->>'error'<>'forbidden' then raise exception 'former_owner_transfer';end if;
+ result:=public.cancel_ticket_transfer(tid);if result->>'error'<>'forbidden' then raise exception 'former_owner_cancel';end if;
+ perform set_config('request.jwt.claim.sub',recipient_id::text,true);
+ result:=public.prepare_ticket_transfer(tid,recipient_mail);if not (result->>'ok')::boolean then raise exception 'current_owner_prepare';end if;
+ result:=public.cancel_ticket_transfer(tid);if not (result->>'ok')::boolean then raise exception 'current_owner_cancel';end if;
+end $$;
+select 'transfer_security_tests_passed_rollback' as result;
+rollback;

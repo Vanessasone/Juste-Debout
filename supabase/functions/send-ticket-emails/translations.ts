@@ -9,7 +9,9 @@ export const translations = {
     "finalDays": "Finales · 13–14 mars",
     "accessMulti": "{n} jours · une entrée par jour, sortie définitive",
     "passThree": "Pass 3 jours",
-    "passFour": "Pass 4 jours"
+    "passFour": "Pass 4 jours",
+    "invitationEmailSubject": "Juste Debout — Un billet vous attend",
+    "claimLogin": "Crée ton compte Juste Debout ou connecte-toi avec l’adresse email qui a reçu cette invitation."
   },
   "en": {
     "emailSubject": "Juste Debout — Your order is confirmed",
@@ -21,7 +23,9 @@ export const translations = {
     "finalDays": "Finals · 13–14 March",
     "accessMulti": "{n} days · one entry per day, no re-entry after leaving",
     "passThree": "3-day pass",
-    "passFour": "4-day pass"
+    "passFour": "4-day pass",
+    "invitationEmailSubject": "Juste Debout — A ticket is waiting for you",
+    "claimLogin": "Create your Juste Debout account or sign in with the email that received this invitation."
   },
   "de": {
     "emailSubject": "Juste Debout — Deine Bestellung ist bestätigt",
@@ -33,7 +37,9 @@ export const translations = {
     "finalDays": "Finale · 13.–14. März",
     "accessMulti": "{n} Tage · ein Einlass pro Tag, kein Wiedereinlass nach Verlassen",
     "passThree": "3-Tages-Pass",
-    "passFour": "4-Tages-Pass"
+    "passFour": "4-Tages-Pass",
+    "invitationEmailSubject": "Juste Debout — Ein Ticket wartet auf dich",
+    "claimLogin": "Erstelle dein Juste-Debout-Konto oder melde dich mit der E-Mail-Adresse dieser Einladung an."
   },
   "it": {
     "emailSubject": "Juste Debout — Il tuo ordine è confermato",
@@ -45,7 +51,9 @@ export const translations = {
     "finalDays": "Finali · 13–14 marzo",
     "accessMulti": "{n} giorni · un ingresso al giorno, nessun rientro dopo l’uscita",
     "passThree": "Pass 3 giorni",
-    "passFour": "Pass 4 giorni"
+    "passFour": "Pass 4 giorni",
+    "invitationEmailSubject": "Juste Debout — Un biglietto ti aspetta",
+    "claimLogin": "Crea il tuo account Juste Debout o accedi con l’e-mail che ha ricevuto questo invito."
   },
   "es": {
     "emailSubject": "Juste Debout — Tu pedido está confirmado",
@@ -57,7 +65,9 @@ export const translations = {
     "finalDays": "Finales · 13–14 marzo",
     "accessMulti": "{n} días · una entrada al día, sin reentrada tras salir",
     "passThree": "Pase de 3 días",
-    "passFour": "Pase de 4 días"
+    "passFour": "Pase de 4 días",
+    "invitationEmailSubject": "Juste Debout — Una entrada te espera",
+    "claimLogin": "Crea tu cuenta Juste Debout o inicia sesión con el correo que recibió esta invitación."
   },
   "pt": {
     "emailSubject": "Juste Debout — A tua encomenda está confirmada",
@@ -69,7 +79,9 @@ export const translations = {
     "finalDays": "Finais · 13–14 março",
     "accessMulti": "{n} dias · uma entrada por dia, sem reentrada após sair",
     "passThree": "Passe de 3 dias",
-    "passFour": "Passe de 4 dias"
+    "passFour": "Passe de 4 dias",
+    "invitationEmailSubject": "Juste Debout — Um bilhete espera por ti",
+    "claimLogin": "Cria a tua conta Juste Debout ou inicia sessão com o e-mail que recebeu este convite."
   },
   "zh": {
     "emailSubject": "Juste Debout — 订单已确认",
@@ -81,7 +93,9 @@ export const translations = {
     "finalDays": "决赛 · 3月13–14日",
     "accessMulti": "{n}天 · 每天仅一次入场，离场后不可再次进入",
     "passThree": "三日通票",
-    "passFour": "四日通票"
+    "passFour": "四日通票",
+    "invitationEmailSubject": "Juste Debout — 有门票等你领取",
+    "claimLogin": "创建Juste Debout账户或使用收到邀请的电子邮箱登录。"
   },
   "ko": {
     "emailSubject": "Juste Debout — 주문이 확인되었습니다",
@@ -93,7 +107,9 @@ export const translations = {
     "finalDays": "결승 · 3월 13–14일",
     "accessMulti": "{n}일 · 하루 한 번 입장, 퇴장 후 재입장 불가",
     "passThree": "3일 패스",
-    "passFour": "4일 패스"
+    "passFour": "4일 패스",
+    "invitationEmailSubject": "Juste Debout — 티켓이 기다리고 있습니다",
+    "claimLogin": "Juste Debout 계정을 만들거나 초대를 받은 이메일로 로그인하세요."
   },
   "ja": {
     "emailSubject": "Juste Debout — ご注文が確認されました",
@@ -105,6 +121,8 @@ export const translations = {
     "finalDays": "決勝 · 3月13–14日",
     "accessMulti": "{n}日間 · 1日1回入場、退場後の再入場不可",
     "passThree": "3日パス",
-    "passFour": "4日パス"
+    "passFour": "4日パス",
+    "invitationEmailSubject": "Juste Debout — チケットを受け取れます",
+    "claimLogin": "Juste Deboutアカウントを作成するか、招待を受けたメールアドレスでログインしてください。"
   }
 } as const;

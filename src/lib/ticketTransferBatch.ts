@@ -19,7 +19,7 @@ export function parseRecipientList(raw: string): { valid: ImportedRecipient[]; i
   return { valid, invalid, duplicates };
 }
 
-export async function createTransferBatch(tickets: { id: string }[], recipients: ImportedRecipient[]) {
+export async function createTransferBatch(tickets: { id: string }[], recipients: ImportedRecipient[], locale = 'fr') {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('unauthorized');
   if (recipients.length > tickets.length) throw new Error('too_many_recipients');
@@ -27,17 +27,19 @@ export async function createTransferBatch(tickets: { id: string }[], recipients:
   const { data: batch, error: be } = await supabase.from('ticket_transfer_batches').insert({ purchaser_id: user.id }).select('id').single();
   if (be) throw be;
 
+  let failedCount = 0;
   const invitationLinks: Array<{email:string;link:string}> = [];
   for (let i = 0; i < recipients.length; i++) {
     const r = recipients[i], ticket = tickets[i];
     const { data, error } = await supabase.rpc('prepare_ticket_transfer', { p_ticket: ticket.id, p_email: r.email });
     const status = !error && data?.ok ? 'prepared' : 'error';
-    if (status === 'prepared' && data.token) invitationLinks.push({email:r.email,link:`https://juste-debout-app.vercel.app/claim-ticket?token=${encodeURIComponent(data.token)}`});
+    if(status === 'error') failedCount++;
+    if (status === 'prepared' && data.token) invitationLinks.push({email:r.email,link:`https://justedeboutapp.com/claim-ticket?token=${encodeURIComponent(data.token)}&lang=${encodeURIComponent(locale)}`});
     await supabase.from('ticket_transfer_batch_rows').insert({
       batch_id: batch.id, ticket_id: ticket.id, email: r.email,
       holder_name: [r.firstName, r.lastName].filter(Boolean).join(' ') || null,
       status, error: error?.message ?? (!data?.ok ? data?.error : null),
     });
   }
-  return { batchId: batch.id as string, invitationLinks };
+  return { batchId: batch.id as string, invitationLinks, failedCount };
 }

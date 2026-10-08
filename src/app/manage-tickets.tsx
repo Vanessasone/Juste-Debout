@@ -1,3 +1,6 @@
+import { useCustomerText } from '@/lib/customerText';
+import { useI18n } from '@/lib/i18n';
+import { ticketProductText } from '@/lib/ticketProductText';
 import { useEffect, useMemo, useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -11,6 +14,7 @@ import { createTransferBatch, parseRecipientList } from '@/lib/ticketTransferBat
 import { useColors } from '@/lib/theme';
 
 export default function ManageTickets() {
+  const ct=useCustomerText();const {locale}=useI18n();
   const c=useColors(); const styles=useMemo(()=>makeStyles(c),[c]); const router=useRouter();
   const [tickets,setTickets]=useState<Ticket[]>([]); const [raw,setRaw]=useState('');
   const [busy,setBusy]=useState(false);
@@ -26,58 +30,58 @@ export default function ManageTickets() {
   const submit=async()=>{
     if(!canSend)return; setBusy(true);
     try{
-      const result=await createTransferBatch(available,parsed.valid);
+      const result=await createTransferBatch(available,parsed.valid,locale);
       setLinks(result.invitationLinks);
       await load();
-      Alert.alert('Attributions préparées',`${result.invitationLinks.length} lien(s) individuels prêts à copier et partager. Les emails automatiques restent en attente de validation du domaine.`);
-    }catch(e:any){Alert.alert('Import impossible',e?.message??'Réessaie plus tard.');}
+      Alert.alert(ct('groupTitle'),`${ct('groupPrepared',{n:result.invitationLinks.length})}${result.failedCount ? `\n${ct('groupFailed',{n:result.failedCount})}` : ''}`);
+    }catch(e:any){Alert.alert(ct('error'),ct('groupImportError'));}
     finally{setBusy(false);}
   };
 
   return <Screen>
-    <PageHeader title="Gérer mon groupe" subtitle="Attribue plusieurs billets en quelques secondes" />
+    <PageHeader title={ct('groupTitle')} subtitle={ct('groupSubtitle')} />
     <Card>
-      <T variant="h3">{available.length} billet{available.length>1?'s':''} disponible{available.length>1?'s':''}</T>
-      {mjcCount>0 && <T variant="small" color={c.primary} style={{marginTop:6}}>{mjcCount} billet(s) MJC dans ton groupe · un QR individuel par participant.</T>}
-      <T variant="small" color={c.textDim} style={{marginTop:6}}>Les Pass Famille s’attribuent dans leur formulaire dédié. Colle une liste depuis Excel, Numbers ou Google Sheets. Formats acceptés : Prénom ; Nom ; Email, ou simplement une adresse email par ligne.</T>
+      <T variant="h3">{ct('groupAvailable',{n:available.length})}</T>
+      {mjcCount>0 && <T variant="small" color={c.primary} style={{marginTop:6}}>{ct('groupMJC',{n:mjcCount})}</T>}
+      <T variant="small" color={c.textDim} style={{marginTop:6}}>{ct('groupInstructions')}</T>
     </Card>
-    <Section title="Suivi des participants">
+    <Section title={ct('groupFollow')}>
       {allTickets.filter(t=>t.status==='active').map((t,i)=>{
         const pending=t.transfer_status==='pending';
         const accepted=t.transfer_status==='accepted';
         return <Card key={t.id} style={{marginBottom:Space.sm}}>
           <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
             <View style={{flex:1}}>
-              <T variant="caption" color={accepted?c.primary:pending?c.accent:c.textMute}>{accepted?'✓ RÉCUPÉRÉ':pending?'EN ATTENTE':'À ATTRIBUER'}</T>
-              <T variant="small" style={{marginTop:3}}>{t.transfer_email || t.holder_email || `Billet ${i+1}`}</T>
-              <T variant="caption" color={c.textMute} style={{marginTop:2}}>{t.ticket_products?.name ?? t.type} · #{t.id.slice(0,8).toUpperCase()}</T>
+              <T variant="caption" color={accepted?c.primary:pending?c.accent:c.textMute}>{accepted?ct('groupClaimed'):pending?ct('invitePending'):ct('groupAssign')}</T>
+              <T variant="small" style={{marginTop:3}}>{t.transfer_email || t.holder_email || `${ct('myTicket')} ${i+1}`}</T>
+              <T variant="caption" color={c.textMute} style={{marginTop:2}}>{ticketProductText(t.ticket_products?.code ?? '',locale,{name:t.ticket_products?.name ?? t.type}).name} · #{t.id.slice(0,8).toUpperCase()}</T>
             </View>
-            {pending && <Pressable onPress={async()=>{try{await cancelTicketTransfer(t.id);await load();}catch(e:any){Alert.alert('Erreur',e?.message??'Impossible d’annuler.')}}} style={styles.smallBtn}><T variant="caption" color={c.danger}>CORRIGER</T></Pressable>}
+            {pending && <Pressable onPress={async()=>{try{await cancelTicketTransfer(t.id);await load();}catch(e:any){Alert.alert(ct('error'),ct('cancelError'))}}} style={styles.smallBtn}><T variant="caption" color={c.danger}>{ct('groupCorrect')}</T></Pressable>}
           </View>
         </Card>
       })}
     </Section>
-    {links.length>0 && <Section title="Liens d’invitation à partager">
+    {links.length>0 && <Section title={ct('groupLinks')}>
       <Card>
-        <T variant="small" color={c.textDim}>Chaque lien est réservé à l'adresse du destinataire. Transmets chaque lien uniquement à la personne concernée.</T>
-        <Pressable onPress={async()=>{await Clipboard.setStringAsync(links.map(x=>x.email+' ; '+x.link).join('\n'));Alert.alert('Copié','Liste des liens copiée.');}} style={styles.send}><T variant="label" color={c.black}>COPIER TOUS LES LIENS</T></Pressable>
+        <T variant="small" color={c.textDim}>{ct('groupLinkPrivacy')}</T>
+        <Pressable onPress={async()=>{await Clipboard.setStringAsync(links.map(x=>x.email+' ; '+x.link).join('\n'));Alert.alert(ct('copied'),ct('groupLinks'));}} style={styles.send}><T variant="label" color={c.black}>{ct('copyAll')}</T></Pressable>
       </Card>
       {links.map(x=><Card key={x.email} style={{marginTop:Space.sm}}>
         <T variant="small">{x.email}</T>
-        <Pressable onPress={async()=>{await Clipboard.setStringAsync(x.link);Alert.alert('Copié','Lien individuel copié.');}} style={styles.smallBtn}><T variant="caption" color={c.primary}>COPIER SON LIEN</T></Pressable>
+        <Pressable onPress={async()=>{await Clipboard.setStringAsync(x.link);Alert.alert(ct('copied'),ct('copyOne'));}} style={styles.smallBtn}><T variant="caption" color={c.primary}>{ct('copyOne')}</T></Pressable>
       </Card>)}
     </Section>}
-    <Section title="Importer les participants">
+    <Section title={ct('groupImport')}>
       <TextInput multiline value={raw} onChangeText={setRaw} placeholder={"Marie ; Dupont ; marie@email.com\nPaul ; Martin ; paul@email.com"} placeholderTextColor={c.textMute} style={styles.area}/>
       <View style={styles.stats}>
-        <Stat n={parsed.valid.length} label="valides" c={c}/><Stat n={parsed.duplicates.length} label="doublons" c={c}/><Stat n={parsed.invalid.length} label="invalides" c={c}/>
+        <Stat n={parsed.valid.length} label={ct('validRows')} c={c}/><Stat n={parsed.duplicates.length} label={ct('duplicateRows')} c={c}/><Stat n={parsed.invalid.length} label={ct('invalidRows')} c={c}/>
       </View>
-      {parsed.valid.length>available.length && <T variant="small" color={c.danger}>Tu as importé {parsed.valid.length} personnes mais seulement {available.length} billets sont disponibles.</T>}
-      {parsed.invalid.length>0 && <Card style={{marginTop:Space.md}}><T variant="caption" color={c.danger}>LIGNES À CORRIGER</T>{parsed.invalid.slice(0,8).map((x,i)=><T key={i} variant="small" color={c.textDim} style={{marginTop:4}}>{x}</T>)}</Card>}
+      {parsed.valid.length>available.length && <T variant="small" color={c.danger}>{ct('groupOverflow',{n:parsed.valid.length,available:available.length})}</T>}
+      {parsed.invalid.length>0 && <Card style={{marginTop:Space.md}}><T variant="caption" color={c.danger}>{ct('correctRows')}</T>{parsed.invalid.slice(0,8).map((x,i)=><T key={i} variant="small" color={c.textDim} style={{marginTop:4}}>{x}</T>)}</Card>}
       <Pressable disabled={!canSend} onPress={submit} style={[styles.send,!canSend&&{opacity:.35}]}>
-        <T variant="label" color={c.black}>{busy?'UN INSTANT…':`ATTRIBUER ${parsed.valid.length} BILLET${parsed.valid.length>1?'S':''}`}</T>
+        <T variant="label" color={c.black}>{busy?ct('wait'):ct('assignTickets',{n:parsed.valid.length})}</T>
       </Pressable>
-      <T variant="caption" color={c.textMute} style={{textAlign:'center',marginTop:10}}>{Math.max(0,available.length-parsed.valid.length)} billet(s) resteront dans ton wallet.</T>
+      <T variant="caption" color={c.textMute} style={{textAlign:'center',marginTop:10}}>{ct('remainWallet',{n:Math.max(0,available.length-parsed.valid.length)})}</T>
     </Section>
   </Screen>;
 }

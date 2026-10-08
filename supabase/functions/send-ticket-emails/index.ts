@@ -61,13 +61,19 @@ Deno.serve(async (req: Request) => {
         actionUrl = order.user_id ? "https://justedeboutapp.com/wallet" : `https://justedeboutapp.com/login?recover=1&lang=${encodeURIComponent(locale)}`;
       } else {
         const { data: ticket } = await admin.from("tickets")
-          .select("id,transfer_email,transfer_status,transfer_token,status")
+          .select("id,order_id,transfer_email,transfer_status,transfer_token,status")
           .eq("id", job.source_id).single();
         if (!ticket || ticket.status !== "active" || ticket.transfer_status !== "pending" || ticket.transfer_email?.toLowerCase() !== job.recipient_email || !ticket.transfer_token || ticket.transfer_token !== job.transfer_token) throw Error("invitation_not_eligible");
-        subject = "Juste Debout — Un billet vous attend";
-        body = "Un billet Juste Debout vous a été attribué. Connectez-vous avec cette adresse e-mail pour le récupérer.";
-        action = "RÉCUPÉRER MON BILLET";
-        actionUrl = `https://juste-debout-app.vercel.app/claim-ticket?token=${encodeURIComponent(ticket.transfer_token)}`;
+        if(ticket.order_id) {
+          const {data: order} = await admin.from("ticket_orders").select("customer_locale").eq("id",ticket.order_id).maybeSingle();
+          if(order && Object.hasOwn(translations,order.customer_locale)) locale=order.customer_locale;
+        }
+        const language=translations[locale as keyof typeof translations];
+        subject=language.invitationEmailSubject;
+        body=language.claimLogin;
+        action=language.recover;
+        actionUrl=`https://justedeboutapp.com/claim-ticket?token=${encodeURIComponent(ticket.transfer_token)}&lang=${encodeURIComponent(locale)}`;
+
       }
       const esc = (v: string) => v.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
       const html = `<!DOCTYPE html><html lang="${locale}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body style="margin:0;background-color:#eee;font-family:Arial,Helvetica,sans-serif"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" bgcolor="#eeeeee" style="padding:24px"><table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%"><tr><td align="center" bgcolor="#ffffff" style="padding:30px"><img src="https://juste-debout-app.vercel.app/email/vitruve.png" width="100" height="100" border="0" alt="Juste Debout" style="display:block;width:100px;height:100px"></td></tr><tr><td bgcolor="#ffffff" style="padding:30px"><h1 style="font-family:Arial,Helvetica,sans-serif;font-size:23px;line-height:30px;color:#111">${esc(subject)}</h1><p style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:25px;color:#333">${esc(body).replace(/\n/g,"<br>")}</p><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td bgcolor="#b5fa42" style="padding:14px"><a href="${esc(actionUrl)}" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;color:#111;text-decoration:none">${esc(action)}</a></td></tr></table></td></tr><tr><td align="center" bgcolor="#ffffff" style="padding:24px"><img src="https://juste-debout-app.vercel.app/email/juste-debout.png" width="190" height="73" border="0" alt="Juste Debout" style="display:block;width:190px;height:73px"></td></tr></table></td></tr></table></body></html>`;
