@@ -177,7 +177,7 @@ function TicketCard({
         />
       </View>
       <T variant="small" color={c.textDim} style={{ alignSelf: 'flex-start', marginTop: 2 }}>
-        {[ev.venue, ev.city].filter(Boolean).join(' · ')}
+        {expectedDates.length > 0 ? 'Paris · plusieurs lieux selon les journées' : [ev.venue, ev.city].filter(Boolean).join(' · ')}
       </T>
 
       <View style={{alignSelf:'stretch',backgroundColor:categoryColor,paddingVertical:14,paddingHorizontal:14,borderRadius:10,marginTop:16}}>
@@ -190,7 +190,10 @@ function TicketCard({
         {saturdayUsed && <DetailRow icon="checkmark-circle-outline" label="Samedi" value={`Entrée utilisée à ${scanTime(saturdayScan!.scanned_at)} · sortie définitive. Dimanche disponible.`} c={c} />}
         {!expectedDates.length && sundayScan && <DetailRow icon="checkmark-circle-outline" label="Dimanche" value={`Entrée utilisée à ${scanTime(sundayScan.scanned_at)} · sortie définitive`} c={c} />}
         {!isWeekend && scans.length>0 && <DetailRow icon="checkmark-circle-outline" label="Entrée" value={`Utilisée à ${scanTime(scans[0].scanned_at)} · sortie définitive`} c={c} />}
-        <DetailRow icon="location-outline" label="Lieu" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />
+        {expectedDates.length > 0 ? <>
+          <DetailRow icon="location-outline" label="Présélections · 11–12 mars" value="Autre salle à Paris · adresse communiquée ultérieurement" c={c} />
+          <DetailRow icon="location-outline" label="Finales · 13–14 mars" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'Stade Pierre-de-Coubertin · Paris' } c={c} />
+        </> : <DetailRow icon="location-outline" label="Lieu" value={[ev.venue, ev.address, ev.city].filter(Boolean).join(' · ') || 'À confirmer'} c={c} />}
         <DetailRow icon="person-outline" label="Détenteur" value={ticket.holder_name || ticket.holder_email || 'Acheteur du billet'} c={c} />
         <DetailRow icon="receipt-outline" label="Référence" value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
       </View>
