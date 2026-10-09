@@ -3,6 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 import { Card, PageHeader, Screen, T } from '@/components/ui';
 import { Space } from '@/constants/brand';
 import { supabase } from '@/lib/supabase';
+import { serverRequest } from '@/lib/serverRequest';
 import { useColors } from '@/lib/theme';
 
 const EVENT = 'eb0025ca-b597-4708-9d47-b24ebbf507b5';
@@ -30,18 +31,21 @@ export default function EntryDashboard() {
     return EVENT_DAYS.find(day => day.date === nowParis)?.date ?? (nowParis > EVENT_END ? EVENT_END : EVENT_START);
   });
   const requestSeq = useRef(0);
+  const pendingRequest = useRef<number | null>(null);
   const mounted = useRef(true);
   const today = new Date(clock).toLocaleDateString('en-CA', { timeZone: 'Europe/Paris' });
   const eventDay = today >= EVENT_START && today <= EVENT_END;
   const stale = updatedAt === null || clock - updatedAt > 15000;
 
   const load = useCallback(async () => {
+    if (pendingRequest.current !== null) return;
     const seq = ++requestSeq.current;
+    pendingRequest.current = seq;
     try {
-      const [a, b] = await Promise.all([
-        supabase.rpc('entry_dashboard', { p_event: EVENT, p_date: selectedDate }),
-        supabase.rpc('entry_dashboard_details', { p_event: EVENT, p_date: selectedDate }),
-      ]);
+      const [a, b] = await serverRequest(signal => Promise.all([
+        supabase.rpc('entry_dashboard', { p_event: EVENT, p_date: selectedDate }).abortSignal(signal),
+        supabase.rpc('entry_dashboard_details', { p_event: EVENT, p_date: selectedDate }).abortSignal(signal),
+      ]), 8000);
       if (!mounted.current || seq !== requestSeq.current) return;
       if (a.error || !a.data?.ok || b.error || !b.data?.ok) {
         setErr(a.error?.message || a.data?.error || b.error?.message || b.data?.error || 'Synchronisation impossible');
@@ -53,6 +57,8 @@ export default function EntryDashboard() {
       setErr('');
     } catch (e: unknown) {
       if (mounted.current && seq === requestSeq.current) setErr('Erreur : ' + (e instanceof Error ? e.message : String(e)).slice(0, 180));
+    } finally {
+      if (pendingRequest.current === seq) pendingRequest.current = null;
     }
   }, [selectedDate]);
 
@@ -65,7 +71,7 @@ export default function EntryDashboard() {
     void load();
     const refresh = setInterval(() => { void load(); }, 5000);
     const tick = setInterval(() => setClock(Date.now()), 1000);
-    return () => { mounted.current = false; requestSeq.current += 1; clearInterval(refresh); clearInterval(tick); };
+    return () => { mounted.current = false; requestSeq.current += 1; pendingRequest.current = null; clearInterval(refresh); clearInterval(tick); };
   }, [load]);
 
   return <Screen>
