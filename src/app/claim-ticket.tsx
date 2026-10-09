@@ -38,6 +38,7 @@ export default function ClaimTicket() {
       } catch (e: any) {
         const m=String(e?.message??'');
         if(m.includes('wrong_recipient')) setMessage('claimWrong');
+        else if(m.includes('holder_name_required')) setMessage('recipientNameRequired');
         else if(m.includes('transfer_unavailable')) setMessage('claimUnavailable');
         else setMessage('claimError');
       }

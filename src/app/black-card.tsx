@@ -8,7 +8,7 @@ import { Vitruve, Wordmark } from '@/components/Logo';
 import { Card, PageHeader, Screen, T } from '@/components/ui';
 import { Radius, Space } from '@/constants/brand';
 import { BLACK_CARD_BENEFITS } from '@/constants/blackCardBenefits';
-import { BlackCardMembership, getMyBlackCard } from '@/lib/blackCard';
+import { BlackCardMembership, BlackCardEvent, getMyBlackCard, getMyBlackCardEvents } from '@/lib/blackCard';
 import { useColors } from '@/lib/theme';
 
 const GOLD = '#D9C27A';
@@ -17,6 +17,9 @@ export default function BlackCardScreen() {
   const ct = useCustomerText();
   const { locale } = useI18n();
   const [card, setCard] = useState<BlackCardMembership | null>();
+  const [events, setEvents] = useState<BlackCardEvent[]>([]);
+  const [calendarError,setCalendarError] = useState(false);
+  const loadEvents = () => { setCalendarError(false); getMyBlackCardEvents().then(setEvents).catch(()=>setCalendarError(true)); };
   const [error, setError] = useState(false);
   const [width, setWidth] = useState(340);
   const [qrOpen, setQrOpen] = useState(false);
@@ -26,6 +29,7 @@ export default function BlackCardScreen() {
     getMyBlackCard().then(setCard).catch(() => { setError(true); setCard(null); });
   };
   useEffect(load, []);
+  useEffect(()=>{if(card) loadEvents();else setEvents([]);},[card?.id]);
   const qrSize = Math.max(96, Math.min(180, Math.floor(width * 0.34)));
   const titleSize = Math.min(68, Math.max(40, width * 0.14));
   const number = card?.card_number.replace(/^JD-BC-/, '2026-').replace('-', ' · ') || '2026 · 0000';
@@ -59,6 +63,19 @@ export default function BlackCardScreen() {
           <View style={styles.benefit}><Ionicons name="calendar-outline" size={20} color={c.primary} /><T variant="small" style={{ flex: 1 }}>{ct('blackYear')}</T></View>
         </> : <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>{ct('blackLimit')}</T>}
       </Card>
+      {card && <Card style={{marginTop:Space.lg}}>
+        <T variant="h3">{ct('blackProgram')}</T>
+        {calendarError ? <Pressable onPress={loadEvents}><T color={c.primary} style={{marginTop:12}}>{ct('retry')}</T></Pressable> : events.map(event => {
+          const canonical = event.event_id === 'eb0025ca-b597-4708-9d47-b24ebbf507b5';
+          const date = (value:string) => new Date(value+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Paris'});
+          return <View key={event.event_id} style={{marginTop:14}}>
+            <T variant="small">{canonical ? ct('presels')+' · '+date('2027-03-11')+' – '+date('2027-03-12') : event.events?.title}</T>
+            <T variant="caption" color={c.textDim}>{canonical ? ct('preselVenue') : date(event.access_start_date)+' – '+date(event.access_end_date)+' · '+(event.events?.venue || ct('unknownVenue'))}</T>
+            {canonical && <><T variant="small" style={{marginTop:10}}>{ct('finalDays')+' · '+date('2027-03-13')+' – '+date('2027-03-14')}</T><T variant="caption" color={c.textDim}>{event.events?.venue || 'Stade Pierre-de-Coubertin'}</T></>}
+          </View>;
+        })}
+        <T variant="small" color={c.textDim} style={{marginTop:14}}>{ct('blackCalendar')}</T>
+      </Card>}
       <Card style={{ marginTop: Space.lg }}>
         <T variant="h3">{ct('includedBlack')}</T>
         {BLACK_CARD_BENEFITS.map(benefit => <T key={benefit} variant="small" color={c.textDim} style={{marginTop: 12}}>• {ct(`benefit${BLACK_CARD_BENEFITS.indexOf(benefit) + 1}` as Parameters<typeof ct>[0])}</T>)}

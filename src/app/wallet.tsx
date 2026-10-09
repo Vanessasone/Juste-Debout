@@ -5,7 +5,7 @@ import { ticketProductText } from '@/lib/ticketProductText';
  * Portefeuille — les billets de l'utilisateur avec leur QR d'entrée.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
@@ -15,6 +15,9 @@ import { Radius, Space } from '@/constants/brand';
 import { ThemeColors } from '@/constants/theme';
 import { useT } from '@/lib/i18n';
 import { cancelTicketTransfer, getMyTickets, prepareTicketTransfer, Ticket } from '@/lib/tickets';
+import { serverRequest } from '@/lib/serverRequest';
+import { supabase } from '@/lib/supabase';
+import { claimGuestTickets, resendMyTicketConfirmations } from '@/lib/guestTickets';
 import { useColors } from '@/lib/theme';
 
 export default function Wallet() {
@@ -32,20 +35,41 @@ export default function Wallet() {
   const [transferEmail, setTransferEmail] = useState('');
   const [transferBusy, setTransferBusy] = useState(false);
 
+  const [accountEmail, setAccountEmail] = useState('');
+  const [resendBusy, setResendBusy] = useState(false);
+  const [recoveryInfo, setRecoveryInfo] = useState('');
+  const loadGeneration = useRef(0);
   const load = async () => {
+    const generation = ++loadGeneration.current;
+    setLoading(true); setError(null); setTickets([]); setAccountEmail('');
     try {
-      const tk = await getMyTickets();
-      setTickets(tk);
-    } catch (e: any) {
-      setError(e?.message ?? t('reg.loadFail'));
+      const {data:{user},error:authError} = await serverRequest(() => supabase.auth.getUser());
+      if (authError) throw authError;
+      if (!user) { router.replace({pathname:'/login',params:{recover:'1'}}); return; }
+      await claimGuestTickets();
+      const tk = await serverRequest(() => getMyTickets());
+      const {data:{user:current}} = await serverRequest(() => supabase.auth.getUser());
+      if (generation !== loadGeneration.current || current?.id !== user.id) return;
+      setAccountEmail(user.email ?? ''); setTickets(tk);
+    } catch {
+      if (generation === loadGeneration.current) setError(ct('recoveryHelp'));
     } finally {
-      setLoading(false);
+      if (generation === loadGeneration.current) setLoading(false);
     }
   };
-
   useFocusEffect(useCallback(() => {
-    load();
+    void load();
+    return () => { loadGeneration.current++; };
   }, []));
+  const resend = async () => {
+    if (resendBusy) return;
+    setResendBusy(true); setRecoveryInfo('');
+    try {
+      const result = await resendMyTicketConfirmations();
+      setRecoveryInfo(ct(result.queued > 0 ? 'confirmationQueued' : result.cooldown ? 'confirmationCooldown' : 'recoveryHelp'));
+    } catch { setRecoveryInfo(ct('retry')); }
+    finally { setResendBusy(false); }
+  };
 
 
   const sendTransfer = async () => {
@@ -76,7 +100,15 @@ export default function Wallet() {
     <Screen>
       <PageHeader title={t('wallet.title')} subtitle={t('wallet.subtitle')} />
 
-      {payment === 'success' && <Card style={{ marginBottom: Space.md }}>
+      <Card style={{marginBottom:Space.md}}>
+        {!!accountEmail && <><T variant="small">{ct('connectedEmail',{email:accountEmail})}</T><Pressable accessibilityRole="button" onPress={async()=>{loadGeneration.current++;setTickets([]);setAccountEmail('');await supabase.auth.signOut({scope:'local'});router.replace({pathname:'/login',params:{recover:'1'}});}} style={{paddingVertical:10}}><T variant="small" color={c.primary}>{ct('switchAccount')}</T></Pressable></>}
+        <T variant="small" color={c.textDim} style={{marginTop:6}}>{ct('recoveryHelp')}</T>
+        <Pressable accessibilityRole="button" disabled={resendBusy} onPress={()=>void resend()} style={{paddingVertical:14}}>
+          <T color={c.primary}>{resendBusy ? ct('wait') : ct('resendPurchaseConfirmation')}</T>
+        </Pressable>
+        {!!recoveryInfo && <T variant="small" color={c.textDim}>{recoveryInfo}</T>}
+      </Card>
+      {payment === 'success'  && <Card style={{ marginBottom: Space.md }}>
         <T variant="h3" color={c.primary}>{ct('paymentReturn')}</T>
         <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>
           {ct('walletPending')}
@@ -107,7 +139,9 @@ export default function Wallet() {
       {tickets.length === 0 ? (
         <Card>
           <T variant="h3">{ct('noTickets')}</T>
-          <T variant="small" color={c.textDim} style={{marginTop:8,marginBottom:Space.md}}>{ct('ticketsHere')}</T>
+          <T variant="small" color={c.textDim} style={{marginTop:8,marginBottom:Space.md}}>{ct('recoveryHelp')}</T>
+          <GButton label={ct('refreshTickets')} onPress={()=>void load()} />
+          <Pressable onPress={()=>router.push({pathname:'/login',params:{recover:'1'}})} style={{paddingVertical:14}}><T color={c.primary}>{ct('backLogin')}</T></Pressable>
           <GButton label={ct('boxoffice')} icon="ticket" onPress={() => router.push('/billetterie')} />
         </Card>
       ) : tickets.map((tkt) => (

@@ -230,7 +230,15 @@
     "vipBenefit4": "Une boisson et un snack inclus",
     "purchaseEmail": "Adresse e-mail de l’achat : {email}",
     "resendConfirmation": "Renvoyer l’e-mail de confirmation du compte",
-    "resendInfo": "Si un compte attend sa validation avec cette adresse, un nouvel e-mail de confirmation a été envoyé. Vérifie aussi les indésirables. Si ton compte est déjà confirmé, connecte-toi."
+    "resendInfo": "Si un compte attend sa validation avec cette adresse, un nouvel e-mail de confirmation a été envoyé. Vérifie aussi les indésirables. Si ton compte est déjà confirmé, connecte-toi.",
+    "connectedEmail": "Compte connecté : {email}",
+    "recoveryHelp": "Tes billets sont liés à l’adresse e-mail utilisée pour l’achat. Si tu ne les vois pas, vérifie cette adresse, actualise tes billets ou connecte-toi avec le bon compte.",
+    "resendPurchaseConfirmation": "Renvoyer mes confirmations d’achat",
+    "confirmationQueued": "Tes confirmations ont été mises en file d’envoi. Vérifie ta boîte de réception et tes indésirables.",
+    "confirmationCooldown": "Une demande est déjà en cours. Attends 10 minutes avant de recommencer.",
+    "blackProgram": "Mon programme Black Card",
+    "recipientNameRequired": "Ajoute ton nom et prénom dans ton profil, puis ouvre à nouveau ton invitation.",
+    "switchAccount": "Changer de compte"
   },
   "en": {
     "paid": "PAYMENT CONFIRMED",
@@ -463,7 +471,15 @@
     "vipBenefit4": "One drink and one snack included",
     "purchaseEmail": "Purchase email address: {email}",
     "resendConfirmation": "Resend account confirmation email",
-    "resendInfo": "If an account with this address is awaiting verification, a new confirmation email has been sent. Check spam too. If already verified, sign in."
+    "resendInfo": "If an account with this address is awaiting verification, a new confirmation email has been sent. Check spam too. If already verified, sign in.",
+    "connectedEmail": "Signed-in account: {email}",
+    "recoveryHelp": "Your tickets are linked to the email used at purchase. If they are missing, check that address, refresh your tickets or sign in to the correct account.",
+    "resendPurchaseConfirmation": "Resend my purchase confirmations",
+    "confirmationQueued": "Your confirmations are queued. Check your inbox and spam folder.",
+    "confirmationCooldown": "A request is already in progress. Wait 10 minutes before trying again.",
+    "blackProgram": "My Black Card programme",
+    "recipientNameRequired": "Add your full name to your profile, then reopen your invitation.",
+    "switchAccount": "Switch account"
   },
   "de": {
     "paid": "ZAHLUNG BESTÄTIGT",
@@ -696,7 +712,15 @@
     "vipBenefit4": "Ein Getränk und ein Snack inklusive",
     "purchaseEmail": "E-Mail-Adresse des Kaufs: {email}",
     "resendConfirmation": "Bestätigungs-E-Mail erneut senden",
-    "resendInfo": "Falls ein Konto mit dieser Adresse auf Bestätigung wartet, wurde eine neue E-Mail gesendet. Prüfe auch Spam. Ist das Konto bereits bestätigt, melde dich an."
+    "resendInfo": "Falls ein Konto mit dieser Adresse auf Bestätigung wartet, wurde eine neue E-Mail gesendet. Prüfe auch Spam. Ist das Konto bereits bestätigt, melde dich an.",
+    "connectedEmail": "Angemeldetes Konto: {email}",
+    "recoveryHelp": "Deine Tickets sind mit der beim Kauf verwendeten E-Mail verknüpft. Prüfe diese Adresse, aktualisiere die Tickets oder melde dich mit dem richtigen Konto an.",
+    "resendPurchaseConfirmation": "Kaufbestätigungen erneut senden",
+    "confirmationQueued": "Deine Bestätigungen werden versendet. Prüfe Posteingang und Spamordner.",
+    "confirmationCooldown": "Eine Anfrage läuft bereits. Warte 10 Minuten.",
+    "blackProgram": "Mein Black-Card-Programm",
+    "recipientNameRequired": "Ergänze deinen Vor- und Nachnamen im Profil und öffne die Einladung erneut.",
+    "switchAccount": "Konto wechseln"
   },
   "it": {
     "paid": "PAGAMENTO CONFERMATO",
@@ -929,7 +953,15 @@
     "vipBenefit4": "Una bevanda e uno snack inclusi",
     "purchaseEmail": "E-mail dell’acquisto: {email}",
     "resendConfirmation": "Invia di nuovo l’e-mail di conferma",
-    "resendInfo": "Se un account con questa e-mail attende conferma, è stata inviata una nuova e-mail. Controlla anche lo spam. Se è già confermato, accedi."
+    "resendInfo": "Se un account con questa e-mail attende conferma, è stata inviata una nuova e-mail. Controlla anche lo spam. Se è già confermato, accedi.",
+    "connectedEmail": "Account connesso: {email}",
+    "recoveryHelp": "I biglietti sono collegati all’e-mail usata per l’acquisto. Verifica l’indirizzo, aggiorna i biglietti o accedi all’account corretto.",
+    "resendPurchaseConfirmation": "Invia di nuovo le conferme d’acquisto",
+    "confirmationQueued": "Le conferme sono in coda. Controlla posta in arrivo e spam.",
+    "confirmationCooldown": "Una richiesta è già in corso. Attendi 10 minuti.",
+    "blackProgram": "Il mio programma Black Card",
+    "recipientNameRequired": "Aggiungi nome e cognome al profilo, poi riapri l’invito.",
+    "switchAccount": "Cambia account"
   },
   "es": {
     "paid": "PAGO CONFIRMADO",
@@ -1162,7 +1194,15 @@
     "vipBenefit4": "Una bebida y un snack incluidos",
     "purchaseEmail": "Correo de la compra: {email}",
     "resendConfirmation": "Reenviar correo de confirmación",
-    "resendInfo": "Si una cuenta con este correo espera confirmación, se ha enviado un nuevo correo. Revisa el spam. Si ya está confirmada, inicia sesión."
+    "resendInfo": "Si una cuenta con este correo espera confirmación, se ha enviado un nuevo correo. Revisa el spam. Si ya está confirmada, inicia sesión.",
+    "connectedEmail": "Cuenta conectada: {email}",
+    "recoveryHelp": "Tus entradas están vinculadas al correo usado en la compra. Comprueba la dirección, actualiza las entradas o accede a la cuenta correcta.",
+    "resendPurchaseConfirmation": "Reenviar mis confirmaciones de compra",
+    "confirmationQueued": "Las confirmaciones están en cola. Revisa tu bandeja de entrada y spam.",
+    "confirmationCooldown": "Ya hay una solicitud en curso. Espera 10 minutos.",
+    "blackProgram": "Mi programa Black Card",
+    "recipientNameRequired": "Añade nombre y apellidos a tu perfil y vuelve a abrir la invitación.",
+    "switchAccount": "Cambiar de cuenta"
   },
   "pt": {
     "paid": "PAGAMENTO CONFIRMADO",
@@ -1395,7 +1435,15 @@
     "vipBenefit4": "Uma bebida e um snack incluídos",
     "purchaseEmail": "E-mail da compra: {email}",
     "resendConfirmation": "Reenviar e-mail de confirmação",
-    "resendInfo": "Se uma conta com este e-mail aguarda confirmação, foi enviado um novo e-mail. Verifica o spam. Se já está confirmada, inicia sessão."
+    "resendInfo": "Se uma conta com este e-mail aguarda confirmação, foi enviado um novo e-mail. Verifica o spam. Se já está confirmada, inicia sessão.",
+    "connectedEmail": "Conta ligada: {email}",
+    "recoveryHelp": "Os bilhetes estão associados ao e-mail usado na compra. Confirma o endereço, atualiza os bilhetes ou entra na conta correta.",
+    "resendPurchaseConfirmation": "Reenviar confirmações de compra",
+    "confirmationQueued": "As confirmações estão na fila de envio. Verifica a caixa de entrada e o spam.",
+    "confirmationCooldown": "Já existe um pedido em curso. Aguarda 10 minutos.",
+    "blackProgram": "O meu programa Black Card",
+    "recipientNameRequired": "Adiciona o nome completo ao perfil e abre novamente o convite.",
+    "switchAccount": "Mudar de conta"
   },
   "zh": {
     "paid": "付款已确认",
@@ -1628,7 +1676,15 @@
     "vipBenefit4": "包含一份饮品和一份小食",
     "purchaseEmail": "购票邮箱：{email}",
     "resendConfirmation": "重新发送账户确认邮件",
-    "resendInfo": "如果该邮箱的账户正在等待验证，已重新发送确认邮件。请检查垃圾邮件。如果账户已确认，请登录。"
+    "resendInfo": "如果该邮箱的账户正在等待验证，已重新发送确认邮件。请检查垃圾邮件。如果账户已确认，请登录。",
+    "connectedEmail": "已登录账户：{email}",
+    "recoveryHelp": "门票关联购买时使用的电子邮箱。如未显示，请核对邮箱、刷新门票或登录正确账户。",
+    "resendPurchaseConfirmation": "重新发送购买确认邮件",
+    "confirmationQueued": "确认邮件已加入发送队列。请查看收件箱及垃圾邮件。",
+    "confirmationCooldown": "已有请求正在处理中，请等待10分钟后重试。",
+    "blackProgram": "我的Black Card活动安排",
+    "recipientNameRequired": "请在个人资料中填写姓名，然后重新打开邀请。",
+    "switchAccount": "切换账户"
   },
   "ko": {
     "paid": "결제 확인 완료",
@@ -1861,7 +1917,15 @@
     "vipBenefit4": "음료 1잔과 간식 1개 포함",
     "purchaseEmail": "구매 이메일: {email}",
     "resendConfirmation": "계정 확인 이메일 다시 보내기",
-    "resendInfo": "이 이메일의 계정이 확인을 기다리고 있다면 새 확인 이메일이 전송되었습니다. 스팸함도 확인하세요. 이미 확인된 계정이라면 로그인하세요."
+    "resendInfo": "이 이메일의 계정이 확인을 기다리고 있다면 새 확인 이메일이 전송되었습니다. 스팸함도 확인하세요. 이미 확인된 계정이라면 로그인하세요.",
+    "connectedEmail": "로그인한 계정: {email}",
+    "recoveryHelp": "티켓은 구매 시 사용한 이메일과 연결됩니다. 티켓이 없으면 이메일을 확인하거나 새로고침하거나 올바른 계정으로 로그인하세요.",
+    "resendPurchaseConfirmation": "구매 확인 이메일 다시 보내기",
+    "confirmationQueued": "확인 이메일이 전송 대기 중입니다. 받은편지함과 스팸함을 확인하세요.",
+    "confirmationCooldown": "이미 요청이 진행 중입니다. 10분 후 다시 시도하세요.",
+    "blackProgram": "나의 Black Card 일정",
+    "recipientNameRequired": "프로필에 이름과 성을 추가한 후 초대 링크를 다시 여세요.",
+    "switchAccount": "계정 변경"
   },
   "ja": {
     "paid": "支払い確認済み",
@@ -2094,6 +2158,14 @@
     "vipBenefit4": "ドリンク1杯とスナック1個付き",
     "purchaseEmail": "購入時のメールアドレス：{email}",
     "resendConfirmation": "アカウント確認メールを再送",
-    "resendInfo": "このメールアドレスのアカウントが確認待ちの場合、新しい確認メールを送信しました。迷惑メールも確認してください。確認済みの場合はログインしてください。"
+    "resendInfo": "このメールアドレスのアカウントが確認待ちの場合、新しい確認メールを送信しました。迷惑メールも確認してください。確認済みの場合はログインしてください。",
+    "connectedEmail": "ログイン中のアカウント：{email}",
+    "recoveryHelp": "チケットは購入時のメールアドレスに紐づきます。表示されない場合はアドレスを確認し、更新するか正しいアカウントでログインしてください。",
+    "resendPurchaseConfirmation": "購入確認メールを再送する",
+    "confirmationQueued": "確認メールを送信待ちに追加しました。受信箱と迷惑メールをご確認ください。",
+    "confirmationCooldown": "リクエストは処理中です。10分待ってから再試行してください。",
+    "blackProgram": "私のBlack Cardプログラム",
+    "recipientNameRequired": "プロフィールに氏名を追加し、招待をもう一度開いてください。",
+    "switchAccount": "アカウントを切り替える"
   }
 }

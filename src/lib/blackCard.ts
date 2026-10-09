@@ -38,3 +38,12 @@ export async function getMyBlackCard(): Promise<BlackCardMembership | null> {
     qr_token: ticketResult.data && ['active', 'used'].includes(ticketResult.data.status) ? ticketResult.data.qr_token : null,
   } as BlackCardMembership;
 }
+
+export type BlackCardEvent = { event_id: string; access_start_date: string; access_end_date: string; events: {title:string; venue:string|null; city:string|null} | null };
+export async function getMyBlackCardEvents(): Promise<BlackCardEvent[]> {
+  const {data,error} = await supabase.from('black_card_event_access')
+    .select('event_id,access_start_date,access_end_date,events(title,venue,city)')
+    .eq('active',true).order('access_start_date');
+  if (error) throw error;
+  return (data ?? []) as unknown as BlackCardEvent[];
+}
