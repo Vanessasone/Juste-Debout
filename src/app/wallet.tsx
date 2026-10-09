@@ -172,14 +172,14 @@ function TicketCard({
   const expectedDates = multiStart && multiDays > 2 ? Array.from({length:multiDays},(_,i)=>{const d=new Date(multiStart+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+i);return d.toISOString().slice(0,10);}) : [];
   const multiScannedCount = expectedDates.filter(d=>scans.some(x=>x.access_date===d)).length;
   const fullyScanned = expectedDates.length ? multiScannedCount===expectedDates.length : isWeekend && !!saturdayScan && !!sundayScan;
-  const used = ticket.status === 'used' || fullyScanned;
-  const cancelled = ticket.status === 'cancelled';
+  const categoryCode = ticket.ticket_products?.code ?? '';
+  const premiumBlack = categoryCode === 'black_card';
+  const used = ticket.status === 'used' || (!premiumBlack && fullyScanned);
+  const cancelled = ticket.status === 'cancelled' || ticket.status === 'refunded';
   const saturdayUsed = !expectedDates.length && isWeekend && !!saturdayScan && !sundayScan && !cancelled;
   const multiPartial = expectedDates.length>0 && multiScannedCount>0 && !fullyScanned && !cancelled;
   const accessStatus = cancelled ? t('wallet.cancelled') : used ? (isWeekend ? ct('fullyUsed') : ct('used')) : multiPartial ? ct('daysUsed', {n:multiScannedCount, days:multiDays}) : saturdayUsed ? ct('sundayAvailable') : t('wallet.valid');
   const scanTime = (stamp:string) => new Date(stamp).toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'});
-  const categoryCode = ticket.ticket_products?.code ?? '';
-  const premiumBlack = categoryCode === 'black_card';
   const premiumVip = categoryCode.startsWith('vip_');
   const categoryColor = premiumBlack ? '#D7B66D' : premiumVip ? '#B5FA42' : '#303030';
   const categoryTextColor = premiumBlack || premiumVip ? '#101010' : '#FFFFFF';
@@ -216,6 +216,7 @@ function TicketCard({
         <DetailRow icon="receipt-outline" label={ct('reference')} value={ticket.id.slice(0, 8).toUpperCase()} c={c} />
       </View>
 
+      {premiumBlack && <T variant="small" color={c.textDim} style={{alignSelf:'stretch',marginTop:16}}>{ct('blackCalendar')}</T>}
       <View style={[styles.qrBox, used && { opacity: 0.3 }]}>
         <QRCode value={ticket.qr_token} size={180} color="#0A0A0A" backgroundColor="#FFFFFF" />
         {used && (

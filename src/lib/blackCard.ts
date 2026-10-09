@@ -35,6 +35,6 @@ export async function getMyBlackCard(): Promise<BlackCardMembership | null> {
   return {
     ...data,
     holder_name: ticketResult.data?.holder_name || profileResult.data?.full_name || null,
-    qr_token: ticketResult.data && ticketResult.data.status !== 'cancelled' ? ticketResult.data.qr_token : null,
+    qr_token: ticketResult.data && ['active', 'used'].includes(ticketResult.data.status) ? ticketResult.data.qr_token : null,
   } as BlackCardMembership;
 }
