@@ -144,18 +144,19 @@ export default function Tickets() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
     <Screen scrollRef={scrollRef}>
       <LanguagePicker />
-      <EarlyBirdCountdown />
       <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
+      <EarlyBirdCountdown />
       <PageHeader title={ct('boxoffice')} subtitle={ct('finals')} />
-      <View style={styles.hero}>
-        <T variant="title" color="#FFFFFF" style={{ fontSize: 38 }}>{ct('salesHeadline')}</T>
-        <T color="#E5E5E5" style={{ marginTop: 12 }}>{ct('salesVenue')}</T>
+      <View style={[styles.hero, { flexDirection: width >= 900 ? 'row' : 'column', alignItems: 'center', gap: 24 }]}><View style={{ flex: 1, width: '100%', minWidth: 0 }}>
+        <T variant="title" color="#FFFFFF" style={{ fontSize: width >= 900 ? 76 : 48, lineHeight: width >= 900 ? 80 : 52 }}>{ct('salesHeadline')}</T>
+        <T color="#B5FC44" style={{ marginTop: 20, fontSize: 20, lineHeight: 28 }}>{ct('salesVenue')}</T>
         <Pressable accessibilityRole="button" onPress={() => showOffers()} style={styles.buy}>
           <T variant="label" color="#000000">{ct('salesReserve')}</T><Ionicons name="arrow-down" size={20} color="#000000" />
         </Pressable>
         <T variant="small" color="#FFFFFF" style={{ marginTop: 12, lineHeight: 21 }}>{ct('salesTrust')}</T>
-        <EventPoster compact />
+        </View><View style={{ width: width >= 900 ? '36%' : '100%', maxWidth: 400 }}><EventPoster /></View>
       </View>
+      <View style={{ backgroundColor: '#B5FC44', borderRadius: 16, padding: 20, marginBottom: 16 }}><T variant="label" color="#000000" style={{ fontSize: 20, lineHeight: 30, textAlign: 'center' }}>POPPING · LOCKING · HIP HOP · HOUSE · JUNIOR DANCE TOUR · AFRO · DANCEHALL · ELECTRO · KRUMP</T></View>
       <TicketVideoPreview />
       <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>{ct('steps')}</T>
       <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>{ct('login')}</T></Pressable>
@@ -186,7 +187,7 @@ export default function Tickets() {
       <TicketComparison prices={{ standard: lowestPrice(['day_sat','day_sun']), vip: lowestPrice(['vip_sat','vip_sun']), black: lowestPrice(['black_card']) }} onChoose={showOffers} />
 
       <View onLayout={event => { offersY.current = event.nativeEvent.layout.y; }}>
-      <Section title={ct('choose')}>
+      <Section title={ct('choose')} titleStyle={{ fontSize: 36, lineHeight: 42, flexShrink: 1 }}>
         <View style={styles.groups}>
           {groups.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityState={{ selected: group === item.id }} onPress={() => setGroup(item.id)} style={[styles.group, group === item.id && { backgroundColor: c.primary, borderColor: c.primary }]}>
             <T variant="label" color={group === item.id ? '#000000' : c.text} style={{ fontSize: 13 }}>{ct(item.label)}</T>
@@ -213,7 +214,7 @@ export default function Tickets() {
               {selectedProduct === p.id && <T variant="caption" color={c.accent}>{ct('selected')}</T>}
               <View style={styles.rowBetween}>
                 <View style={{ flex: 1, paddingRight: Space.md }}>
-                  <T variant="h2">{display.name}</T>
+                  <T variant="h2" style={{ fontSize: 28, lineHeight: 34 }}>{display.name}</T>
                   {previewOnly && <T variant="caption" color={c.accent} style={{marginTop:5}}>{ct('preview')}</T>}
                   {!!p.description && <T variant="small" color={c.textDim} style={{ marginTop: 4 }}>{display.description}</T>}
                   {(vip || bc) && <T variant="small" color={soldOut ? c.danger : c.accent} style={{marginTop:6}}>{remaining===undefined ? ct('availability') : remaining===0 ? ct('full') : `${ct('places', { n: remaining, max: bc ? 56 : 112 })}${vip ? ` · ${ct('perDay')}` : ''}`}</T>}
@@ -221,7 +222,7 @@ export default function Tickets() {
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   {discounted && <T variant="small" color={c.textDim} style={{ textDecorationLine: 'line-through' }}>{(p.price_cents / 100).toFixed(0)} €</T>}
-                  <T variant="title" color={c.accent} style={{ fontSize: 28 }}>{price} €</T>
+                  <T variant="title" color={c.accent} style={{ fontSize: 36 }}>{price} €</T>
                   {discounted && <T variant="small" color={c.accent}>{ct('salesWithCode')}</T>}
                 </View>
               </View>
@@ -252,6 +253,11 @@ export default function Tickets() {
       </Section>
       </View>
       <TicketFAQ />
+      <View style={{ backgroundColor: '#161A1D', borderRadius: 24, padding: 24, marginTop: 24 }}>
+        <T variant="h2" color="#FFFFFF" style={{ fontSize: 36, lineHeight: 42 }}>{ct('salesReserve')}</T>
+        <T color="#E5E5E5" style={{ marginTop: 12, lineHeight: 24 }}>{ct('salesTrust')}</T>
+        <Pressable accessibilityRole="button" onPress={() => showOffers()} style={styles.buy}><T variant="label" color="#000000">{ct('choose')}</T><Ionicons name="arrow-up" size={20} color="#000000" /></Pressable>
+      </View>
     </Screen>
     {width < 768 && <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: c.bg, borderTopWidth: 1, borderColor: c.border, paddingHorizontal: 16, paddingTop: 10, paddingBottom: Math.max(insets.bottom, 12) }}>
       <Pressable accessibilityRole="button" accessibilityLabel={ct('salesReserve')} onPress={() => showOffers()} style={[styles.buy, { marginTop: 0 }]}>
@@ -263,7 +269,7 @@ export default function Tickets() {
 }
 
 const makeStyles = (c: ThemeColors) => StyleSheet.create({
-  hero: { backgroundColor: '#161A1D', borderRadius: Radius.xl, padding: 20, marginVertical: 16 },
+  hero: { backgroundColor: '#161A1D', borderRadius: Radius.xl, padding: 24, marginVertical: 16 },
   groups: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
   group: { paddingVertical: 12, paddingHorizontal: 14, borderWidth: 1, borderColor: c.border, borderRadius: Radius.pill },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },

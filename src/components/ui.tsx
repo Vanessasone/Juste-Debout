@@ -112,18 +112,20 @@ export function Section({
   title,
   action,
   onAction,
+  titleStyle,
   children,
 }: {
   title: string;
   action?: string;
   onAction?: () => void;
+  titleStyle?: StyleProp<TextStyle>;
   children: React.ReactNode;
 }) {
   const c = useColors();
   return (
     <View style={{ marginTop: Space.xl }}>
       <View style={s.sectionHead}>
-        <Text style={[s.sectionTitle, { color: c.text }]}>{title}</Text>
+        <Text style={[s.sectionTitle, { color: c.text }, titleStyle]}>{title}</Text>
         {action ? (
           <Pressable onPress={onAction} hitSlop={8}>
             <Text style={s.sectionAction}>{action}</Text>

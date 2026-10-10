@@ -47,14 +47,15 @@ export function TicketComparison({ prices, onChoose }: {
     { group: 'vip' as const, name: 'salesVip' as const, benefit: 'compareVip' as const, price: prices.vip },
     { group: 'black' as const, name: 'salesBlack' as const, benefit: 'compareBlack' as const, price: prices.black },
   ];
-  return <Section title={ct('compareTitle')}>
+  return <Section title={ct('compareTitle')} titleStyle={{ fontSize: 36, lineHeight: 42, flexShrink: 1 }}>
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
-      {options.map(option => <Card key={option.group} style={{ flexGrow: 1, flexBasis: 250, minWidth: 0, borderColor: option.group === 'black' ? '#D9C27A' : c.border }}>
-        <T variant="h2">{ct(option.name)}</T>
-        {option.price !== null && <T variant="h3" color={c.accent} style={{ marginTop: 8 }}>{ct(option.group === 'black' ? 'comparePrice' : 'compareFrom', {price: (option.price / 100).toFixed(0)})}</T>}
-        <T variant="small" color={c.textDim} style={{ marginTop: 12, lineHeight: 23 }}>{ct(option.benefit)}</T>
-        <Pressable accessibilityRole="button" accessibilityLabel={`${ct('compareDiscover')} ${ct(option.name)}`} onPress={() => onChoose(option.group)} style={{ paddingVertical: 14, marginTop: 12 }}>
-          <T variant="label" color={c.accent}>{ct('compareDiscover')} →</T>
+      {options.map(option => <Card key={option.group} style={{ flexGrow: 1, flexBasis: 280, minWidth: 0, backgroundColor: option.group === 'black' ? '#161A1D' : c.surface, borderWidth: 2, borderColor: option.group === 'black' ? '#D9C27A' : c.border }}>
+        <T variant="h2" color={option.group === 'black' ? '#D9C27A' : c.text} style={{ fontSize: 36 }}>{ct(option.name)}</T>
+        {option.price !== null && <T variant="h3" color={option.group === 'black' ? '#D9C27A' : c.accent} style={{ marginTop: 12, fontSize: 28 }}>{ct(option.group === 'black' ? 'comparePrice' : 'compareFrom', {price: (option.price / 100).toFixed(0)})}</T>}
+        <T variant="small" color={option.group === 'black' ? '#E5E5E5' : c.textDim} style={{ marginTop: 12, lineHeight: 25, fontSize: 17 }}>{ct(option.benefit)}</T>
+        {option.group !== 'standard' && (option.group === 'vip' ? ['vipBenefit1', 'vipBenefit2', 'vipBenefit3', 'vipBenefit4'] as const : ['benefit1', 'benefit2', 'benefit3', 'benefit5'] as const).map(key => <View key={key} style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}><Ionicons name="checkmark-circle" size={20} color={option.group === 'black' ? '#D9C27A' : c.accent} /><T variant="small" color={option.group === 'black' ? '#FFFFFF' : c.text} style={{ flex: 1, lineHeight: 22 }}>{ct(key)}</T></View>)}
+        <Pressable accessibilityRole="button" accessibilityLabel={`${ct('compareDiscover')} ${ct(option.name)}`} onPress={() => onChoose(option.group)} style={{ paddingVertical: 16, paddingHorizontal: 16, borderRadius: 30, backgroundColor: option.group === 'black' ? '#D9C27A' : '#B5FC44', marginTop: 24, alignItems: 'center' }}>
+          <T variant="label" color="#000000">{ct('compareDiscover')} →</T>
         </Pressable>
       </Card>)}
     </View>
@@ -71,7 +72,7 @@ export function TicketFAQ() {
     { question: 'faqDatesQuestion' as const, answer: 'faqDatesAnswer' as const },
     { question: 'faqFamilyQuestion' as const, answer: 'faqFamilyAnswer' as const },
   ];
-  return <Section title={ct('faqTitle')}>
+  return <Section title={ct('faqTitle')} titleStyle={{ fontSize: 36, lineHeight: 42, flexShrink: 1 }}>
     {questions.map((item, index) => <Card key={item.question} style={{ marginBottom: 10 }}>
       <Pressable accessibilityRole="button" accessibilityState={{ expanded: open === index }} onPress={() => setOpen(current => current === index ? null : index)} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 }}>
         <T variant="small" style={{ flex: 1, fontWeight: '700' }}>{ct(item.question)}</T>
