@@ -1,5 +1,5 @@
 import { createElement, useState } from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { Ionicons } from '@expo/vector-icons';
 import { Card, Section, T } from '@/components/ui';
@@ -15,22 +15,18 @@ function NativePromoVideo() {
     player.loop = true;
     player.play();
   });
-  return <VideoView player={player} nativeControls contentFit="contain" style={{ width: '100%', height: '100%' }} />;
+  return <VideoView player={player} nativeControls={false} contentFit="cover" style={{ width: '100%', height: '100%' }} />;
 }
 
-export function TicketVideoPreview() {
-  const ct = useCustomerText();
-  return <View style={{ backgroundColor: '#161A1D', borderRadius: 24, padding: 20, marginTop: 16, marginBottom: 16 }}>
-    <T variant="title" color="#FFFFFF" style={{ fontSize: 36, lineHeight: 42 }}>{ct('salesVideoPlay')}</T>
-    <T color="#E5E5E5" style={{ marginTop: 10, marginBottom: 16, lineHeight: 24 }}>{ct('salesVideoBody')}</T>
-    <View style={{ width: '100%', aspectRatio: 906 / 512, borderRadius: 16, overflow: 'hidden', backgroundColor: '#000000' }}>
-      {Platform.OS === 'web' ? createElement('video', {
-        src: '/media/juste-debout-promo.mp4', poster: '/media/juste-debout-promo.jpg',
-        autoPlay: true, muted: true, playsInline: true, loop: true, controls: true, preload: 'auto',
-        'aria-label': ct('salesVideoPlay'),
-        style: { width: '100%', height: '100%', objectFit: 'contain', display: 'block' },
-      }) : <NativePromoVideo />}
-    </View>
+export function TicketVideoBackground() {
+  return <View pointerEvents="none" accessible={false} style={StyleSheet.absoluteFill}>
+    {Platform.OS === 'web' ? createElement('video', {
+      src: '/media/juste-debout-promo.mp4', poster: '/media/juste-debout-promo.jpg',
+      autoPlay: true, muted: true, playsInline: true, loop: true, controls: false, preload: 'auto',
+      tabIndex: -1, 'aria-hidden': true, disablePictureInPicture: true,
+      style: { width: '100%', height: '100%', objectFit: 'cover', display: 'block', pointerEvents: 'none' },
+    }) : <NativePromoVideo />}
+    <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.62)' }]} />
   </View>;
 }
 
