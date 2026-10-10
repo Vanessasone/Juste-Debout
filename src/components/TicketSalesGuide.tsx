@@ -1,39 +1,37 @@
 import { createElement, useState } from 'react';
-import { Linking, Modal, Platform, Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
+import { useVideoPlayer, VideoView } from 'expo-video';
 import { Ionicons } from '@expo/vector-icons';
 import { Card, Section, T } from '@/components/ui';
 import { useCustomerText } from '@/lib/customerText';
 import { useColors } from '@/lib/theme';
 import { TicketGroup } from '@/lib/ticketSalesPresentation';
 
-// Official video already listed in the application's replay catalogue.
-const OFFICIAL_VIDEO = '4KYmQAUPcqo';
+const PROMO_VIDEO = 'https://justedeboutapp.com/media/juste-debout-promo.mp4';
+
+function NativePromoVideo() {
+  const player = useVideoPlayer(PROMO_VIDEO, player => {
+    player.muted = true;
+    player.loop = true;
+    player.play();
+  });
+  return <VideoView player={player} nativeControls contentFit="contain" style={{ width: '100%', height: '100%' }} />;
+}
 
 export function TicketVideoPreview() {
   const ct = useCustomerText();
-  const [open, setOpen] = useState(false);
-  const watch = () => {
-    if (Platform.OS === 'web') setOpen(true);
-    else void Linking.openURL(`https://www.youtube.com/watch?v=${OFFICIAL_VIDEO}`);
-  };
-  return <>
-    <Pressable accessibilityRole="button" accessibilityLabel={ct('salesVideoPlay')} onPress={watch} style={{ backgroundColor: '#161A1D', borderRadius: 18, marginTop: 16, padding: 20, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-      <Ionicons name="play-circle" size={48} color="#B5FC44" />
-      <View style={{ flex: 1 }}><T variant="h3" color="#FFFFFF">{ct('salesVideoPlay')}</T><T variant="small" color="#E5E5E5" style={{ marginTop: 6 }}>{ct('salesVideoBody')}</T></View>
-    </Pressable>
-    <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', justifyContent: 'center', padding: 16 }}>
-        <View style={{ maxWidth: 800, width: '100%', alignSelf: 'center' }}>
-          <T variant="h3" color="#FFFFFF" style={{ marginBottom: 12 }}>{ct('salesVideoBody')}</T>
-          <View style={{ width: '100%', aspectRatio: 16 / 9 }}>
-            {open && Platform.OS === 'web' && createElement('iframe', { src: `https://www.youtube-nocookie.com/embed/${OFFICIAL_VIDEO}?start=0&end=60&rel=0`, title: ct('salesVideoPlay'), allow: 'encrypted-media; picture-in-picture; fullscreen', allowFullScreen: true, referrerPolicy: 'strict-origin-when-cross-origin', style: { width: '100%', height: '100%', border: 0 } })}
-          </View>
-          <Pressable accessibilityRole="button" onPress={() => { void Linking.openURL(`https://www.youtube.com/watch?v=${OFFICIAL_VIDEO}`); }} style={{ paddingVertical: 16 }}><T variant="small" color="#FFFFFF">{ct('salesVideoFull')} ↗</T></Pressable>
-          <Pressable accessibilityRole="button" onPress={() => setOpen(false)} style={{ backgroundColor: '#B5FC44', borderRadius: 24, padding: 16, alignItems: 'center' }}><T variant="label" color="#000000">{ct('close')}</T></Pressable>
-        </View>
-      </View>
-    </Modal>
-  </>;
+  return <View style={{ backgroundColor: '#161A1D', borderRadius: 24, padding: 20, marginTop: 16, marginBottom: 16 }}>
+    <T variant="title" color="#FFFFFF" style={{ fontSize: 36, lineHeight: 42 }}>{ct('salesVideoPlay')}</T>
+    <T color="#E5E5E5" style={{ marginTop: 10, marginBottom: 16, lineHeight: 24 }}>{ct('salesVideoBody')}</T>
+    <View style={{ width: '100%', aspectRatio: 906 / 512, borderRadius: 16, overflow: 'hidden', backgroundColor: '#000000' }}>
+      {Platform.OS === 'web' ? createElement('video', {
+        src: '/media/juste-debout-promo.mp4', poster: '/media/juste-debout-promo.jpg',
+        autoPlay: true, muted: true, playsInline: true, loop: true, controls: true, preload: 'auto',
+        'aria-label': ct('salesVideoPlay'),
+        style: { width: '100%', height: '100%', objectFit: 'contain', display: 'block' },
+      }) : <NativePromoVideo />}
+    </View>
+  </View>;
 }
 
 export function TicketComparison({ prices, onChoose }: {
