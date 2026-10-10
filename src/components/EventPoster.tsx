@@ -1,8 +1,8 @@
 import { Image, StyleSheet, View } from 'react-native';
 
-export function EventPoster() {
+export function EventPoster({ compact = false }: { compact?: boolean }) {
   return (
-    <View style={styles.frame}>
+    <View style={[styles.frame, compact && { maxWidth: 260 }]}>
       <Image
         source={require('../../assets/images/juste-debout-paris-2027.jpg')}
         accessibilityLabel="Juste Debout Paris 2027 · 13 & 14 March 2027"

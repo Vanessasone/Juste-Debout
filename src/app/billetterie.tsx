@@ -4,9 +4,9 @@ import { ticketProductText } from '@/lib/ticketProductText';
 import { LanguagePicker } from '@/components/LanguagePicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useCustomerText } from '@/lib/customerText';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ActivityIndicator, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, AppState, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { Vitruve, Wordmark } from '@/components/Logo';
 import { EarlyBirdCountdown } from '@/components/EarlyBirdCountdown';
@@ -17,6 +17,8 @@ import { useColors } from '@/lib/theme';
 import { readTicketDraft, saveTicketDraft } from '@/lib/ticketPurchase';
 import { supabase } from '@/lib/supabase';
 import { getTicketProducts, TicketProduct } from '@/lib/ticketing';
+import { EARLY_BIRD_END, EARLY_BIRD_START, earlyBirdState } from '@/lib/earlyBird';
+import { checkoutPromo, displayedTicketPrice, ticketGroup, TicketGroup } from '@/lib/ticketSalesPresentation';
 
 const PARIS_EVENT_ID = 'eb0025ca-b597-4708-9d47-b24ebbf507b5';
 
@@ -32,12 +34,33 @@ export default function Tickets() {
   const [eventId, setEventId] = useState<string | null>(null);
   const [products, setProducts] = useState<TicketProduct[]>([]);
   const [qty, setQty] = useState<Record<string, number>>({});
-  const [promo, setPromo] = useState('');
+  const [promo, setPromo] = useState(() => earlyBirdState(Date.now()).phase === 'active' ? '48' : '');
+  const [now, setNow] = useState(Date.now);
+  const [group, setGroup] = useState<TicketGroup>('standard');
+  const scrollRef = useRef<ScrollView>(null);
+  const offersY = useRef(0);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [availability, setAvailability] = useState<{ days: { date: string; remaining: number }[]; black_card: { capacity: number; remaining: number } } | null>(null);
+
+  useEffect(() => {
+    const refresh = () => setNow(Date.now());
+    const boundary = now < EARLY_BIRD_START ? EARLY_BIRD_START : EARLY_BIRD_END;
+    const timer = now < boundary ? setTimeout(refresh, Math.min(2147483647, boundary - now + 10)) : undefined;
+    const subscription = AppState.addEventListener('change', state => { if (state === 'active') refresh(); });
+    return () => { clearTimeout(timer); subscription.remove(); };
+  }, [now]);
+
+  const earlyActive = earlyBirdState(now).phase === 'active';
+  const effectivePromo = promo.trim() === '48' && !earlyActive ? '' : promo;
+  const groups = [
+    { id: 'standard' as const, label: 'salesStandard' as const },
+    { id: 'vip' as const, label: 'salesVip' as const },
+    { id: 'black' as const, label: 'salesBlack' as const },
+    { id: 'family' as const, label: 'salesFamily' as const },
+  ];
 
   useEffect(() => {
     (async () => {
@@ -62,8 +85,9 @@ export default function Tickets() {
           const product = ps.find(p => p.id === draft.productId && p.active);
           if (product) {
             initial[product.id] = Math.max(product.min_per_order, Math.min(product.max_per_order, draft.quantity));
-            setPromo(draft.promoCode || '');
+            setPromo(draft.promoCode || (earlyBirdState(Date.now()).phase === 'active' ? '48' : ''));
             setSelectedProduct(product.id);
+            setGroup(ticketGroup(product.code));
           }
         }
         setQty(initial);
@@ -96,7 +120,7 @@ export default function Tickets() {
 
   const buy = async (p: TicketProduct) => {
     if (!eventId) return;
-    await saveTicketDraft({ eventId, productId: p.id, productName: ticketProductText(p.code, locale, p).name, productCode: p.code, quantity: qty[p.id] ?? p.min_per_order, promoCode: promo, createdAt: Date.now() });
+    await saveTicketDraft({ eventId, productId: p.id, productName: ticketProductText(p.code, locale, p).name, productCode: p.code, quantity: qty[p.id] ?? p.min_per_order, promoCode: checkoutPromo(p, effectivePromo, Date.now()), createdAt: Date.now() });
     router.push('/ticket-details');
   };
 
@@ -105,10 +129,19 @@ export default function Tickets() {
   }
 
   return (
-    <Screen>
+    <Screen scrollRef={scrollRef}>
       <LanguagePicker />
       <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
       <PageHeader title={ct('boxoffice')} subtitle={ct('finals')} />
+      <View style={styles.hero}>
+        <T variant="title" color="#FFFFFF" style={{ fontSize: 38 }}>{ct('salesHeadline')}</T>
+        <T color="#E5E5E5" style={{ marginTop: 12 }}>{ct('salesVenue')}</T>
+        <Pressable accessibilityRole="button" onPress={() => scrollRef.current?.scrollTo({ y: offersY.current, animated: true })} style={styles.buy}>
+          <T variant="label" color="#000000">{ct('salesReserve')}</T><Ionicons name="arrow-down" size={20} color="#000000" />
+        </Pressable>
+        <T variant="small" color="#FFFFFF" style={{ marginTop: 12, lineHeight: 21 }}>{ct('salesTrust')}</T>
+        <EventPoster compact />
+      </View>
       <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>{ct('steps')}</T>
       <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>{ct('login')}</T></Pressable>
 
@@ -117,31 +150,40 @@ export default function Tickets() {
         <Ionicons name="map-outline" size={24} color={c.primary}/>
       </Pressable>
       <EarlyBirdCountdown />
-      <EventPoster />
 
       <View style={{ marginTop: Space.lg }}>
         <T variant="h3" color={c.text} style={{ marginBottom: 10 }}>{ct('promo')}</T>
         <TextInput
           accessibilityLabel={ct('promo')}
-          value={promo}
+          value={effectivePromo}
           onChangeText={setPromo}
           autoCapitalize="characters"
-          placeholder="48"
+          placeholder={earlyActive ? '48' : ct('promo')}
           placeholderTextColor={c.textMute}
           style={styles.input}
         />
+        {earlyActive && effectivePromo.trim() === '48' && <T variant="small" color={c.accent} style={{ marginTop: 8 }}>{ct('salesPromoApplied')}</T>}
       </View>
 
       {error && <T variant="small" color={c.danger} style={{ marginTop: Space.md }}>{error}</T>}
 
       {testMode && <Card style={{marginTop:Space.md,borderColor:c.accent}}><T variant="h3">APERÇU INTERNE DES NOUVEAUX PASS</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Les pass 3 et 4 jours sont visibles ici uniquement pour vérification par les administrateurs. Ils restent désactivés et ne peuvent pas être achetés. Le billet technique 1 € reste réservé aux tests.</T></Card>}
 
+      <View onLayout={event => { offersY.current = event.nativeEvent.layout.y; }}>
       <Section title={ct('choose')}>
-        {products.map((p) => {
+        <View style={styles.groups}>
+          {groups.map(item => <Pressable key={item.id} accessibilityRole="button" accessibilityState={{ selected: group === item.id }} onPress={() => setGroup(item.id)} style={[styles.group, group === item.id && { backgroundColor: c.primary, borderColor: c.primary }]}>
+            <T variant="label" color={group === item.id ? '#000000' : c.text} style={{ fontSize: 13 }}>{ct(item.label)}</T>
+          </Pressable>)}
+        </View>
+        <T variant="small" color={c.textDim} style={{ marginBottom: 16 }}>{ct(group === 'standard' ? 'salesStandardInfo' : group === 'vip' ? 'salesVipInfo' : group === 'black' ? 'salesBlackInfo' : 'salesFamilyInfo')}</T>
+        {products.filter(p => ticketGroup(p.code) === group).map((p) => {
           const q = qty[p.id] ?? p.min_per_order;
           const display = ticketProductText(p.code, locale, p);
-          const price = (p.price_cents / 100).toFixed(0);
-          const total = ((p.price_cents * q) / 100).toFixed(0);
+          const displayCents = displayedTicketPrice(p, effectivePromo, now);
+          const discounted = displayCents < p.price_cents;
+          const price = (displayCents / 100).toFixed(0);
+          const total = ((displayCents * q) / 100).toFixed(0);
           const previewOnly = !p.active && ['three_days', 'four_days'].includes(p.code);
           const vip = ['vip_sat','vip_sun','vip_two_days'].includes(p.code);
           const bc = p.code === 'black_card';
@@ -161,7 +203,11 @@ export default function Tickets() {
                   {(vip || bc) && <T variant="small" color={soldOut ? c.danger : c.accent} style={{marginTop:6}}>{remaining===undefined ? ct('availability') : remaining===0 ? ct('full') : `${ct('places', { n: remaining, max: bc ? 56 : 112 })}${vip ? ` · ${ct('perDay')}` : ''}`}</T>}
                   {!!groupNote && <T variant="caption" color={c.accent} style={{ marginTop: 6 }}>{groupNote}</T>}
                 </View>
-                <T variant="title" color={c.accent} style={{ fontSize: 24 }}>{price} €</T>
+                <View style={{ alignItems: 'flex-end' }}>
+                  {discounted && <T variant="small" color={c.textDim} style={{ textDecorationLine: 'line-through' }}>{(p.price_cents / 100).toFixed(0)} €</T>}
+                  <T variant="title" color={c.accent} style={{ fontSize: 28 }}>{price} €</T>
+                  {discounted && <T variant="small" color={c.accent}>{ct('salesWithCode')}</T>}
+                </View>
               </View>
 
               {(vip || bc) && <View style={{ marginTop: Space.md, gap: 8 }}>
@@ -188,11 +234,15 @@ export default function Tickets() {
           );
         })}
       </Section>
+      </View>
     </Screen>
   );
 }
 
 const makeStyles = (c: ThemeColors) => StyleSheet.create({
+  hero: { backgroundColor: '#161A1D', borderRadius: Radius.xl, padding: 20, marginVertical: 16 },
+  groups: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 12 },
+  group: { paddingVertical: 12, paddingHorizontal: 14, borderWidth: 1, borderColor: c.border, borderRadius: Radius.pill },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   early: { borderColor: c.primary },
   input: {
