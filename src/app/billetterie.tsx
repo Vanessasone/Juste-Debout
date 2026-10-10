@@ -57,7 +57,8 @@ export default function Tickets() {
     return () => { clearTimeout(timer); subscription.remove(); };
   }, [now]);
 
-  const earlyActive = earlyBirdState(now).phase === 'active';
+  const earlyPhase = earlyBirdState(now).phase;
+  const earlyActive = earlyPhase === 'active';
   const effectivePromo = promo.trim() === '48' && !earlyActive ? '' : promo;
   const showOffers = (nextGroup?: TicketGroup) => {
     if (nextGroup) setGroup(nextGroup);
@@ -145,7 +146,7 @@ export default function Tickets() {
     <Screen scrollRef={scrollRef}>
       <LanguagePicker />
       <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
-      <EarlyBirdCountdown />
+      {earlyPhase === 'ended' ? <TicketVideoPreview /> : <EarlyBirdCountdown />}
       <PageHeader title={ct('boxoffice')} subtitle={ct('finals')} />
       <View style={[styles.hero, { flexDirection: width >= 900 ? 'row' : 'column', alignItems: 'center', gap: 24 }]}><View style={{ flex: 1, width: '100%', minWidth: 0 }}>
         <T variant="title" color="#FFFFFF" style={{ fontSize: width >= 900 ? 76 : 48, lineHeight: width >= 900 ? 80 : 52 }}>{ct('salesHeadline')}</T>
@@ -157,7 +158,7 @@ export default function Tickets() {
         </View><View style={{ width: width >= 900 ? '36%' : '100%', maxWidth: 400 }}><EventPoster /></View>
       </View>
       <View style={{ backgroundColor: '#B5FC44', borderRadius: 16, padding: 20, marginBottom: 16 }}><T variant="label" color="#000000" style={{ fontSize: 20, lineHeight: 30, textAlign: 'center' }}>POPPING · LOCKING · HIP HOP · HOUSE · JUNIOR DANCE TOUR · AFRO · DANCEHALL · ELECTRO · KRUMP</T></View>
-      <TicketVideoPreview />
+      {earlyPhase !== 'ended' && <TicketVideoPreview />}
       <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>{ct('steps')}</T>
       <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>{ct('login')}</T></Pressable>
 
