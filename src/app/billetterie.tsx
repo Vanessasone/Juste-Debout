@@ -144,6 +144,7 @@ export default function Tickets() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
     <Screen scrollRef={scrollRef}>
       <LanguagePicker />
+      <EarlyBirdCountdown />
       <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
       <PageHeader title={ct('boxoffice')} subtitle={ct('finals')} />
       <View style={styles.hero}>
@@ -163,7 +164,6 @@ export default function Tickets() {
         <View style={{flex:1}}><T variant="h3" color="#FFFFFF">{ct('plan')}</T><T variant="small" color="#E5E5E5" style={{marginTop:4}}>Black Card · VIP · Standard</T></View>
         <Ionicons name="map-outline" size={24} color={c.primary}/>
       </Pressable>
-      <EarlyBirdCountdown />
 
       <View style={{ marginTop: Space.lg }}>
         <T variant="h3" color={c.text} style={{ marginBottom: 10 }}>{ct('promo')}</T>

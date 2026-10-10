@@ -14,7 +14,7 @@ export function EarlyBirdCountdown() {
   }, []);
   const { phase, color, clock } = earlyBirdState(now);
   if (phase === 'ended') return null;
-  return <View style={{ backgroundColor: '#161A1D', borderColor: color, borderWidth: 2, borderRadius: 18, padding: 18, marginTop: 16 }}>
+  return <View style={{ backgroundColor: '#161A1D', borderColor: color, borderWidth: 2, borderRadius: 18, padding: 18, marginTop: 16, marginBottom: 16 }}>
     <Text style={{ color: '#FFFFFF', fontSize: 18, fontWeight: '700' }}>EARLY BIRD · 48 H</Text>
     <Text style={{ color: '#E5E5E5', fontSize: 15, marginTop: 10 }}>{phase === 'upcoming' ? ct('opening') : ct('remaining')}</Text>
     <Text accessibilityLabel={`${phase === 'upcoming' ? ct('opening') : ct('remaining')} ${clock}`} style={{ color, fontSize: 38, fontWeight: '800', fontVariant: ['tabular-nums'], marginTop: 8 }}>{clock}</Text>
