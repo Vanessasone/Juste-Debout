@@ -6,7 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCustomerText } from '@/lib/customerText';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ActivityIndicator, AppState, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, AppState, Pressable, ScrollView, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TicketComparison, TicketFAQ, TicketVideoPreview } from '@/components/TicketSalesGuide';
 
 import { Vitruve, Wordmark } from '@/components/Logo';
 import { EarlyBirdCountdown } from '@/components/EarlyBirdCountdown';
@@ -27,6 +29,8 @@ export default function Tickets() {
   const requestedTest = test === '1';
   const [testMode, setTestMode] = useState(false);
   const c = useColors();
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const ct = useCustomerText();
   const { locale, t } = useI18n();
@@ -55,6 +59,14 @@ export default function Tickets() {
 
   const earlyActive = earlyBirdState(now).phase === 'active';
   const effectivePromo = promo.trim() === '48' && !earlyActive ? '' : promo;
+  const showOffers = (nextGroup?: TicketGroup) => {
+    if (nextGroup) setGroup(nextGroup);
+    scrollRef.current?.scrollTo({ y: offersY.current, animated: true });
+  };
+  const lowestPrice = (codes: string[]) => {
+    const matching = products.filter(p => p.active && codes.includes(p.code));
+    return matching.length ? Math.min(...matching.map(p => displayedTicketPrice(p, effectivePromo, now))) : null;
+  };
   const groups = [
     { id: 'standard' as const, label: 'salesStandard' as const },
     { id: 'vip' as const, label: 'salesVip' as const },
@@ -129,6 +141,7 @@ export default function Tickets() {
   }
 
   return (
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
     <Screen scrollRef={scrollRef}>
       <LanguagePicker />
       <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
@@ -136,12 +149,13 @@ export default function Tickets() {
       <View style={styles.hero}>
         <T variant="title" color="#FFFFFF" style={{ fontSize: 38 }}>{ct('salesHeadline')}</T>
         <T color="#E5E5E5" style={{ marginTop: 12 }}>{ct('salesVenue')}</T>
-        <Pressable accessibilityRole="button" onPress={() => scrollRef.current?.scrollTo({ y: offersY.current, animated: true })} style={styles.buy}>
+        <Pressable accessibilityRole="button" onPress={() => showOffers()} style={styles.buy}>
           <T variant="label" color="#000000">{ct('salesReserve')}</T><Ionicons name="arrow-down" size={20} color="#000000" />
         </Pressable>
         <T variant="small" color="#FFFFFF" style={{ marginTop: 12, lineHeight: 21 }}>{ct('salesTrust')}</T>
         <EventPoster compact />
       </View>
+      <TicketVideoPreview />
       <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>{ct('steps')}</T>
       <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>{ct('login')}</T></Pressable>
 
@@ -168,6 +182,8 @@ export default function Tickets() {
       {error && <T variant="small" color={c.danger} style={{ marginTop: Space.md }}>{error}</T>}
 
       {testMode && <Card style={{marginTop:Space.md,borderColor:c.accent}}><T variant="h3">APERÇU INTERNE DES NOUVEAUX PASS</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Les pass 3 et 4 jours sont visibles ici uniquement pour vérification par les administrateurs. Ils restent désactivés et ne peuvent pas être achetés. Le billet technique 1 € reste réservé aux tests.</T></Card>}
+
+      <TicketComparison prices={{ standard: lowestPrice(['day_sat','day_sun']), vip: lowestPrice(['vip_sat','vip_sun']), black: lowestPrice(['black_card']) }} onChoose={showOffers} />
 
       <View onLayout={event => { offersY.current = event.nativeEvent.layout.y; }}>
       <Section title={ct('choose')}>
@@ -235,7 +251,14 @@ export default function Tickets() {
         })}
       </Section>
       </View>
+      <TicketFAQ />
     </Screen>
+    {width < 768 && <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: c.bg, borderTopWidth: 1, borderColor: c.border, paddingHorizontal: 16, paddingTop: 10, paddingBottom: Math.max(insets.bottom, 12) }}>
+      <Pressable accessibilityRole="button" accessibilityLabel={ct('salesReserve')} onPress={() => showOffers()} style={[styles.buy, { marginTop: 0 }]}>
+        <T variant="label" color="#000000">{ct('salesReserve')}</T><Ionicons name="arrow-down" size={20} color="#000000" />
+      </Pressable>
+    </View>}
+    </View>
   );
 }
 

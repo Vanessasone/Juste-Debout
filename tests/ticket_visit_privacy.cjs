@@ -1,0 +1,13 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const ts = require('typescript');
+const exportsObject = {};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('src/lib/ticketVisitPrivacy.ts', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText, { exports: exportsObject, URL, Set });
+const sanitize = exportsObject.ticketVisitBeforeSend;
+assert.equal(sanitize({ type: 'pageview', url: 'https://justedeboutapp.com/ticket-success?session_id=secret&email=private#token' }).url, 'https://justedeboutapp.com/ticket-success');
+for (const path of ['/wallet', '/auth', '/scanner', '/unknown']) assert.equal(sanitize({ type: 'pageview', url: 'https://justedeboutapp.com' + path }), null);
+assert.equal(sanitize({ type: 'event', url: 'https://justedeboutapp.com/' }), null);
+assert.equal(sanitize({ type: 'pageview', url: 'invalid' }), null);
+assert.equal(sanitize({ type: 'pageview', url: 'http://justedeboutapp.com/' }), null);
+console.log('Visit privacy: public pages only, no query strings or tokens.');

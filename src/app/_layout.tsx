@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 
 import { ArrivalAnimation } from '@/components/ArrivalAnimation';
+import { TicketVisitAnalytics } from '@/components/TicketVisitAnalytics';
 import { WELCOME_FLAG } from '@/app/welcome';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { I18nProvider } from '@/lib/i18n';
@@ -196,6 +197,7 @@ export default function RootLayout() {
         <ThemeProvider>
           <AuthProvider>
             <RootNavigator />
+            <TicketVisitAnalytics />
           </AuthProvider>
         </ThemeProvider>
       </I18nProvider>

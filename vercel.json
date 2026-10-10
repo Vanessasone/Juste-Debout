@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/((?!_expo/|assets/|email/|favicon\\.ico|manifest\\.webmanifest|app-icon\\.png).*)",
+      "source": "/((?!_vercel/|_expo/|assets/|email/|favicon\\.ico|manifest\\.webmanifest|app-icon\\.png).*)",
       "destination": "/index.html"
     }
   ]
