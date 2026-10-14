@@ -71,3 +71,38 @@ tax gating, numbering, lease retries, snapshot immutability, refunded invoice
 retention, buyer-only RLS, discount/VAT sums, Unicode and multi-page PDFs, and
 the actual email attachment/idempotency and email-failure retry paths. PDFs in
 `/tmp/jd-invoice-*.pdf` are test documents with no accounting value.
+
+## Historical purchases
+
+The private worker operation `reconcile_history` scans 15 Paris paid/refunded
+orders per request since the public opening (8 October 2026, 21:00 Paris).
+Pass its returned `next_cursor` to continue. Internal/test products are excluded.
+It retrieves the original Stripe session with expanded payment method and
+charge, verifies order metadata, paid amount, currency and buyer email, then
+recovers a full billing address from those verified records where available.
+Existing purchaser names take precedence; payment billing names fill gaps only.
+Updating verified billing data triggers the existing invoice queue. Unique
+order IDs prevent duplicates; issued snapshots remain immutable.
+
+Incomplete historical addresses are never fabricated. Such orders are held
+until the buyer provides the missing billing data. The operation returns counts
+and short order references only, never names, addresses or checkout links.
+
+For missing historical details, `ticket_invoice_details.sql` adds an authenticated
+RPC that completes only the verified buyer's unissued Paris invoices. Billing
+fields are validated and whitelisted; already issued snapshots and other buyers'
+orders cannot be changed. Wallet → My invoices displays the form. One submission
+covers that buyer's eligible missing orders. The existing queue sends the PDFs
+once details are completed.
+
+`ticket_invoice_details_requests` deduplicates requests by event and purchase
+email. Queue it only after the form is live. The independent worker sends a
+transactional FR/EN request with a fixed app link and stable hashed idempotency
+key. A lease recovers interrupted sends; completed buyers are suppressed. No
+marketing, tracking or recurring reminders are added.
+
+Historical reconciliation on 15 October 2026 checked 95 client orders: 30 full
+billing addresses were recovered from verified Stripe records and their PDFs
+were sent; 65 orders across 64 buyers need a billing address. Technical/test
+orders are excluded. Discounted PDFs use the font-supported ASCII minus sign;
+Latin-only discounted invoice rendering is now covered by the regression test.
