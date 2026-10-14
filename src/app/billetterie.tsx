@@ -183,6 +183,8 @@ export default function Tickets() {
 
       {error && <T variant="small" color={c.danger} style={{ marginTop: Space.md }}>{error}</T>}
 
+      <Card style={{marginTop:Space.md,borderColor:c.border}}><T variant="h3">ACHAT FERME ET DÉFINITIF</T><T variant="small" color={c.textDim} style={{marginTop:8,lineHeight:22}}>Toute commande de billets est définitive après confirmation du paiement. Billets ni repris ni échangés à la demande de l’acheteur, sous réserve des dispositions légales impératives applicables, notamment en cas d’annulation ou de modification substantielle de l’événement. Les conditions complètes sont présentées avant paiement.</T></Card>
+
       {testMode && <Card style={{marginTop:Space.md,borderColor:c.accent}}><T variant="h3">APERÇU INTERNE DES NOUVEAUX PASS</T><T variant="small" color={c.textDim} style={{marginTop:6}}>Les pass 3 et 4 jours sont visibles ici uniquement pour vérification par les administrateurs. Ils restent désactivés et ne peuvent pas être achetés. Le billet technique 1 € reste réservé aux tests.</T></Card>}
 
       <TicketComparison prices={{ standard: lowestPrice(['day_sat','day_sun']), vip: lowestPrice(['vip_sat','vip_sun']), black: lowestPrice(['black_card']) }} onChoose={showOffers} />
