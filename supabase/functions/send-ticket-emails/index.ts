@@ -1,3 +1,4 @@
+import { sendParisRegistrationEmails } from './paris-registration.ts';
 import { translations } from "./translations.ts";
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.110.1";
@@ -91,5 +92,6 @@ Deno.serve(async (req: Request) => {
       failed++;
     }
   }
-  return Response.json({ processed: (pending ?? []).length, sent, failed });
+  const parisRegistrations = await sendParisRegistrationEmails(admin, apiKey);
+  return Response.json({ parisRegistrations, processed: (pending ?? []).length, sent, failed });
 });

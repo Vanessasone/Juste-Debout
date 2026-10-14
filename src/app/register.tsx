@@ -65,19 +65,19 @@ export default function Register() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [requestedEventId, t]);
 
   // Catégories de l'événement sélectionné
   useEffect(() => {
     if (!eventId) return;
-    setType(null);
-    setCategoryId(null);
-    getEventCategories(eventId).then(setCategories).catch(() => setCategories([]));
+    let active = true;
+    getEventCategories(eventId).then(rows => { if (active) setCategories(rows); }).catch(() => { if (active) setCategories([]); });
+    return () => { active = false; };
   }, [eventId]);
 
   const visibleEvents = events.filter(e => e.status !== 'done' && e.moderation !== 'rejected' && (!e.starts_on || e.starts_on >= new Date().toISOString().slice(0,10)));
   const canSubmit =
-    !!eventId && !!type && (type === 'spectator' || !!categoryId) && consent && !submitting;
+    !!eventId && !!type && !(type === 'dancer' && eventId === 'eb0025ca-b597-4708-9d47-b24ebbf507b5') && (type === 'spectator' || !!categoryId) && consent && !submitting;
 
   const submit = async () => {
     if (!eventId || !type) return;
@@ -117,7 +117,7 @@ export default function Register() {
           {visibleEvents.map((e) => (
             <Pressable
               key={e.id}
-              onPress={() => setEventId(e.id)}
+              onPress={() => { setEventId(e.id); setType(null); setCategoryId(null); setConsent(false); setCategories([]); }}
               style={[styles.evChip, eventId === e.id && styles.evChipActive]}>
               <T variant="label" color={eventId === e.id ? c.black : c.textDim}>
                 {e.city ?? e.title}{e.starts_on ? ` · ${new Date(e.starts_on+'T12:00:00').toLocaleDateString(locale,{day:'numeric',month:'short',year:'numeric'})}` : ''}
@@ -154,8 +154,14 @@ export default function Register() {
         </View>
       )}
 
-      {selectedEvent && <Card style={{marginTop:Space.md}}><T variant="small" color={c.textDim}>Chaque inscription est rattachée à cet événement précis. L'inscription comme spectateur ne constitue pas un billet d'entrée : pour accéder à un événement payant, un billet valide est nécessaire.</T></Card>}
+      {selectedEvent && <Card style={{marginTop:Space.md}}><T variant="small" color={c.textDim}>Chaque inscription est rattachée à cet événement précis. L&apos;inscription comme spectateur ne constitue pas un billet d&apos;entrée : pour accéder à un événement payant, un billet valide est nécessaire.</T></Card>}
 
+      {selectedEvent?.id === 'eb0025ca-b597-4708-9d47-b24ebbf507b5' && !existing && (
+        <Card style={{ marginTop: Space.md }}>
+          <T variant="small">Pour participer à Paris, chaque danseur doit signer personnellement le règlement. Pour le Junior Dance Tour, le responsable légal signe.</T>
+          <Pressable accessibilityRole="button" onPress={() => router.push('/tour-register' as never)} style={{ paddingVertical: 16 }}><T color={c.accent}>Préparer mon dossier danseur et signer le règlement</T></Pressable>
+        </Card>
+      )}
       {/* Déjà inscrit → statut */}
       {existing ? (
         <Card style={styles.done}>
