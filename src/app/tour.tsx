@@ -162,7 +162,7 @@ export default function Tour() {
             </View>
           </View>
           <Pressable
-            onPress={() => router.push('/register')}
+            onPress={() => router.push({pathname:'/register',params:{eventId:selected.id}})}
             style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: c.primary, borderRadius: Radius.pill, paddingVertical: 13, marginTop: Space.md }}>
             <T variant="label" color={c.black}>{t('home.imIn')}</T>
             <Ionicons name="arrow-forward" size={16} color={c.black} style={{ marginLeft: 6 }} />
