@@ -5,7 +5,7 @@ export default function Terms() {
     <LegalDoc
       title="CGU"
       subtitle="Conditions générales d'utilisation"
-      updated="10 juillet 2026"
+      updated="14 octobre 2026"
       intro="Les présentes conditions régissent l'utilisation de l'application Juste Debout, éditée par [Juste Debout — entité juridique à compléter]. En créant un compte, tu les acceptes."
       sections={[
         {
@@ -48,7 +48,9 @@ export default function Terms() {
         {
           h: 'Billets',
           body: [
-            "Les billets délivrés dans l'app donnent accès à un événement selon les conditions de l'organisateur. Les modalités de paiement, d'échange et de remboursement seront précisées lors de la mise en place de la billetterie payante.",
+            "Toute commande de billets est ferme et définitive après confirmation du paiement. Les billets ne sont ni repris ni échangés à la demande de l’acheteur, sauf dispositions légales impératives applicables.",
+            "Les prestations de loisirs fournies à une date ou période déterminée ne bénéficient pas du droit de rétractation de 14 jours, conformément à l’article L221-28, 12° du Code de la consommation, lorsque ses conditions sont réunies.",
+            "En cas d’annulation ou de modification substantielle de l’événement, les droits légaux de l’acheteur restent applicables. Les modalités de réclamation sont communiquées par l’organisateur.",
           ],
         },
         {
