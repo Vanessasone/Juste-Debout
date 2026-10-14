@@ -159,6 +159,11 @@ export default function Wallet() {
         <View style={{flex:1}}><T variant="h3">{ct('buyTickets')}</T><T variant="caption" color={c.textMute}>{ct('finals')}</T></View>
         <Ionicons name="chevron-forward" size={18} color={c.textMute} />
       </Pressable>
+      <Pressable accessibilityRole="button" onPress={() => router.push('/ticket-invoices')} style={styles.groupBtn}>
+        <Ionicons name="document-text-outline" size={20} color={c.primary} />
+        <View style={{flex:1}}><T variant="h3">{locale === 'fr' ? 'Mes factures' : 'My invoices'}</T><T variant="caption" color={c.textMute}>{locale === 'fr' ? 'Télécharger les factures de mes billets' : 'Download my ticket invoices'}</T></View>
+        <Ionicons name="chevron-forward" size={18} color={c.textMute} />
+      </Pressable>
       <Pressable onPress={() => router.push('/my-orders')} style={styles.groupBtn}>
         <Ionicons name="receipt-outline" size={20} color={c.primary} />
         <View style={{flex:1}}><T variant="h3">{ct('myOrders')}</T><T variant="caption" color={c.textMute}>{ct('orderSubtitle')}</T></View>

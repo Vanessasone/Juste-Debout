@@ -1,12 +1,12 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import Stripe from "npm:stripe@^22";
-import { createClient } from "npm:@supabase/supabase-js@2.110.1";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2.110.1";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "");
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
 
-async function syncRefund(admin: ReturnType<typeof createClient>, chargeId: string) {
+async function syncRefund(admin: SupabaseClient, chargeId: string) {
  const charge = await stripe.charges.retrieve(chargeId);
  const paymentIntent = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id;
  if (!paymentIntent) return;
@@ -20,7 +20,7 @@ async function syncRefund(admin: ReturnType<typeof createClient>, chargeId: stri
  if (error) throw error;
  if (!data?.ok) throw new Error("refund_reconciliation_failed");
 }
-async function syncPaymentRefund(admin: ReturnType<typeof createClient>, paymentIntentId: string) {
+async function syncPaymentRefund(admin: SupabaseClient, paymentIntentId: string) {
  const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
  const chargeId = typeof intent.latest_charge === "string" ? intent.latest_charge : intent.latest_charge?.id;
  if (chargeId) await syncRefund(admin,chargeId);
@@ -64,9 +64,22 @@ Deno.serve(async (req: Request) => {
         if (error) throw error;
         console.log("shop order finalized", orderId);
       } else {
-        const { data: existingOrder, error: orderError } = await admin.from("ticket_orders").select("status").eq("id",orderId).maybeSingle();
+        const { data: existingOrder, error: orderError } = await admin.from("ticket_orders")
+          .select("status,total_cents,currency,stripe_checkout_session_id").eq("id",orderId).maybeSingle();
         if (orderError) throw orderError;
+        if (!existingOrder || existingOrder.stripe_checkout_session_id !== session.id
+          || existingOrder.total_cents !== session.amount_total
+          || existingOrder.currency.toLowerCase() !== session.currency) throw Error("paid_session_order_mismatch");
         if (existingOrder?.status === "refunded") return Response.json({received:true,ignored:"already_refunded"});
+        const details=session.customer_details;
+        // Only the verified payment event supplies billing identity. An issued
+        // invoice already holds its immutable buyer snapshot.
+        const billingName=details?.individual_name ?? details?.name;
+        if(details?.address && billingName) {
+          const {error: billingError}=await admin.from("ticket_orders")
+            .update({customer_name:billingName,billing_address:details.address}).eq("id",orderId);
+          if(billingError)throw billingError;
+        }
         const { data, error } = await admin.rpc("finalize_ticket_order", {
           p_order: orderId,
           p_payment_intent: typeof session.payment_intent === "string" ? session.payment_intent : null,
