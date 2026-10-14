@@ -53,7 +53,7 @@ export default function TicketDetails() {
         <Pressable accessibilityRole="link" onPress={()=>router.push('/legal/terms')} style={{marginTop:8}}><T color={c.accent}>Consulter les conditions générales</T></Pressable>
       </Card>
       {!!error&&<T color={c.danger}>{error}</T>}
-      {busy?<ActivityIndicator />:<GButton label={ct('pay')} disabled={!acceptedFinalSale} onPress={()=>void pay()} />}
+      {busy?<ActivityIndicator />:<Pressable accessibilityRole="button" accessibilityState={{disabled:!acceptedFinalSale}} disabled={!acceptedFinalSale} onPress={()=>void pay()} style={{backgroundColor:c.accent,borderRadius:28,padding:17,alignItems:'center',opacity:acceptedFinalSale?1:0.45}}><T color="#101010" variant="label">{ct('pay')}</T></Pressable>}
       <Pressable accessibilityRole="button" onPress={()=>router.replace('/billetterie')} style={{padding:16}}><T color={c.accent}>{ct('edit')}</T></Pressable>
     </View>
   </Screen>;
