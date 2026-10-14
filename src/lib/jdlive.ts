@@ -275,6 +275,7 @@ export async function register(input: {
   type: RegType;
   categoryId?: string | null;
   consent: boolean;
+  parisDraftId?: string;
 }): Promise<void> {
   const {
     data: { user },
@@ -286,6 +287,7 @@ export async function register(input: {
     type: input.type,
     category_id: input.categoryId ?? null,
     consent_rgpd: input.consent,
+    ...(input.parisDraftId ? { paris_draft_id: input.parisDraftId } : {}),
     status: 'registered',
   });
   if (error) throw error;

@@ -1,6 +1,6 @@
 # Inscriptions danseurs 2027 — préparation
 
-Route préparée : `/tour-register`. Pas de lien public ajouté au menu, pas d'ouverture des inscriptions, pas de paiement, pas d'e-mail de confirmation envoyé. Le bouton sauvegarde exclusivement un brouillon privé, jamais une inscription définitive.
+Route préparée : `/tour-register`. Pas d’ouverture définitive, pas de paiement. Le parcours Paris existant propose désormais la préparation et la signature dans cette version en brouillon. Le bouton sauvegarde exclusivement un brouillon privé, jamais une inscription définitive.
 
 ## Périmètre validé par Vanessa le 14 octobre 2026
 
@@ -31,3 +31,5 @@ Tester : choisir Londres (seulement 4 catégories, aucun JDT), Milan (JDT visibl
 - Finaliser les libellés multilingues et intégrer la route dans le menu après recette.
 
 Cette étape est une préparation testable des formulaires et de leurs brouillons ; elle ne prétend pas réaliser les fonctions ci-dessus.
+
+Paris : voir `paris-signature-2027.md` pour la signature individuelle obligatoire, les photos privées et l’envoi du règlement avec la confirmation.

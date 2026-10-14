@@ -13,8 +13,8 @@ export const TOUR_STOPS: TourStop[] = [
   { slug: 'london', name: 'Royaume-Uni · Londres', date: '2027-03-07', categories: ['Hip Hop', 'Popping', 'Afro', 'Krump'], junior: false },
   { slug: 'paris', name: 'France · Paris — prélims', date: '2027-03-11', endDate: '2027-03-12', categories: [...CLASSIC, ...AFRO], junior: true },
 ];
-export type Dancer = { name: string; alias: string; email: string; country: string; birthDate: string };
-export type TourEntry = { stop: string; category: string; teamName: string; dancers: Dancer[]; guardianName: string; guardianEmail: string; guardianPhone: string; guardianConsent: boolean; consent: boolean };
+export type Dancer = { name: string; alias: string; email: string; country: string; birthDate: string; photoPath?: string };
+export type TourEntry = { stop: string; category: string; teamName: string; dancers: Dancer[]; guardianName: string; guardianEmail: string; guardianPhone: string; guardianConsent: boolean; consent: boolean; duoPhotoPath?: string };
 export const emptyDancer = (): Dancer => ({ name: '', alias: '', email: '', country: '', birthDate: '' });
 export function isValidDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
