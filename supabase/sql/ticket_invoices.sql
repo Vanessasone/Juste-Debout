@@ -74,7 +74,7 @@ revoke all on function public.enqueue_ticket_invoice() from public,anon,authenti
 create trigger queue_ticket_invoice after insert or update of status,paid_at,billing_address on public.ticket_orders
 for each row execute function public.enqueue_ticket_invoice();
 
-create function public.protect_ticket_invoice() returns trigger language plpgsql as $$
+create function public.protect_ticket_invoice() returns trigger language plpgsql set search_path=public as $$
 begin
  if new.id is distinct from old.id or new.order_id is distinct from old.order_id
  or new.number is distinct from old.number or new.issued_at is distinct from old.issued_at

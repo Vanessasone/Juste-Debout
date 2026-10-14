@@ -36,6 +36,7 @@ export function invoiceAmounts(s: InvoiceSnapshot) {
 
 export async function renderInvoicePdf(inv: InvoiceDocument, fontBytes: Uint8Array, cjkBytes?:Uint8Array) {
  const s=inv.snapshot, amounts=invoiceAmounts(s);
+ const exempt=s.seller.vat_rate_bps===0 && !!s.seller.exemption_note;
  const doc=await PDFDocument.create(); doc.registerFontkit({create:(bytes: Uint8Array)=>{
  const face=fontkit.create(bytes) as ReturnType<typeof fontkit.create> & {
   variationAxes?:Record<string,unknown>;getVariation:(axes:Record<string,number>)=>ReturnType<typeof fontkit.create>;
@@ -99,16 +100,17 @@ export async function renderInvoicePdf(inv: InvoiceDocument, fontBytes: Uint8Arr
   const nameLines=lines(item.name,499,11);
   if(y-(nameLines.length*17+80)<74)newPage();
   text(item.name,11);
-  text(item.quantity+' × '+money(item.unit_price_cents)+' TTC'+detail,9,499,grey);
+  text(item.quantity+' × '+money(item.unit_price_cents)+(exempt?'':' TTC')+detail,9,499,grey);
   if(amounts.discounts[i])text('Remise : −'+money(amounts.discounts[i]),9,499,grey);
-  text('Total HT : '+money(amounts.nets[i])+' • TVA : '+(s.seller.vat_rate_bps/100)+' % • Total TTC : '+money(amounts.totals[i]),9);
+  text(exempt?'Total : '+money(amounts.totals[i]):'Total HT : '+money(amounts.nets[i])+' • TVA : '+(s.seller.vat_rate_bps/100)+' % • Total TTC : '+money(amounts.totals[i]),9);
   gap();
  }
  if(y<200)newPage();
  text('Sous-total avant remise : '+money(s.subtotal_cents));
  if(s.discount_cents)text('Remise totale : −'+money(s.discount_cents));
- text('Total HT : '+money(amounts.net));text('TVA ('+(s.seller.vat_rate_bps/100)+' %) : '+money(amounts.vat));
- text('TOTAL TTC PAYÉ : '+money(s.total_cents),15);text('Reste à payer : '+money(0));gap();
+ if(exempt)text('TVA : non applicable');
+ else {text('Total HT : '+money(amounts.net));text('TVA ('+(s.seller.vat_rate_bps/100)+' %) : '+money(amounts.vat));}
+ text((exempt?'TOTAL PAYÉ : ':'TOTAL TTC PAYÉ : ')+money(s.total_cents),15);text('Reste à payer : '+money(0));gap();
  if(s.seller.exemption_note)text(s.seller.exemption_note,9,499,grey);
  text('Paiement en ligne à la commande. Cette facture ne constitue pas un billet d’entrée.',9,499,grey);
  const pages=doc.getPages();

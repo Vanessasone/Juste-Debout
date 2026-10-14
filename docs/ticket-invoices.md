@@ -8,19 +8,19 @@ recipients never acquire the buyer's invoice.
 
 ## Activation prerequisite
 
-The Paris issuer is seeded **disabled** with JD Events' verified address and
-SIRET. Before activation, obtain the applicable ticket VAT rate and VAT number,
-or the exact legal exemption wording from the organizer/accountant. Neither
-association status nor a different JD Gold offer proves the ticket VAT regime.
-Then set `vat_rate_bps` (basis points), `vat_number` or `exemption_note`, and
-`enabled=true` in `ticket_invoice_issuers`. The database rejects enabled settings
-without this information. Confirm whether all ticket products share that rate;
-the initial implementation supports one confirmed ticket rate per event.
+Vanessa confirmed on 14 October 2026 that JD Events is non-assujettie à la
+TVA. The Paris configuration therefore uses no VAT and the wording
+“TVA non applicable — association non assujettie à la TVA.” No unsupported
+reference to a particular tax-code article is added. Non-assujettie invoices
+show the paid total and no fictional 0% VAT rate. The issuer is initially
+seeded disabled, then configured by `ticket_invoice_paris_tax.sql` and enabled
+after the production rendering/download diagnostics pass.
 
 The dedicated series starts at `JD-BIL-YYYY-000001` each calendar year in Paris
-time. Confirm this new ticket series with accounting before activation. Other
-events need their own verified issuer row; they are never billed as JD Events
-automatically. Settings apply to future issuance only, never existing invoices.
+time. Other events need their own verified issuer row; they are never billed as
+JD Events automatically. Settings apply to future issuance only, never existing
+invoices. Taxable event organizers can configure one confirmed ticket VAT rate
+per event, plus their VAT number.
 
 ## Deployment order
 
@@ -34,9 +34,10 @@ automatically. Settings apply to future issuance only, never existing invoices.
 3. Apply `supabase/sql/ticket_invoice_dispatch.sql` after checking `pg_cron` and
    `pg_net` exist. It sends a worker request every 10 seconds. Ticket confirmation
    emails remain independent.
-4. Deploy the app. Confirm issuer tax settings and accounting series, then enable
-   its row. Exercise a Stripe **test-mode** paid checkout and inspect the PDF,
-   attachment, private download, duplicate webhook and a failed email retry.
+4. Apply `ticket_invoice_paris_tax.sql`, run the private worker diagnostics for
+   Latin/CJK PDFs and Storage, then enable the Paris issuer and deploy the app.
+   A full Stripe test-mode paid purchase additionally exercises actual delivery.
+   The deployed worker diagnostics create no orders, invoice numbers or emails.
 
 No historical order backfill is run by this migration. Sessions created before
 the new checkout may lack a billing address/name; their queued jobs wait for

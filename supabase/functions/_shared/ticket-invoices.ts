@@ -24,6 +24,28 @@ function base64(bytes:Uint8Array) {
 }
 type Job=InvoiceDocument & {order_id:string;lease_token:string;pdf_path:string|null;email_sent_at:string|null};
 
+// Private deployment diagnostic: no order, invoice number, customer or email.
+export async function probeTicketInvoicePdf(admin:SupabaseClient,cjk=false) {
+ const id=crypto.randomUUID(),stamp=new Date().toISOString();
+ const sample:InvoiceDocument={id,number:'TEST-SANS-VALEUR-COMPTABLE',issued_at:stamp,snapshot:{
+  order_id:id,paid_at:stamp,currency:'EUR',subtotal_cents:100,discount_cents:0,total_cents:100,
+  seller:{name:'TEST — SANS VALEUR COMPTABLE',address:'Adresse de test',registration:'TEST',vat_number:null,vat_rate_bps:0,exemption_note:'TVA non applicable — TEST'},
+  buyer:{name:cjk?'Élodie Müller / 山田花子 / 박지민':'Élodie Müller',email:'invoice-test@example.invalid',address:{line1:'Adresse de test',country:'FR'}},
+  event:{title:'Événement de test',starts_on:'2027-03-13',ends_on:'2027-03-14'},
+  items:[{name:'Billet de test',quantity:1,unit_price_cents:100,access_date:'2027-03-13',access_days:1}]
+ }};
+ const bytes=await renderInvoicePdf(sample,await invoiceFont('latin'),cjk?await invoiceFont('cjk'):undefined);
+ const path='__checks/'+id+'.pdf';
+ const bucket=admin.storage.from('ticket-invoices');
+ const {error:uploadError}=await bucket.upload(path,bytes,{contentType:'application/pdf',upsert:false});
+ if(uploadError)throw Error('invoice_probe_upload_failed');
+ try {
+  const {data,error}=await bucket.download(path);
+  if(error||!data||data.size!==bytes.length)throw Error('invoice_probe_download_failed');
+  return {ok:true,pdf_bytes:bytes.length,cjk};
+ } finally {await bucket.remove([path]);}
+}
+
 export async function processTicketInvoices(admin:SupabaseClient,apiKey:string) {
  let sent=0,failed=0;
  // Dedicated worker: expensive PDF rendering never competes with ticket emails.
