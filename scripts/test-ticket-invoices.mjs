@@ -10,16 +10,18 @@ const db=new PGlite();
 await db.exec(`
 create role anon;create role authenticated;create role service_role;
 create schema auth;create schema storage;
+create table auth.users(id uuid primary key,email_confirmed_at timestamptz);
 create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
 grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;
 create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
 create table public.events(id uuid primary key,title text,starts_on date,ends_on date);
 create table public.ticket_orders(id uuid primary key,user_id uuid,event_id uuid,status text,currency text,subtotal_cents int,total_cents int,discount_cents int,customer_name text,customer_email text,paid_at timestamptz);
-create table public.ticket_order_items(id uuid primary key default gen_random_uuid(),order_id uuid,product_name text,unit_price_cents int,quantity int,created_at timestamptz default now(),access_date date,access_days int);
+create table public.ticket_order_items(id uuid primary key default gen_random_uuid(),order_id uuid,product_code text default 'day_sat',product_name text,unit_price_cents int,quantity int,created_at timestamptz default now(),access_date date,access_days int);
 grant select on public.ticket_orders to authenticated;
 insert into events values('eb0025ca-b597-4708-9d47-b24ebbf507b5','Juste Debout Paris 2027','2027-03-13','2027-03-14');
 `);
 await db.exec(await fs.readFile('supabase/sql/ticket_invoices.sql','utf8'));
+await db.exec(await fs.readFile('supabase/sql/ticket_invoice_details.sql','utf8'));
 const buyer='11111111-1111-4111-8111-111111111111';
 const first='22222222-2222-4222-8222-222222222222';
 const second='33333333-3333-4333-8333-333333333333';
@@ -57,6 +59,21 @@ await db.exec(`select set_config('request.jwt.claim.sub','55555555-5555-4555-855
 assert.equal((await db.query('select id from ticket_invoices')).rows.length,0,'Invoices private to buyer');
 await assert.rejects(db.query('select claim_ticket_invoice()'),/permission denied/);
 await db.exec('reset role');
+const missingOrder='66666666-6666-4666-8666-666666666666';
+await order(missingOrder,{address:false});
+await db.query('insert into auth.users values($1,now())',[buyer]);
+await db.exec(`set role authenticated;select set_config('request.jwt.claim.sub','55555555-5555-4555-8555-555555555555',false)`);
+await assert.rejects(db.query('select complete_my_ticket_invoice_details($1,$2)',['Intruder',{line1:'1 Test Street',city:'Paris',country:'FR'}]),/verified_account_required/);
+await db.exec('reset role');
+await db.exec("insert into auth.users values('55555555-5555-4555-8555-555555555555',now());set role authenticated");
+assert.equal((await db.query('select complete_my_ticket_invoice_details($1,$2) result',['Intruder',{line1:'1 Test Street',city:'Paris',postal_code:'75020',country:'FR'}])).rows[0].result.queued,0,'A verified different buyer cannot complete another buyer’s invoices');
+await db.exec(`select set_config('request.jwt.claim.sub','${buyer}',false)`);
+await assert.rejects(db.query('select complete_my_ticket_invoice_details($1,$2)',['Buyer',{line1:'',city:'Paris',country:'FR'}]),/invalid_billing_details/);
+const completed=(await db.query('select complete_my_ticket_invoice_details($1,$2) result',['Buyer',{line1:'1 Test Street',city:'Paris',postal_code:'75020',country:'fr'}])).rows[0].result;
+assert.equal(completed.queued,1,'Only the verified buyer’s missing, unissued invoice is completed');
+assert.equal((await db.query('select complete_my_ticket_invoice_details($1,$2) result',['Buyer',{line1:'1 Test Street',city:'Paris',postal_code:'75020',country:'fr'}])).rows[0].result.queued,0,'Repeat submission cannot duplicate invoices or change already complete orders');
+await db.exec('reset role');
+assert.equal((await db.query('select billing_address from ticket_orders where id=$1',[missingOrder])).rows[0].billing_address.country,'FR');
 const source=(await fs.readFile('supabase/functions/_shared/invoice-pdf.ts','utf8'))
  .replace('npm:pdf-lib@1.17.1','/tmp/jd-invoice-test/node_modules/pdf-lib/cjs/index.js')
  .replace('npm:@pdf-lib/fontkit@1.1.1','/tmp/jd-invoice-test/node_modules/@pdf-lib/fontkit/dist/fontkit.umd.js');
@@ -71,6 +88,7 @@ for(const rate of [210,550,1000,2000]) {
 assert.throws(()=>invoiceAmounts({...job.snapshot,total_cents:9500}),/invoice_amount_mismatch/);
 const font=await fs.readFile('/tmp/jd-invoice-font-full.ttf');
 const latin=await fs.readFile('/tmp/jd-invoice-font-latin.ttf');
+assert.equal((await PDFDocument.load(await renderInvoicePdf(job,latin))).getPageCount(),1,'Discounted Latin-only invoice renders without CJK fallback');
 const sample={...job,snapshot:{...job.snapshot,buyer:{...job.snapshot.buyer,name:'Élodie Müller / 山田花子 / 박지민'},seller:{...job.snapshot.seller,exemption_note:'DOCUMENT DE TEST — AUCUNE VALEUR COMPTABLE'}}};
 const pdf=await renderInvoicePdf(sample,latin,font);await fs.writeFile('/tmp/jd-invoice-sample.pdf',pdf);
 assert.equal((await PDFDocument.load(pdf)).getPageCount(),1);

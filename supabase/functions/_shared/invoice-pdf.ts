@@ -51,7 +51,7 @@ export async function renderInvoicePdf(inv: InvoiceDocument, fontBytes: Uint8Arr
   const cp=char.codePointAt(0)!;
   if(supported.has(cp))return font;
   if(cjk&&cjkSupported.has(cp))return cjk;
-  throw Error('invoice_font_missing_glyph');
+  throw Error('invoice_font_missing_glyph_'+cp);
  };
  const measureWidth=(value:string,size:number)=>Array.from(value).reduce((sum,char)=>sum+characterFont(char).widthOfTextAtSize(char,size),0);
  const money=(n:number)=>new Intl.NumberFormat('fr-FR',{style:'currency',currency:s.currency}).format(n/100).replace(/\u202f|\u00a0/g,' ');
@@ -101,13 +101,13 @@ export async function renderInvoicePdf(inv: InvoiceDocument, fontBytes: Uint8Arr
   if(y-(nameLines.length*17+80)<74)newPage();
   text(item.name,11);
   text(item.quantity+' × '+money(item.unit_price_cents)+(exempt?'':' TTC')+detail,9,499,grey);
-  if(amounts.discounts[i])text('Remise : −'+money(amounts.discounts[i]),9,499,grey);
+  if(amounts.discounts[i])text('Remise : -'+money(amounts.discounts[i]),9,499,grey);
   text(exempt?'Total : '+money(amounts.totals[i]):'Total HT : '+money(amounts.nets[i])+' • TVA : '+(s.seller.vat_rate_bps/100)+' % • Total TTC : '+money(amounts.totals[i]),9);
   gap();
  }
  if(y<200)newPage();
  text('Sous-total avant remise : '+money(s.subtotal_cents));
- if(s.discount_cents)text('Remise totale : −'+money(s.discount_cents));
+ if(s.discount_cents)text('Remise totale : -'+money(s.discount_cents));
  if(exempt)text('TVA : non applicable');
  else {text('Total HT : '+money(amounts.net));text('TVA ('+(s.seller.vat_rate_bps/100)+' %) : '+money(amounts.vat));}
  text((exempt?'TOTAL PAYÉ : ':'TOTAL TTC PAYÉ : ')+money(s.total_cents),15);text('Reste à payer : '+money(0));gap();
