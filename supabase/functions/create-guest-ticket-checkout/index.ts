@@ -133,9 +133,11 @@ Deno.serve(async (req: Request) => {
       const expiresAt = Math.floor(Date.now() / 1000) + 30 * 60;
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
+        billing_address_collection: "required",
+        name_collection: { individual: { enabled: true, optional: false } },
         client_reference_id: orderId,
         customer_email: email,
-        locale: locale === "zh" ? "zh" : locale as Stripe.Checkout.SessionCreateParams.Locale,
+        locale: locale as "fr" | "en" | "de" | "it" | "es" | "pt" | "zh" | "ko" | "ja",
         // Stripe remplace ce marqueur après paiement. Le client vérifie la commande côté Supabase.
         success_url: successUrl + (successUrl.includes("?") ? "&" : "?") + "session_id={CHECKOUT_SESSION_ID}",
         cancel_url: cancelUrl,

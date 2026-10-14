@@ -130,6 +130,8 @@ Deno.serve(async (req: Request) => {
       const expiresAt = Math.floor(Date.now() / 1000) + 30 * 60;
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
+        billing_address_collection: "required",
+        name_collection: { individual: { enabled: true, optional: false } },
         client_reference_id: user.id,
         customer_email: user.email ?? undefined,
         // Stripe remplace ce marqueur après paiement. Le client vérifie la commande côté Supabase.
