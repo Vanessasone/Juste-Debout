@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { ticketProductText } from '@/lib/ticketProductText';
 import { useCustomerText } from '@/lib/customerText';
 import { useEffect, useState } from 'react';
@@ -17,6 +18,7 @@ export default function TicketDetails() {
   const [draft,setDraft]=useState<TicketDraft|null>(null);
   const [name,setName]=useState(''),[email,setEmail]=useState(''),[confirmEmail,setConfirmEmail]=useState('');
   const [busy,setBusy]=useState(false),[error,setError]=useState('');
+  const [acceptedFinalSale,setAcceptedFinalSale]=useState(false);
   useEffect(()=>{void (async()=>{
     const saved=await readTicketDraft();
     if(!saved){router.replace('/billetterie');return;}
@@ -26,6 +28,7 @@ export default function TicketDetails() {
   })();},[]);
   const pay=async()=>{
     if(!draft) return;
+    if(!acceptedFinalSale){setError('Merci de confirmer avoir pris connaissance des conditions de vente avant de payer.');return;}
     if(name.trim().length<2 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())){setError(ct('invalidContact'));return;}
     if(email.trim().toLowerCase()!==confirmEmail.trim().toLowerCase()){setError(ct('mismatch'));return;}
     setError('');setBusy(true);
@@ -40,8 +43,17 @@ export default function TicketDetails() {
       <T>{ct('name')}</T><TextInput accessibilityLabel={ct('name')} value={name} onChangeText={setName} autoComplete="name" maxLength={120} style={input} />
       <T>{ct('email')}</T><TextInput accessibilityLabel={ct('email')} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" maxLength={254} style={input} />
       <T>{ct('confirmEmail')}</T><TextInput accessibilityLabel={ct('confirmEmail')} value={confirmEmail} onChangeText={setConfirmEmail} keyboardType="email-address" autoCapitalize="none" maxLength={254} style={input} />
+      <Card style={{borderColor:c.accent}}>
+        <T variant="h3">ACHAT FERME ET DÉFINITIF</T>
+        <T style={{marginTop:8}}>Les billets ne sont ni repris ni échangés à la demande de l’acheteur, sauf dispositions légales impératives applicables, notamment en cas d’annulation ou de modification substantielle de l’événement. Aucun droit de rétractation de 14 jours ne s’applique aux prestations de loisirs à date déterminée.</T>
+        <Pressable accessibilityRole="checkbox" accessibilityState={{checked:acceptedFinalSale}} onPress={()=>setAcceptedFinalSale(v=>!v)} style={{flexDirection:'row',alignItems:'flex-start',gap:12,marginTop:16,paddingVertical:8}}>
+          <Ionicons name={acceptedFinalSale?'checkbox':'square-outline'} size={25} color={c.accent}/>
+          <T style={{flex:1}}>J’ai lu et j’accepte les conditions de vente. Je comprends que mon achat est ferme et définitif, sous réserve de mes droits légaux.</T>
+        </Pressable>
+        <Pressable accessibilityRole="link" onPress={()=>router.push('/legal/terms')} style={{marginTop:8}}><T color={c.accent}>Consulter les conditions générales</T></Pressable>
+      </Card>
       {!!error&&<T color={c.danger}>{error}</T>}
-      {busy?<ActivityIndicator />:<GButton label={ct('pay')} onPress={()=>void pay()} />}
+      {busy?<ActivityIndicator />:<GButton label={ct('pay')} disabled={!acceptedFinalSale} onPress={()=>void pay()} />}
       <Pressable accessibilityRole="button" onPress={()=>router.replace('/billetterie')} style={{padding:16}}><T color={c.accent}>{ct('edit')}</T></Pressable>
     </View>
   </Screen>;
