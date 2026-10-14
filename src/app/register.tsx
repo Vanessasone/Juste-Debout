@@ -3,7 +3,7 @@
  * Lit les événements + disciplines depuis Supabase, écrit dans `registrations`.
  */
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
@@ -26,6 +26,7 @@ import {
 export default function Register() {
   const c = useColors();
   const router = useRouter();
+  const { eventId: requestedEventId } = useLocalSearchParams<{eventId?:string}>();
   const { t, locale } = useI18n();
   const styles = useMemo(() => makeStyles(c), [c]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +57,8 @@ export default function Register() {
         const [ev, regs] = await Promise.all([getEvents(), getMyRegistrations()]);
         setEvents(ev);
         setMyRegs(regs);
-        if (ev.length) setEventId(ev[0].id);
+        const upcoming = ev.filter(e => e.status !== 'done' && (!e.starts_on || e.starts_on >= new Date().toISOString().slice(0,10)) && e.moderation !== 'rejected');
+        if (upcoming.length) setEventId(upcoming.find(e => e.id === requestedEventId)?.id ?? upcoming[0].id);
       } catch (e: any) {
         setError(e?.message ?? t('reg.loadFail'));
       } finally {
@@ -73,6 +75,7 @@ export default function Register() {
     getEventCategories(eventId).then(setCategories).catch(() => setCategories([]));
   }, [eventId]);
 
+  const visibleEvents = events.filter(e => e.status !== 'done' && e.moderation !== 'rejected' && (!e.starts_on || e.starts_on >= new Date().toISOString().slice(0,10)));
   const canSubmit =
     !!eventId && !!type && (type === 'spectator' || !!categoryId) && consent && !submitting;
 
@@ -109,15 +112,15 @@ export default function Register() {
       <PageHeader title={t('reg.title')} subtitle={t('reg.subtitle')} />
 
       {/* Sélecteur d'événement (si plusieurs) */}
-      {events.length > 1 && (
+      {visibleEvents.length > 1 && (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: Space.sm }}>
-          {events.map((e) => (
+          {visibleEvents.map((e) => (
             <Pressable
               key={e.id}
               onPress={() => setEventId(e.id)}
               style={[styles.evChip, eventId === e.id && styles.evChipActive]}>
               <T variant="label" color={eventId === e.id ? c.black : c.textDim}>
-                {e.city ?? e.title}
+                {e.city ?? e.title}{e.starts_on ? ` · ${new Date(e.starts_on+'T12:00:00').toLocaleDateString(locale,{day:'numeric',month:'short',year:'numeric'})}` : ''}
               </T>
             </Pressable>
           ))}
@@ -150,6 +153,8 @@ export default function Register() {
           )}
         </View>
       )}
+
+      {selectedEvent && <Card style={{marginTop:Space.md}}><T variant="small" color={c.textDim}>Chaque inscription est rattachée à cet événement précis. L'inscription comme spectateur ne constitue pas un billet d'entrée : pour accéder à un événement payant, un billet valide est nécessaire.</T></Card>}
 
       {/* Déjà inscrit → statut */}
       {existing ? (
