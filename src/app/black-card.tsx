@@ -2,105 +2,87 @@ import { useCustomerText } from '@/lib/customerText';
 import { useI18n } from '@/lib/i18n';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'expo-router';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { Vitruve, Wordmark } from '@/components/Logo';
 import { Card, PageHeader, Screen, T } from '@/components/ui';
-import { Radius, Space } from '@/constants/brand';
+import { BlackCardVisual, BLACK_CARD_GOLD as GOLD } from '@/components/BlackCardVisual';
+import { Space } from '@/constants/brand';
 import { BLACK_CARD_BENEFITS } from '@/constants/blackCardBenefits';
 import { BlackCardMembership, BlackCardEvent, getMyBlackCard, getMyBlackCardEvents } from '@/lib/blackCard';
-import { useColors } from '@/lib/theme';
 
-const GOLD = '#D9C27A';
 export default function BlackCardScreen() {
-  const c = useColors();
-  const ct = useCustomerText();
-  const { locale } = useI18n();
-  const [card, setCard] = useState<BlackCardMembership | null>();
-  const [events, setEvents] = useState<BlackCardEvent[]>([]);
-  const [calendarError,setCalendarError] = useState(false);
-  const loadEvents = () => { setCalendarError(false); getMyBlackCardEvents().then(setEvents).catch(()=>setCalendarError(true)); };
-  const [error, setError] = useState(false);
-  const [width, setWidth] = useState(340);
-  const [qrOpen, setQrOpen] = useState(false);
-  const load = () => {
-    setError(false);
-    setCard(undefined);
-    getMyBlackCard().then(setCard).catch(() => { setError(true); setCard(null); });
-  };
-  useEffect(load, []);
-  useEffect(()=>{if(card) loadEvents();else setEvents([]);},[card?.id]);
-  const qrSize = Math.max(96, Math.min(180, Math.floor(width * 0.34)));
-  const titleSize = Math.min(68, Math.max(40, width * 0.14));
-  const number = card?.card_number.replace(/^JD-BC-/, '2026-').replace('-', ' · ') || '2026 · 0000';
-  return <Screen><PageHeader title="Black Card" subtitle="Juste Debout · Membership" />
-    {card === undefined ? <ActivityIndicator /> : error ? <Card><T variant="h3">{ct('cardLoad')}</T><Pressable onPress={load} accessibilityRole="button"><T style={{ marginTop: 12 }} color={c.primary}>{ct('retry')}</T></Pressable></Card> : <>
-      <View style={styles.blackCard} onLayout={event => setWidth(event.nativeEvent.layout.width)}>
-        <View style={styles.glow} />
-        <View style={styles.logo}><Vitruve size={48} color={GOLD} /></View>
-        <View style={styles.body}>
-          <View style={styles.identity}>
-            <T variant="title" color="#FFFFFF" style={{ fontSize: titleSize, lineHeight: titleSize }}>BLACK</T>
-            <T variant="title" color={GOLD} style={{ fontSize: titleSize, lineHeight: titleSize }}>CARD</T>
-            <T variant="small" color="#FFFFFF" style={{ marginTop: 14 }}>{card?.holder_name || (card ? ct('name') : ct('name').toUpperCase())}</T>
-            <T variant="h2" color="#FFFFFF" style={{ marginTop: 8, fontSize: width < 340 ? 15 : 18 }}>{number}</T>
-            <T variant="caption" color="#A9A9A9" style={{ marginTop: 8 }}>{card ? ct('validUntil', {date:new Date(card.valid_until).toLocaleDateString(locale)}) : ct('inactivePreview')}</T>
-          </View>
-          <View style={styles.qrColumn}>
-            {card?.qr_token ? <Pressable onPress={() => setQrOpen(true)} accessibilityRole="button" accessibilityLabel={ct('qrZoom')} style={styles.qr}>
-              <QRCode value={card.qr_token} size={qrSize} color="#0A0A0A" backgroundColor="#FFFFFF" quietZone={8} />
-            </Pressable> : <View style={[styles.qrPlaceholder, { width: qrSize + 16, height: qrSize + 16 }]}><Ionicons name="qr-code-outline" size={qrSize * 0.7} color={GOLD} /></View>}
-            <T variant="caption" color={GOLD} style={{ marginTop: 8 }}>{card?.qr_token ? ct('myTicket').toUpperCase() : ct('previewShort')}</T>
-          </View>
-        </View>
-        <View style={styles.signature}><Wordmark height={34} color={GOLD} /></View>
-      </View>
-      <Card style={{ marginTop: Space.lg }}>
-        <T variant="h3">{card ? ct('activeBenefits') : ct('noBlack')}</T>
-        {card ? <>
-          <View style={styles.benefit}><Ionicons name="bag-handle-outline" size={20} color={c.primary} /><T variant="small">{ct('merchDiscount', {n:card.merchandise_discount_percent})}</T></View>
-          <View style={styles.benefit}><Ionicons name="ticket-outline" size={20} color={c.primary} /><T variant="small" style={{ flex: 1 }}>{ct('qrAccess')}</T></View>
-          <View style={styles.benefit}><Ionicons name="calendar-outline" size={20} color={c.primary} /><T variant="small" style={{ flex: 1 }}>{ct('blackYear')}</T></View>
-        </> : <T variant="small" color={c.textDim} style={{ marginTop: 6 }}>{ct('blackLimit')}</T>}
-      </Card>
-      {card && <Card style={{marginTop:Space.lg}}>
-        <T variant="h3">{ct('blackProgram')}</T>
-        {calendarError ? <Pressable onPress={loadEvents}><T color={c.primary} style={{marginTop:12}}>{ct('retry')}</T></Pressable> : events.map(event => {
-          const canonical = event.event_id === 'eb0025ca-b597-4708-9d47-b24ebbf507b5';
-          const date = (value:string) => new Date(value+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Paris'});
-          return <View key={event.event_id} style={{marginTop:14}}>
-            <T variant="small">{canonical ? ct('presels')+' · '+date('2027-03-11')+' – '+date('2027-03-12') : event.events?.title}</T>
-            <T variant="caption" color={c.textDim}>{canonical ? ct('preselVenue') : date(event.access_start_date)+' – '+date(event.access_end_date)+' · '+(event.events?.venue || ct('unknownVenue'))}</T>
-            {canonical && <><T variant="small" style={{marginTop:10}}>{ct('finalDays')+' · '+date('2027-03-13')+' – '+date('2027-03-14')}</T><T variant="caption" color={c.textDim}>{event.events?.venue || 'Stade Pierre-de-Coubertin'}</T></>}
-          </View>;
-        })}
-        <T variant="small" color={c.textDim} style={{marginTop:14}}>{ct('blackCalendar')}</T>
-      </Card>}
-      <Card style={{ marginTop: Space.lg }}>
-        <T variant="h3">{ct('includedBlack')}</T>
-        {BLACK_CARD_BENEFITS.map(benefit => <T key={benefit} variant="small" color={c.textDim} style={{marginTop: 12}}>• {ct(`benefit${BLACK_CARD_BENEFITS.indexOf(benefit) + 1}` as Parameters<typeof ct>[0])}</T>)}
-        <T variant="small" color={c.textDim} style={{marginTop: 16}}>{ct('blackCalendar')}</T>
-      </Card>
-    </>}
-    <Modal visible={qrOpen && !!card?.qr_token} transparent animationType="fade" onRequestClose={() => setQrOpen(false)}>
-      <Pressable style={styles.modal} onPress={() => setQrOpen(false)} accessibilityRole="button" accessibilityLabel={ct('closeQr')}>
-        <View style={styles.largeQr}>{card?.qr_token && <QRCode value={card.qr_token} size={240} quietZone={16} color="#0A0A0A" backgroundColor="#FFFFFF" />}</View>
-        <T color="#FFFFFF" style={{ marginTop: 18 }}>{ct('close')}</T>
-      </Pressable>
-    </Modal>
-  </Screen>;
+ const ct=useCustomerText(),{locale}=useI18n(),router=useRouter();
+ const [card,setCard]=useState<BlackCardMembership|null>();
+ const [events,setEvents]=useState<BlackCardEvent[]>([]);
+ const [calendarError,setCalendarError]=useState(false),[error,setError]=useState(false),[qrOpen,setQrOpen]=useState(false);
+ const load=()=>{setError(false);setCard(undefined);getMyBlackCard().then(setCard).catch(()=>{setError(true);setCard(null);});};
+ const loadEvents=()=>{setCalendarError(false);getMyBlackCardEvents().then(setEvents).catch(()=>setCalendarError(true));};
+ useEffect(()=>{
+  let active=true;
+  getMyBlackCard().then(value=>{if(active)setCard(value);}).catch(()=>{if(active){setError(true);setCard(null);}});
+  return ()=>{active=false;};
+ },[]);
+ const cardId=card?.id;
+ useEffect(()=>{
+  if(!cardId)return;
+  let active=true;
+  getMyBlackCardEvents().then(value=>{if(active)setEvents(value);}).catch(()=>{if(active)setCalendarError(true);});
+  return ()=>{active=false;};
+ },[cardId]);
+ return <Screen>
+  <PageHeader title="Black Card" subtitle="Juste Debout · Paris 2027"/>
+  <View style={styles.hero}>
+   <T variant="caption" color={GOLD} style={{letterSpacing:3}}>{ct('blackPrivilege')}</T>
+   <T variant="title" color="#F9ECD6" style={{fontSize:48,lineHeight:54,marginTop:12}}>{ct('blackHeadline')}</T>
+   <T color="#D8D1C4" style={{lineHeight:26,marginTop:14,fontSize:17,maxWidth:580}}>{ct('blackIntro')}</T>
+  </View>
+  {card===undefined?<ActivityIndicator color={GOLD}/>:error?<Card><T>{ct('cardLoad')}</T><Pressable onPress={load} accessibilityRole="button" style={{padding:16}}><T>{ct('retry')}</T></Pressable></Card>:<>
+   <BlackCardVisual qrToken={card?.qr_token} holderName={card?.holder_name} number={card?.card_number}
+    validity={card?ct('validUntil',{date:new Date(card.valid_until).toLocaleDateString(locale)}):ct('inactivePreview')} onQrPress={()=>setQrOpen(true)}/>
+   <T variant="small" style={{textAlign:'center',marginTop:12}}>{card?.qr_token?ct('qrZoom'):ct('blackPersonalQr')}</T>
+   <View style={styles.benefits}>
+    {BLACK_CARD_BENEFITS.map(({key,icon},index)=><View key={key} style={styles.benefit}>
+     <View style={styles.icon}><Ionicons name={icon} size={24} color={GOLD}/></View>
+     <View style={{flex:1,minWidth:0}}><T variant="caption" color={GOLD}>0{index+1}</T><T color="#F3EDDF" style={{lineHeight:25,marginTop:6,fontSize:16}}>{ct(key)}</T></View>
+    </View>)}
+   </View>
+   <View style={styles.invitation}>
+    <T variant="h2" color={GOLD} style={{fontSize:30,lineHeight:36}}>{ct('blackClosing')}</T>
+    <T variant="small" color="#CCC1AD" style={{marginTop:12,lineHeight:23}}>{ct('blackLimit')}</T>
+    {!card?<Pressable accessibilityRole="button" onPress={()=>router.push({pathname:'/billetterie',params:{offer:'black'}})} style={styles.cta}>
+     <T variant="label" color="#15110B" style={{flexShrink:1}}>{ct('blackCta')}</T><Ionicons name="arrow-forward" size={20} color="#15110B"/>
+    </Pressable>:null}
+   </View>
+   {card?<Card style={{marginTop:Space.lg}}>
+    <T variant="h3">{ct('blackProgram')}</T>
+    {calendarError?<Pressable accessibilityRole="button" onPress={loadEvents} style={{paddingVertical:16}}><T>{ct('retry')}</T></Pressable>:events.map(event=>{
+     const canonical=event.event_id==='eb0025ca-b597-4708-9d47-b24ebbf507b5';
+     const date=(v:string)=>new Date(v+'T12:00:00Z').toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric',timeZone:'Europe/Paris'});
+     return <View key={event.event_id} style={{marginTop:18}}>
+      <T variant="small">{canonical?ct('presels')+' · '+date('2027-03-11')+' – '+date('2027-03-12'):event.events?.title}</T>
+      <T variant="caption" style={{marginTop:5}}>{canonical?ct('preselVenue'):date(event.access_start_date)+' – '+date(event.access_end_date)+' · '+(event.events?.venue||ct('unknownVenue'))}</T>
+      {canonical?<><T variant="small" style={{marginTop:14}}>{ct('finalDays')+' · '+date('2027-03-13')+' – '+date('2027-03-14')}</T><T variant="caption">{event.events?.venue||'Stade Pierre-de-Coubertin'}</T></>:null}
+     </View>;
+    })}
+    <T variant="small" style={{marginTop:18,lineHeight:23}}>{ct('blackCalendar')}</T>
+   </Card>:null}
+  </>}
+  <Modal visible={qrOpen&&!!card?.qr_token} transparent animationType="fade" onRequestClose={()=>setQrOpen(false)}>
+   <Pressable style={styles.modal} onPress={()=>setQrOpen(false)} accessibilityRole="button" accessibilityLabel={ct('closeQr')}>
+    <View style={styles.largeQr}>{card?.qr_token?<QRCode value={card.qr_token} size={240} quietZone={20} color="#080808" backgroundColor="#FFFFFF" ecl="M"/>:null}</View>
+    <T color="#FFFFFF" style={{marginTop:18}}>{ct('close')}</T>
+   </Pressable>
+  </Modal>
+ </Screen>;
 }
-const styles = StyleSheet.create({
-  blackCard: { borderRadius: Radius.xl, padding: 20, backgroundColor: '#050505', borderWidth: 1, borderColor: '#3A3421', overflow: 'hidden', maxWidth: 650, width: '100%', alignSelf: 'center' },
-  glow: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: '#19160D', right: -60, top: -80 },
-  logo: { alignItems: 'center', marginBottom: 16 },
-  body: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  identity: { flex: 1 },
-  qrColumn: { alignItems: 'center' },
-  qr: { backgroundColor: '#FFFFFF', padding: 4 },
-  qrPlaceholder: { borderWidth: 1, borderColor: '#3A3421', alignItems: 'center', justifyContent: 'center' },
-  signature: { alignItems: 'center', marginTop: 22 },
-  benefit: { flexDirection: 'row', gap: 10, alignItems: 'center', marginTop: 14 },
-  modal: { flex: 1, backgroundColor: 'rgba(0,0,0,0.92)', alignItems: 'center', justifyContent: 'center' },
-  largeQr: { backgroundColor: '#FFFFFF', padding: 8 },
+const styles=StyleSheet.create({
+ hero:{backgroundColor:'#0B0B0B',borderRadius:24,padding:26,marginBottom:24,borderWidth:1,borderColor:'#443725'},
+ benefits:{flexDirection:'row',flexWrap:'wrap',gap:12,marginTop:24},
+ benefit:{flexDirection:'row',gap:16,flexGrow:1,flexBasis:270,backgroundColor:'#12110F',borderWidth:1,borderColor:'#3A3021',borderRadius:20,padding:22},
+ icon:{width:44,height:44,alignItems:'center',justifyContent:'center',backgroundColor:'#242015',borderRadius:14},
+ invitation:{backgroundColor:'#14120E',padding:26,borderRadius:24,marginTop:24,borderWidth:1,borderColor:'#685336'},
+ cta:{flexDirection:'row',alignItems:'center',justifyContent:'center',gap:12,backgroundColor:GOLD,borderRadius:30,padding:18,marginTop:22},
+ modal:{flex:1,backgroundColor:'rgba(0,0,0,0.95)',alignItems:'center',justifyContent:'center'},
+ largeQr:{backgroundColor:'#FFFFFF',padding:8,borderRadius:16},
 });

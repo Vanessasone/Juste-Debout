@@ -9,6 +9,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, AppState, Pressable, ScrollView, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TicketComparison, TicketFAQ, TicketVideoBackground } from '@/components/TicketSalesGuide';
+import { BlackCardVisual } from '@/components/BlackCardVisual';
+import { BLACK_CARD_BENEFITS } from '@/constants/blackCardBenefits';
 
 import { Vitruve, Wordmark } from '@/components/Logo';
 import { EarlyBirdCountdown } from '@/components/EarlyBirdCountdown';
@@ -25,7 +27,7 @@ import { checkoutPromo, displayedTicketPrice, ticketGroup, TicketGroup } from '@
 const PARIS_EVENT_ID = 'eb0025ca-b597-4708-9d47-b24ebbf507b5';
 
 export default function Tickets() {
-  const { test, resume } = useLocalSearchParams<{ test?: string; resume?: string }>();
+  const { test, resume, offer } = useLocalSearchParams<{ test?: string; resume?: string; offer?:string }>();
   const requestedTest = test === '1';
   const [testMode, setTestMode] = useState(false);
   const c = useColors();
@@ -40,7 +42,7 @@ export default function Tickets() {
   const [qty, setQty] = useState<Record<string, number>>({});
   const [promo, setPromo] = useState(() => earlyBirdState(Date.now()).phase === 'active' ? '48' : '');
   const [now, setNow] = useState(Date.now);
-  const [group, setGroup] = useState<TicketGroup>('standard');
+  const [group, setGroup] = useState<TicketGroup>(offer==='black'?'black':'standard');
   const scrollRef = useRef<ScrollView>(null);
   const offersY = useRef(0);
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -214,6 +216,7 @@ export default function Tickets() {
           const groupNote = p.code.startsWith('family_') ? ct('family') : p.group_size > 1 ? ct('people', { n: p.group_size }) : p.min_per_order > 1 ? ct('minimum', { n: p.min_per_order }) : null;
           return (
             <Card key={p.id} style={{ marginBottom: Space.md, ...(selectedProduct === p.id ? { borderColor: c.primary, borderWidth: 2 } : {}) }}>
+              {bc?<View style={{marginBottom:24}}><BlackCardVisual preview/><T variant="h2" style={{marginTop:20,fontSize:36,lineHeight:40}}>{ct('blackHeadline')}</T></View>:null}
               {selectedProduct === p.id && <T variant="caption" color={c.accent}>{ct('selected')}</T>}
               <View style={styles.rowBetween}>
                 <View style={{ flex: 1, paddingRight: Space.md }}>
@@ -233,7 +236,7 @@ export default function Tickets() {
               {(vip || bc) && <View style={{ marginTop: Space.md, gap: 8 }}>
                 <T variant="h3">{ct(bc ? 'includedBlack' : 'includedVip')}</T>
                 {(bc
-                  ? ['benefit1','benefit2','benefit3','benefit4','benefit5','benefit6','benefit7','benefit8','benefit9'] as const
+                  ? BLACK_CARD_BENEFITS.map(benefit=>benefit.key)
                   : ['vipBenefit1','vipBenefit2','vipBenefit3','vipBenefit4'] as const
                 ).map(key => <T key={key} variant="small" color={c.textDim}>• {ct(key)}</T>)}
               </View>}
@@ -248,7 +251,7 @@ export default function Tickets() {
               )}
 
               <Pressable disabled={previewOnly || busy || soldOut || ((vip || bc) && !availability)} onPress={() => buy(p)} style={[styles.buy, (previewOnly || busy || soldOut || ((vip || bc) && !availability)) && { opacity: 0.5 }]}>
-                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? ct('soon') : soldOut ? ct('full') : selectedProduct === p.id ? ct('continue') : ct('choosePass')}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
+                {busy ? <ActivityIndicator color={c.black} /> : <><T variant="label" color={c.black}>{previewOnly ? ct('soon') : soldOut ? ct('full') : selectedProduct === p.id ? ct('continue') : ct(bc?'blackCta':'choosePass')}</T><Ionicons name="arrow-forward" size={18} color={c.black} /></>}
               </Pressable>
             </Card>
           );
