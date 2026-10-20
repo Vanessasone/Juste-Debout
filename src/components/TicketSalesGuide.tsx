@@ -6,6 +6,7 @@ import { Card, Section, T } from '@/components/ui';
 import { useCustomerText } from '@/lib/customerText';
 import { useColors } from '@/lib/theme';
 import { TicketGroup } from '@/lib/ticketSalesPresentation';
+import { BlackCardVisual } from '@/components/BlackCardVisual';
 
 const PROMO_VIDEO = 'https://justedeboutapp.com/media/juste-debout-promo.mp4';
 
@@ -45,9 +46,10 @@ export function TicketComparison({ prices, onChoose }: {
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
       {options.map(option => <Card key={option.group} style={{ flexGrow: 1, flexBasis: 280, minWidth: 0, backgroundColor: option.group === 'black' ? '#161A1D' : c.surface, borderWidth: 2, borderColor: option.group === 'black' ? '#D9C27A' : c.border }}>
         <T variant="h2" color={option.group === 'black' ? '#D9C27A' : c.text} style={{ fontSize: 36 }}>{ct(option.name)}</T>
+        {option.group==='black'?<View style={{marginTop:16}}><BlackCardVisual preview/></View>:null}
         {option.price !== null && <T variant="h3" color={option.group === 'black' ? '#D9C27A' : c.accent} style={{ marginTop: 12, fontSize: 28 }}>{ct(option.group === 'black' ? 'comparePrice' : 'compareFrom', {price: (option.price / 100).toFixed(0)})}</T>}
         <T variant="small" color={option.group === 'black' ? '#E5E5E5' : c.textDim} style={{ marginTop: 12, lineHeight: 25, fontSize: 17 }}>{ct(option.benefit)}</T>
-        {option.group !== 'standard' && (option.group === 'vip' ? ['vipBenefit1', 'vipBenefit2', 'vipBenefit3', 'vipBenefit4'] as const : ['benefit1', 'benefit2', 'benefit3', 'benefit5'] as const).map(key => <View key={key} style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}><Ionicons name="checkmark-circle" size={20} color={option.group === 'black' ? '#D9C27A' : c.accent} /><T variant="small" color={option.group === 'black' ? '#FFFFFF' : c.text} style={{ flex: 1, lineHeight: 22 }}>{ct(key)}</T></View>)}
+        {option.group !== 'standard' && (option.group === 'vip' ? ['vipBenefit1', 'vipBenefit2', 'vipBenefit3', 'vipBenefit4'] as const : ['benefit1', 'benefit2', 'benefit3', 'benefit4'] as const).map(key => <View key={key} style={{ flexDirection: 'row', gap: 10, marginTop: 14 }}><Ionicons name="checkmark-circle" size={20} color={option.group === 'black' ? '#D9C27A' : c.accent} /><T variant="small" color={option.group === 'black' ? '#FFFFFF' : c.text} style={{ flex: 1, lineHeight: 22 }}>{ct(key)}</T></View>)}
         <Pressable accessibilityRole="button" accessibilityLabel={`${ct('compareDiscover')} ${ct(option.name)}`} onPress={() => onChoose(option.group)} style={{ paddingVertical: 16, paddingHorizontal: 16, borderRadius: 30, backgroundColor: option.group === 'black' ? '#D9C27A' : '#B5FC44', marginTop: 24, alignItems: 'center' }}>
           <T variant="label" color="#000000">{ct('compareDiscover')} →</T>
         </Pressable>
