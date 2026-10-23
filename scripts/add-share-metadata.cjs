@@ -23,5 +23,6 @@ const metadata = [
   '<meta name="twitter:image" content="https://justedeboutapp.com/app-icon.png?v=20261008">'
 ].join('\n');
 html = html.replace('</head>', metadata + '\n</head>');
+html = html.replace('</body>', '<script src="https://www.juste-debout.com/galaxy/widget.js" data-current="tickets" defer></script>\\n</body>');
 fs.writeFileSync(file, html);
 console.log('Static share metadata added.');
