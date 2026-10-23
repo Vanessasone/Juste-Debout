@@ -147,7 +147,14 @@ export default function Tickets() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
     <Screen scrollRef={scrollRef}>
       <LanguagePicker />
-      <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', paddingVertical: 16, marginBottom: Space.md, gap: 8 }}><Vitruve size={64} /><Wordmark height={26} /></View>
+      <View accessibilityLabel="Juste Debout" style={{ backgroundColor: '#161A1D', borderRadius: 18, alignItems: 'center', padding: 16, marginBottom: Space.md, gap: 12 }}>
+        <Vitruve size={64} /><Wordmark height={26} />
+        <Pressable accessibilityRole="button" onPress={() => router.push({ pathname: '/login', params: { mode: 'signin' } })}
+          style={{ backgroundColor: '#B5FC44', borderRadius: 28, minHeight: 48, width: '100%', maxWidth: 360, paddingVertical: 12, paddingHorizontal: 20, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+          <Ionicons name="person-circle-outline" size={24} color="#161A1D" />
+          <T variant="label" color="#161A1D" style={{ flexShrink: 1 }}>{t('auth.doSignin')}</T>
+        </Pressable>
+      </View>
       {earlyPhase !== 'ended' && <EarlyBirdCountdown />}
       <View style={[styles.hero, { minHeight: width >= 900 ? 520 : 480, overflow: 'hidden', justifyContent: 'center' }]}><TicketVideoBackground /><View style={{ width: '100%', maxWidth: 850, minWidth: 0 }}>
         <T variant="label" color="#FFFFFF" style={{ marginBottom: 18 }}>{ct('boxoffice')} · {ct('finals')}</T>
@@ -162,7 +169,7 @@ export default function Tickets() {
       <View style={{ backgroundColor: '#B5FC44', borderRadius: 16, padding: 20, marginBottom: 16 }}><T variant="label" color="#000000" style={{ fontSize: 20, lineHeight: 30, textAlign: 'center' }}>POPPING · LOCKING · HIP HOP · HOUSE · JUNIOR DANCE TOUR · AFRO · DANCEHALL · ELECTRO · KRUMP</T></View>
       <View style={{ alignItems: 'center', marginVertical: 20 }}><View style={{ width: '100%', maxWidth: 400 }}><EventPoster /></View></View>
       <T variant="small" color={c.textDim} style={{ marginBottom: Space.md }}>{ct('steps')}</T>
-      <Pressable onPress={() => router.push('/login')} accessibilityRole="button"><T variant="small" color={c.accent}>{ct('login')}</T></Pressable>
+      <Pressable onPress={() => router.push({ pathname: '/login', params: { mode: 'signin' } })} accessibilityRole="button"><T variant="small" color={c.accent}>{ct('login')}</T></Pressable>
 
       <Pressable onPress={() => router.push('/seating-plan')} style={{backgroundColor:'#161A1D',borderWidth:1,borderColor:'#B5FC44',borderRadius:14,padding:16,marginBottom:Space.md,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
         <View style={{flex:1}}><T variant="h3" color="#FFFFFF">{ct('plan')}</T><T variant="small" color="#E5E5E5" style={{marginTop:4}}>Black Card · VIP · Standard</T></View>

@@ -31,7 +31,7 @@ import { readTicketDraft, TicketDraft } from '@/lib/ticketPurchase';
 type Mode = 'signin' | 'signup';
 
 export default function Login() {
-  const { recover, lang } = useLocalSearchParams<{ recover?: string; lang?: string }>();
+  const { recover, lang, mode: requestedMode } = useLocalSearchParams<{ recover?: string; lang?: string; mode?: string }>();
   const { setLocale } = useI18n();
   useEffect(() => { if (lang && LANGUAGES.some(l => l.code === lang)) void setLocale(lang); }, [lang, setLocale]);
   const purchase = recover === '1';
@@ -44,7 +44,7 @@ export default function Login() {
   const pr = usePasswordResetText();
   const styles = useMemo(() => makeStyles(c), [c]);
   const insets = useSafeAreaInsets();
-  const [mode, setMode] = useState<Mode>('signup');
+  const [mode, setMode] = useState<Mode>(requestedMode === 'signin' ? 'signin' : 'signup');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
