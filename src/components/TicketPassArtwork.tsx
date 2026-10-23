@@ -16,7 +16,7 @@ export function TicketPassArtwork({code,label}:{code:string;label:string}) {
  return <View style={styles.frame}>
   {vipFront?<View style={styles.vipFront}>
    <Image source={art.source} accessible accessibilityLabel={label} resizeMode="stretch" style={styles.vipImage}/>
-  </View>:<Image source={art.source} accessible accessibilityLabel={label} resizeMode="contain" style={{width:'100%',aspectRatio:art.ratio}}/>}
+  </View>:<View style={{width:'100%',aspectRatio:art.ratio}}><Image source={art.source} accessible accessibilityLabel={label} resizeMode="contain" style={[StyleSheet.absoluteFillObject,{width:'100%',height:'100%'}]}/></View>}
  </View>;
 }
 const styles=StyleSheet.create({
