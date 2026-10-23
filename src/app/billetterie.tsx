@@ -9,6 +9,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, AppState, Pressable, ScrollView, StyleSheet, TextInput, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TicketComparison, TicketFAQ, TicketVideoBackground } from '@/components/TicketSalesGuide';
+import { TicketPassArtwork } from '@/components/TicketPassArtwork';
 import { BlackCardVisual } from '@/components/BlackCardVisual';
 import { BLACK_CARD_BENEFITS } from '@/constants/blackCardBenefits';
 
@@ -224,6 +225,7 @@ export default function Tickets() {
           return (
             <Card key={p.id} style={{ marginBottom: Space.md, ...(selectedProduct === p.id ? { borderColor: c.primary, borderWidth: 2 } : {}) }}>
               {bc?<View style={{marginBottom:24}}><BlackCardVisual preview/><T variant="h2" style={{marginTop:20,fontSize:36,lineHeight:40}}>{ct('blackHeadline')}</T></View>:null}
+              {!bc?<TicketPassArtwork code={p.code} label={display.name}/>:null}
               {selectedProduct === p.id && <T variant="caption" color={c.accent}>{ct('selected')}</T>}
               <View style={styles.rowBetween}>
                 <View style={{ flex: 1, paddingRight: Space.md }}>
