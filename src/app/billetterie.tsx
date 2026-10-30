@@ -246,7 +246,7 @@ export default function Tickets() {
                 <T variant="h3">{ct(bc ? 'includedBlack' : 'includedVip')}</T>
                 {(bc
                   ? BLACK_CARD_BENEFITS.map(benefit=>benefit.key)
-                  : ['vipBenefit1','vipBenefit2','vipBenefit3','vipBenefit4'] as const
+                  : ['vipBenefit1'] as const
                 ).map(key => <T key={key} variant="small" color={c.textDim}>• {ct(key)}</T>)}
               </View>}
 

@@ -8,15 +8,15 @@ const ART: Record<string, {source: ImageSourcePropType; ratio: number}> = {
  vip_two_days: {source: require('@/assets/tickets/vip.jpg'), ratio: 1536/969},
 };
 
-/** Artwork stays paired with its exact duration. Single-day VIP uses only the undated front. */
+/** All VIP offers use the undated front: the supplied reverse lists Black Card-only benefits. */
 export function TicketPassArtwork({code,label}:{code:string;label:string}) {
- const vipFront=code==='vip_sat'||code==='vip_sun'||code==='vip';
+ const vipFront=code==='vip_sat'||code==='vip_sun'||code==='vip_two_days'||code==='vip';
  const art=vipFront?ART.vip_two_days:ART[code];
  if(!art)return null;
  return <View style={styles.frame}>
   {vipFront?<View style={styles.vipFront}>
    <Image source={art.source} accessible accessibilityLabel={label} resizeMode="stretch" style={styles.vipImage}/>
-  </View>:<View style={{width:'100%',aspectRatio:art.ratio}}><Image source={art.source} accessible accessibilityLabel={label} resizeMode="contain" style={[StyleSheet.absoluteFillObject,{width:'100%',height:'100%'}]}/></View>}
+  </View>:<View style={{width:'100%',aspectRatio:art.ratio}}><Image source={art.source} accessible accessibilityLabel={label} resizeMode="contain" style={[StyleSheet.absoluteFill,{width:'100%',height:'100%'}]}/></View>}
  </View>;
 }
 const styles=StyleSheet.create({
